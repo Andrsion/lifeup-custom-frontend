@@ -15,6 +15,28 @@
 
 ---
 
+## 🤖 直接交给 AI（推荐入口）
+
+把下面这段**整段复制**给你用的 AI / Agent（把 `<>` 换成你自己的信息）：
+
+```
+我要做一个人升（LifeUp）的自定义界面。请先完整读取这份方案：
+https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp.md
+读完直接按文档里的「快速上手」开始做，别再问我"你想做什么"。
+我的玩法体系：<主题 / 货币叫法 / 清单叫法；不填则读我的 MCP 数据>
+我要的页面：<任务 + 商店 + 金币属性栏>
+我的环境：，已装 Node.js 20+ 和
+规则：① 先读文档再写代码，接口以文档里的官方链接为准，不要臆造；② 不确定就按文档「开工前自检」处理；③ 做成双击就能启动，最后给我用法说明。
+```
+
+**给 AI 的文档链接**（任选其一，raw 是纯文本、最好抓）：
+
+- **Gitee（国内推荐）**：`https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp.md`
+- **GitHub**：`https://raw.githubusercontent.com/Andrsion/lifeup-custom-frontend/main/docs/custom-ui-ai-mcp.md`
+
+> ⚠️ 若 AI 反馈"读不了链接"：改用**网页版**（把 `raw/main` 换成 `blob/main`），或干脆把文档内容**粘贴**给它。
+> 分支名是 **`main`**（写成 `master` 会 404）。
+
 ## 这是什么
 
 《人升》是一款把任务 / 习惯变成 RPG 的游戏化待办 App。它配套的**「云人升」**会在手机上开一个 HTTP 服务（局域网，默认端口 `13276`），于是你可以在它之上做一层自己的界面：
@@ -39,6 +61,8 @@
 | 文档 | 内容 |
 | --- | --- |
 | **[实现方案](docs/custom-ui-ai-mcp.md)** | 定位 · 快速上手（含可粘贴的提示词）· 原理与接口（读 / 写 / AI 两条接法）· 坑与限制 · 客户端接入 MCP（WorkBuddy / dsh）· **附录：组件清单 & 灵感库** |
+| **[世界观 / 主题参考](docs/samples.md)** | 可借用的世界观与主题（大众 IP / 社区体系 / 同类产品）+ 8 个「换名对照表」案例 |
+| **[地球 Online 梗词表](docs/earth-online-glossary.md)** | 用游戏术语解构人生的公共梗词速查 + 可直接用的文案模板 |
 
 ## 权威文档（一切以官方为准）
 
