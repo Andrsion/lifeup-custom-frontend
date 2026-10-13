@@ -1,3 +1,12 @@
+## ⚠️ 先分清：这不是「人升自带的外观设置」
+
+| 你想干嘛 | 该去哪儿 |
+| --- | --- |
+| 调人升**自带**的外观（主题色、简洁模式、Material You、卡片背景） | App 内「**设置**」，或 `lifeup://api/app_settings` 接口（v1.98+） |
+| 在**人升之外**搭自己的界面（看板 / AI 助手 / 机器人） | ✅ **本项目** |
+
+> 本项目**不是**人升自带的外观 / 主题设置，而是**在人升 App 之外**、基于「云人升」HTTP 服务另做的一层**第三方界面**。
+
 # 自定义人升 · 自定义界面 + AI + MCP 实现方案
 
 > 在《人升》(LifeUp) 之上做一层**「自定义界面」** —— 自己搭看板、接 AI 助手、做桌面 / 语音 / 群机器人外壳。
@@ -5,6 +14,28 @@
 > 所有数据与规则都在**手机端人升 App** 里跑，网页只做「展示 + 转发」。**不需要会写代码** —— 把方案整篇喂给 AI 工具即可。
 
 ---
+
+## 🤖 直接交给 AI（推荐入口）
+
+把下面这段**整段复制**给你用的 AI / Agent（把 `<>` 换成你自己的信息）：
+
+```
+我要做一个人升（LifeUp）的自定义界面。请先完整读取这份方案：
+https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp.md
+读完直接按文档里的「快速上手」开始做，别再问我"你想做什么"。
+我的玩法体系：<主题 / 货币叫法 / 清单叫法；不填则读我的 MCP 数据>
+我要的页面：<任务 + 商店 + 金币属性栏>
+我的环境：，已装 Node.js 20+ 和
+规则：① 先读文档再写代码，接口以文档里的官方链接为准，不要臆造；② 不确定就按文档「开工前自检」处理；③ 做成双击就能启动，最后给我用法说明。
+```
+
+**给 AI 的文档链接**（任选其一，raw 是纯文本、最好抓）：
+
+- **Gitee（国内推荐）**：`https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp.md`
+- **GitHub**：`https://raw.githubusercontent.com/Andrsion/lifeup-custom-frontend/main/docs/custom-ui-ai-mcp.md`
+
+> ⚠️ 若 AI 反馈"读不了链接"：改用**网页版**（把 `raw/main` 换成 `blob/main`），或干脆把文档内容**粘贴**给它。
+> 分支名是 **`main`**（写成 `master` 会 404）。
 
 ## 这是什么
 
@@ -25,11 +56,26 @@
 
 > ⚠️ 别用「云端生成 + 云端托管」的平台（秒哒、Bolt.new、v0、Lovable 等）—— 它们访问不到你家 Wi-Fi 里的手机。
 
+## 🧩 想直接跑？看 `examples/`
+
+| 示例 | 形态 |
+| --- | --- |
+| [**minimal-html**](examples/minimal-html/) | 单文件看板 + 本地代理，**双击即用** |
+| [**desktop-dashboard**](examples/desktop-dashboard/) | 大屏看板（大字号、自动刷新） |
+| [**group-bot**](examples/group-bot/) | 群机器人骨架（打卡 → 完成任务） |
+
+> 改 `config.json`（填手机 `IP:13276`）→ 双击启动 → 打开浏览器，就跑起来了。详见 [examples/](examples/)。
+
 ## 文档
 
 | 文档 | 内容 |
 | --- | --- |
 | **[实现方案](docs/custom-ui-ai-mcp.md)** | 定位 · 快速上手（含可粘贴的提示词）· 原理与接口（读 / 写 / AI 两条接法）· 坑与限制 · 客户端接入 MCP（WorkBuddy / dsh）· **附录：组件清单 & 灵感库** |
+| **[接口速查表](docs/api-cheatsheet.md)** | 云人升 HTTP 读 / 写接口 · 返回码 · 字段取值 · `gid` 用法 —— **一页纸**，防臆造 |
+| **[排错 · 常见坑](docs/troubleshooting.md)** | 连不上 / `10001` / `401` / CORS / 写操作不幂等 / 用不了的云平台 |
+| **[从书到人升](docs/books-to-lifeup.md)** | **16 本书**的方法论 → 一张「在人升上的用法」表（怎么设计自己的体系） |
+| **[世界观 / 主题参考](docs/samples.md)** | 可借用的世界观与主题（大众 IP / 社区体系 / 同类产品）+ **9 个**「换名对照表」案例 |
+| **[地球 Online 梗词表](docs/earth-online-glossary.md)** | 用游戏术语解构人生的公共梗词速查 + 可直接用的文案模板 |
 
 ## 权威文档（一切以官方为准）
 

@@ -1,0 +1,37 @@
+# 自定义人升 · 自定义界面 + AI + MCP
+
+> 在《人升》(LifeUp) 之上做一层「**自定义界面**」的开源方案。所有数据与规则都在**手机端人升 App** 里跑，界面只做「展示 + 转发」。
+> 本仓库用途：让任意 AI Agent 读懂方案后，帮用户搭出自己的看板 / AI 助手 / 机器人。
+
+## 先读
+
+- [实现方案（主文档）](docs/custom-ui-ai-mcp.md)：定位 · 快速上手 · 可粘贴提示词 · 原理与接口 · 坑 · MCP 接入
+- [接口速查表](docs/api-cheatsheet.md)：读 / 写接口 · 返回码 · 字段取值 · `gid` —— **防臆造**
+- [排错](docs/troubleshooting.md)：连不上 / `10001` / `401` / CORS / 写操作不幂等
+
+## 参考
+
+- [世界观 / 主题参考](docs/samples.md)：主题换名表（9 个案例）
+- [从书到人升](docs/books-to-lifeup.md)：16 本书 → 任务设计
+- [地球 Online 梗词表](docs/earth-online-glossary.md)
+
+## 可运行示例
+
+- [examples/minimal-html](examples/minimal-html/)：单文件看板 + 本地代理
+- [examples/desktop-dashboard](examples/desktop-dashboard/)：大屏看板
+- [examples/group-bot](examples/group-bot/)：群机器人骨架
+
+## 权威（一切以官方为准）
+
+- 云人升 HTTP 接口：https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
+- MCP & Skills：https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md
+- 官方 SDK / skills 源码：https://github.com/Ayagikei/LifeUp-SDK
+
+## 硬规则（给 AI）
+
+- 先读 [实现方案](docs/custom-ui-ai-mcp.md) 再写代码；接口名 / 参数以官方文档为准，**不要臆造**。
+- 写操作（`complete` / `give_up` / `reward`…）**不幂等**，超时**不要自动重试**。
+- 任务的 `id` **每周期会变**，跨周期识别 / 缓存用 **`gid`**。
+- 浏览器**直连会被 CORS 拦** → 必须加一层**本地代理**。
+- 不要用「云端生成 + 云端托管」平台（秒哒 / Bolt.new / v0 / Lovable）—— 它们连不到用户的局域网。
+- 版本门槛：人升 **v1.106.0+** ＋ 云人升 **3.0.0+**。

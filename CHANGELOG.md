@@ -2,6 +2,14 @@
 
 本文件记录**文档**的版本变化（非人升 / 云人升的版本）。
 
+## v19 · 2026-10-13
+
+- 新增 **可运行示例** `examples/`：`minimal-html`（单文件看板）/ `desktop-dashboard`（大屏）/ `group-bot`（群机器人）
+- 新增 **[接口速查表](docs/api-cheatsheet.md)**、**[排错 · 常见坑](docs/troubleshooting.md)**
+- 新增 **[从书到人升](docs/books-to-lifeup.md)**（16 本书 → 人升用法）
+- `docs/samples.md` 案例 8 → **9**（补星露谷物语）
+- 新增 **`llms.txt` / `llms-full.txt`**（给 AI 的入口）、**`CONTRIBUTING.md`**、Issue 模板
+
 ## v18 · 2026-10-08
 
 - 精简篇幅：「组件清单：照搭一个自己的看板」「可以做成什么」移入文末**附录**，正文聚焦原理 / 接口 / 坑 / MCP 接入
