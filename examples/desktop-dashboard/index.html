@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>人升 · 大屏看板</title>
+<style>
+  :root{ --bg:#0e1015; --card:#171a21; --line:#272c37; --fg:#eef1f7; --sub:#8b93a7; --accent:#4f7cff; --ok:#3ddc84; }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{ margin:0; background:var(--bg); color:var(--fg); padding:32px 40px; overflow:hidden;
+        font:16px/1.5 system-ui,"PingFang SC","Microsoft YaHei",sans-serif; }
+  header{ display:flex; align-items:baseline; gap:18px; margin-bottom:22px; }
+  header h1{ font-size:28px; margin:0; }
+  header .clock{ margin-left:auto; font-size:26px; color:var(--sub); font-variant-numeric:tabular-nums; }
+  .stats{ display:flex; gap:18px; flex-wrap:wrap; margin-bottom:26px; }
+  .stat{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 22px; min-width:150px; }
+  .stat .k{ color:var(--sub); font-size:14px; }
+  .stat .v{ font-size:34px; font-weight:700; }
+  .cols{ columns:3 360px; column-gap:20px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:14px;
+         padding:12px 16px; margin:0 0 14px; break-inside:avoid; display:flex; align-items:center; gap:12px; }
+  .card .name{ flex:1; font-size:18px; }
+  .card .freq{ color:var(--sub); font-size:13px; margin-left:8px; }
+  button{ background:var(--accent); color:#fff; border:0; border-radius:10px; padding:9px 18px;
+          cursor:pointer; font-size:15px; }
+  button:disabled{ opacity:.5; }
+  .err{ position:fixed; left:40px; right:40px; bottom:28px; background:#3a1e22; border:1px solid #6b2b33;
+        color:#ffb4b4; border-radius:12px; padding:12px 16px; white-space:pre-wrap; display:none; }
+</style>
+</head>
+<body>
+  <header>
+    <h1 id="appTitle">人升 · 大屏看板</h1>
+    <span class="clock" id="clock"></span>
+  </header>
+  <div class="stats" id="stats"></div>
+  <div class="cols" id="tasks"></div>
+  <div class="err" id="err"></div>
+
+<script>
+const UI = { coin: "金币", tasks: "今日待办", done: "打卡" };
+const API = { info:"/cloud/info", coin:"/cloud/coin", skills:"/cloud/skills",
+              tasks:"/cloud/tasks?limit=200", do:"/cloud/api/contentprovider?url=" };
+
+const $err = document.getElementById("err");
+function showErr(m){ $err.style.display="block"; $err.textContent=m; }
+function fmt(code){ return {10001:"云人升：人升没运行 / 未授「读取数据」。",10002:"读取失败（权限 / 版本）。",401:"Token 不对。"}[code] || ("错误码 "+code); }
+async function getJSON(u){
+  const r = await fetch(u); const t = await r.text(); let j;
+  try{ j = JSON.parse(t); }catch(e){ throw new Error("返回非 JSON："+t.slice(0,100)); }
+  if(j.code!==200 && j.code!==undefined) throw new Error(fmt(j.code));
+  if(j.data && j.data[0] && j.data[0].result && j.data[0].result.api_result===false) throw new Error(j.data[0].result.error_message||"被 App 拒绝");
+  return j;
+}
+async function load(){
+  try{
+    await getJSON(API.info);
+    const coin=await getJSON(API.coin), sk=await getJSON(API.skills), tk=await getJSON(API.tasks);
+    const stats=document.getElementById("stats"); stats.innerHTML="";
+    const cv=(coin.data&&(coin.data.value!==undefined?coin.data.value:coin.data))??"-";
+    stats.insertAdjacentHTML("beforeend",`<div class="stat"><div class="k">${UI.coin}</div><div class="v">${cv}</div></div>`);
+    (sk.data||[]).slice(0,6).forEach(s=>stats.insertAdjacentHTML("beforeend",
+      `<div class="stat"><div class="k">${s.name??"属性"}</div><div class="v">${s.level??"-"}</div></div>`));
+    const box=document.getElementById("tasks"); box.innerHTML="";
+    const list=(tk.data||[]).filter(t=>t.status===0);
+    if(!list.length) box.innerHTML='<p style="color:var(--sub)">全部完成 🎉</p>';
+    list.forEach(t=>{
+      const key=t.gid??t.id;
+      const el=document.createElement("div"); el.className="card";
+      el.innerHTML=`<span class="name">${t.name}<span class="freq">#${key}</span></span>`;
+      const b=document.createElement("button"); b.textContent=UI.done;
+      b.onclick=async()=>{ b.disabled=true;b.textContent="…";
+        try{ await getJSON(API.do+encodeURIComponent(`lifeup://api/complete?gid=${key}`)); b.textContent="✔"; setTimeout(load,600); }
+        catch(e){ b.disabled=false;b.textContent=UI.done; showErr("打卡失败："+e.message); } };
+      el.appendChild(b); box.appendChild(el);
+    });
+    $err.style.display="none";
+  }catch(e){ showErr(e.message); }
+}
+function tick(){ document.getElementById("clock").textContent = new Date().toLocaleTimeString("zh-CN",{hour12:false}); }
+setInterval(tick,1000); tick();
+load(); setInterval(load,15000);
+</script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>人升 · 我的看板</title>
+<style>
+  :root{ --bg:#12141a; --card:#1b1e26; --line:#2a2f3a; --fg:#e8eaf0; --sub:#98a0b3; --accent:#4f7cff; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--fg); padding:24px;
+        font:15px/1.5 system-ui,"PingFang SC","Microsoft YaHei",sans-serif; }
+  h1{ font-size:20px; margin:0 0 2px; }
+  .sub{ color:var(--sub); font-size:13px; margin-bottom:18px; }
+  .row{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+  .stat{ background:var(--card); border:1px solid var(--line); border-radius:12px;
+         padding:12px 16px; min-width:120px; }
+  .stat .k{ color:var(--sub); font-size:12px; }
+  .stat .v{ font-size:22px; font-weight:600; margin-top:2px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:12px;
+         padding:8px 14px; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .card .name{ flex:1; }
+  .card .freq{ color:var(--sub); font-size:12px; margin-left:6px; }
+  button{ background:var(--accent); color:#fff; border:0; border-radius:8px;
+          padding:7px 14px; cursor:pointer; font-size:13px; }
+  button:disabled{ opacity:.5; cursor:default; }
+  .err{ background:#3a1e22; border:1px solid #6b2b33; color:#ffb4b4; border-radius:10px;
+        padding:12px 14px; margin-bottom:14px; white-space:pre-wrap; }
+  .muted{ color:var(--sub); font-size:13px; }
+</style>
+</head>
+<body>
+  <h1 id="appTitle">人升 · 我的看板</h1>
+  <div class="sub" id="subTitle">云人升 · 最小可运行示例 —— 想换主题，改下面 &lt;script&gt; 里的 UI 即可</div>
+
+  <div id="err" class="err" style="display:none"></div>
+  <div class="row" id="stats"></div>
+  <div id="tasks"></div>
+  <p class="muted">数据来自手机上的「云人升」。所有规则（周期 / 惩罚 / 金币）都在 App 里算，这里只负责展示和转发。</p>
+
+<script>
+// ── 想换主题？改这几行就行（货币 / 属性 / 清单叫法等）──
+const UI = { coin: "金币", tasks: "任务", done: "完成", empty: "今天没有待办 🎉" };
+
+// 前端只连本机代理 proxy.js；代理再把 /cloud/* 转发到云人升
+const API = {
+  info:  "/cloud/info",
+  coin:  "/cloud/coin",
+  skills:"/cloud/skills",
+  tasks: "/cloud/tasks?limit=100",
+  do:    "/cloud/api/contentprovider?url="
+};
+
+document.getElementById("appTitle").textContent = UI.tasks + " · 我的看板";
+
+const $err = document.getElementById("err");
+function showErr(m){ $err.style.display = "block"; $err.textContent = m; }
+function hidErr(){ $err.style.display = "none"; }
+function friendly(code){
+  return { 10001: "云人升：人升没在运行，或没开「读取人升数据」。",
+           10002: "云人升：读取数据失败（权限 / 版本）。",
+           401:   "Token 不对（检查 config.json）。" }[code] || ("接口返回错误码 " + code);
+}
+async function getJSON(url){
+  const r = await fetch(url);
+  const text = await r.text();
+  let j; try { j = JSON.parse(text); } catch (e) { throw new Error("返回不是 JSON：" + text.slice(0,120)); }
+  if (j.code !== 200 && j.code !== undefined) throw new Error(friendly(j.code));
+  if (j.data && j.data[0] && j.data[0].result && j.data[0].result.api_result === false)
+    throw new Error((j.data[0].result.error_message) || "操作被 App 拒绝（api_result=false）");
+  return j;
+}
+
+async function load(){
+  hidErr();
+  try{
+    await getJSON(API.info);                 // 连通自测
+    const coin  = await getJSON(API.coin);
+    const sk    = await getJSON(API.skills);
+    const tasks = await getJSON(API.tasks);
+
+    // 顶部：金币 + 前 5 个属性
+    const stats = document.getElementById("stats");
+    stats.innerHTML = "";
+    const coinVal = (coin.data && (coin.data.value !== undefined ? coin.data.value : coin.data)) ?? "-";
+    stats.insertAdjacentHTML("beforeend",
+      `<div class="stat"><div class="k">${UI.coin}</div><div class="v">${coinVal}</div></div>`);
+    (sk.data || []).slice(0, 5).forEach(s => {
+      stats.insertAdjacentHTML("beforeend",
+        `<div class="stat"><div class="k">${s.name ?? "属性"}</div><div class="v">Lv.${s.level ?? "-"}</div></div>`);
+    });
+
+    // 任务列表（仅未完成）
+    const box = document.getElementById("tasks");
+    box.innerHTML = "";
+    const list = (tasks.data || []).filter(t => t.status === 0);
+    if (!list.length) box.innerHTML = `<p class="muted">${UI.empty}</p>`;
+    list.forEach(t => {
+      const key = t.gid ?? t.id;   // 跨周期识别用 gid（id 每周期会变）
+      const el = document.createElement("div");
+      el.className = "card";
+      el.innerHTML = `<span class="name">${t.name}<span class="freq">#${key}</span></span>`;
+      const btn = document.createElement("button");
+      btn.textContent = UI.done;
+      btn.onclick = async () => {
+        btn.disabled = true; btn.textContent = "…";
+        try{
+          await getJSON(API.do + encodeURIComponent(`lifeup://api/complete?gid=${key}`));
+          btn.textContent = "✔";
+          setTimeout(load, 600);
+        }catch(e){
+          btn.disabled = false; btn.textContent = UI.done;
+          showErr("完成失败：" + e.message + "\n（写操作不幂等，请勿反复重试）");
+        }
+      };
+      el.appendChild(btn);
+      box.appendChild(el);
+    });
+  }catch(e){
+    showErr(e.message + "\n（先确认手机与电脑同一 Wi‑Fi，且 config.json 里的 IP 正确）");
+  }
+}
+
+load();
+setInterval(load, 30000);   // 每 30 秒自动刷新；也可改成监听云人升广播事件
+</script>
+</body>
+</html>
