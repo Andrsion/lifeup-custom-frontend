@@ -1,6 +1,8 @@
-# 自定义人升 · 全量文档（llms-full.txt）
-> 本文件把仓库所有文档合并成一份，方便一次性喂给 AI Agent。最新版以各文件为准。
+# 自定义人升 · 核心文档（llms-full.txt）
 
+> 本文件由 `scripts/build_llms.py` 从仓库各源文档**自动生成**，请勿手改。
+> 修改内容请改源文件，然后重跑：`python3 scripts/build_llms.py`
+> 主题施工稿（`docs/specs/`）是可选的单主题材料，不并入本文件，索引见 `llms.txt`。
 
 <!-- ===== README (README.md) ===== -->
 
@@ -22,6 +24,8 @@
 ---
 
 ## 🤖 直接交给 AI（推荐入口）
+
+> 🧭 **AI 请先读** [`llms.txt`](llms.txt) —— 仓库根目录，已把全部文档 / 示例路径列全。让 AI「先读 llms.txt 再回答」，就不会漏报文件。
 
 把下面这段**整段复制**给你用的 AI / Agent（把 `<>` 换成你自己的信息）：
 
@@ -81,10 +85,10 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 | **[排错 · 常见坑](docs/troubleshooting.md)** | 连不上 / `10001` / `401` / CORS / 写操作不幂等 / 用不了的云平台 |
 | **[从书到人升](docs/books-to-lifeup.md)** | **16 本书**的方法论 → 一张「在人升上的用法」表（怎么设计自己的体系） |
 | **[世界观 / 主题参考](docs/samples.md)** | 可借用的世界观与主题（大众 IP / 社区体系 / 同类产品）+ **9 个**「换名对照表」案例 |
-| **[主题施工稿 · 星露谷农场](docs/specs/stardew-farm.md)** | 界面规格 + 可粘贴提示词：赛季制 · 长线投资 · 延迟满足 |
-| **[主题施工稿 · 原神](docs/specs/genshin.md)** | 界面规格 + 可粘贴提示词：分层货币 · 保底抽卡 · 体力控节奏 |
-| **[主题施工稿 · 崩坏：星穹铁道](docs/specs/star-rail.md)** | 界面规格 + 可粘贴提示词：活跃度制 · 保底跨期继承 · 反焦虑 |
 | **[地球 Online 梗词表](docs/earth-online-glossary.md)** | 用游戏术语解构人生的公共梗词速查 + 可直接用的文案模板 |
+| **[星露谷农场界面 spec](docs/specs/stardew-farm.md)** | 把「完成待办」包装成经营一座农场 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
+| **[原神 · 界面 spec](docs/specs/genshin.md)** | 把「完成待办」包装成提瓦特冒险 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
+| **[星穹铁道 · 界面 spec](docs/specs/star-rail.md)** | 把「完成待办」包装成银河开拓 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
 
 ## 权威文档（一切以官方为准）
 
@@ -105,7 +109,6 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 ---
 
 > 本仓库为社区整理的公开镜像版，非官方仓库；接口与参数细节**以官方文档为准**。
-
 
 <!-- ===== 实现方案 (docs/custom-ui-ai-mcp.md) ===== -->
 
@@ -506,7 +509,6 @@ args: ['-y', '@lifeup/mcp']
 * **桌面小部件 / 番茄钟联动**
 * **自动化**：Tasker / MacroDroid 触发 → 调人升 API（Tasker / MacroDroid 见人升官方文档）
 
-
 <!-- ===== 接口速查表 (docs/api-cheatsheet.md) ===== -->
 
 # 云人升 HTTP 接口 · 速查表
@@ -649,7 +651,6 @@ curl http://192.168.1.23:13276/info
 # 返回含 appVersionName / cloudVersionName 即通
 ```
 
-
 <!-- ===== 排错 · 常见坑 (docs/troubleshooting.md) ===== -->
 
 # 排错 · 常见坑
@@ -699,7 +700,6 @@ curl http://192.168.1.23:13276/info
 
 带上这些信息去求助，效率最高：`GET /info` 的返回、浏览器控制台报错、你请求的完整 URL 与返回体。
 详细求助模板见知识库《🛟 社区求助与反馈指南》。
-
 
 <!-- ===== 从书到人升 (docs/books-to-lifeup.md) ===== -->
 
@@ -989,7 +989,6 @@ curl http://192.168.1.23:13276/info
 | 《游戏剧本怎么写》     | 给任务起个「故事名」、把清单当章节，枯燥的事立马入戏      |
 | 《思维转变》        | 理解「为什么刷手机上瘾」，再靠环境设计对抗           |
 
-
 <!-- ===== 世界观 / 主题参考 (docs/samples.md) ===== -->
 
 # 世界观 / 主题参考
@@ -1264,7 +1263,6 @@ curl http://192.168.1.23:13276/info
 ---
 
 > 本页由社区整理，仅作设计参考，与上述产品无任何关联；不提供任何产品链接。发现值得参考的主题 / 产品，欢迎补充。
-
 
 <!-- ===== 地球 Online 梗词表 (docs/earth-online-glossary.md) ===== -->
 
