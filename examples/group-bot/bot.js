@@ -62,7 +62,7 @@ const doApi = (lifeupUrl) =>
 
 /** 读取未完成任务清单（bot 可用来做「今日待办」） */
 async function listOpenTasks() {
-  const j = await read("/tasks?limit=200");
+  const j = await read("/tasks");
   if (j.code !== 200) throw new Error(mapErr(j.code));
   return (j.data || []).filter((t) => t.status === 0);
 }
