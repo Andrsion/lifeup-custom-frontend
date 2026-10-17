@@ -15,7 +15,7 @@
 
 ---
 
-## 🚀 一、快速上手（多数人只看这里）
+## 🚀 一、快速上手（多数人只看这里）\n\n> 施工时请同时遵循 [AI 施工标准](ai-build-standard.md)：先核对官方接口、先做只读测试、写操作不自动重试。
 
 ### 1｜先懂一句话原理
 
@@ -63,7 +63,7 @@
 >
 > **背景**：人升（LifeUp）是安卓上的游戏化任务管理 App，配套的「云人升」在手机上开了 HTTP 服务（局域网，默认端口 13276），提供两类接口：
 > ① 读：`GET http://<手机IP>:13276/tasks`、`/items`、`/synthesis`、`/coin`、`/skills`、`/info` —— 返回 `{ code, message, data }`，`data` 是列表，支持 `offset` / `limit` 分页；
-> ② 写：`POST http://<手机IP>:13276/api/contentprovider`，请求体 `{ "url": "lifeup://api/complete?id=<任务ID>" }` —— 返回 `{ result }`。**写操作不幂等，请勿自动重试。**
+> ② 写：通过官方定义的 `POST /api/contentprovider` 调用 URL Scheme；JSON 请求体使用 `urls` 数组，例如 `{ "urls": ["lifeup://api/complete?id=<任务ID>"] }`。官方响应为 `{ code, message, data }`；业务结果需要检查 `data[].result.api_result`。**写操作不幂等，请勿自动重试。**
 >
 > **接口依据（重要）**：以上只是常用示例，**完整接口以官方文档为准** → https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md 。**写代码前先核对方法名与参数，不要臆造**（参数写错会直接连不上）。
 >
@@ -170,12 +170,12 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 
 ### 写：Action 层（POST）
 
-* 默认 `POST /api/contentprovider`，body `{ "url": "lifeup://api/..." }`，**返回结果**
+* 默认 `POST /api/contentprovider`，JSON body 使用官方定义的 `urls` 数组（例如 `{ "urls": ["lifeup://api/..."] }`）；具体方法与参数必须按官方文档核对。
 * 需要 UI（页面跳转 / 确认弹窗 / 番茄钟启动）才用 `POST /api`（launch，只保证送达、拿不到返回值）
 * 常用方法：`complete` / `give_up` / `purchase_item` / `use_item` / `synthesize` / `add_task` / `reward` / `loot_box`
 * 批量：`call_api_batch`（≤20 个方法，顺序保持；批内后续调用看不到前面结果）
 * ⚠️ **写操作不幂等**（complete / skip / reward）：超时**不要自动重试**
-* 检查返回：`HTTP 200 + code=200` 只代表送达，必须再看 `ok` 与 `data`
+* 检查返回：顶层 `code=200` 只代表请求已被处理，不等于游戏内操作成功；按官方响应检查 `data[].result.api_result`。
 
 ### AI：两条接法
 
