@@ -6,6 +6,7 @@
 >
 > **配套官方文档（权威源，一切以它为准）**
 > * 云人升 HTTP 接口 · https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
+> * 人升 URL Scheme / API · https://wiki.lifeupapp.fun/zh-cn/guide/api.md
 > * MCP & Skills · https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md
 > * 官方 SDK / skills 源码 · https://github.com/Ayagikei/LifeUp-SDK
 >
