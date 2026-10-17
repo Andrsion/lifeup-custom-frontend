@@ -41,6 +41,28 @@
 - 官方云人升 HTTP 文档列出的基础要求为人升 v1.91+ 与最新版云人升；特定字段 / 功能可能要求更高版本。使用前请求 `GET /info`，并按所用功能核对官方文档 / SDK。
 - `weekdays`（按每周几重复）字段由官方 HTTP 文档标注为人升 v1.106.0+；这不是全部 HTTP 路由的统一最低版本。
 
+## 装 Node / 下依赖很慢
+
+**Node.js 安装包**（官网慢时用国内同源镜像）
+
+| 镜像 | 地址 |
+| --- | --- |
+| 阿里云（推荐） | [https://mirrors.aliyun.com/nodejs-release/](https://mirrors.aliyun.com/nodejs-release/) |
+| 清华 TUNA | [https://mirrors.tuna.tsinghua.edu.cn/nodejs-release/](https://mirrors.tuna.tsinghua.edu.cn/nodejs-release/) |
+
+进入对应镜像后选版本目录（如 `v20.x.x/`），再下载对应系统的安装包（Windows `.msi` / macOS `.pkg`）。
+
+**npm 依赖**（只有安装 MCP 等需要 `npx` 拉包的场景会用到；本项目示例是零依赖）
+
+```bash
+npm config set registry https://registry.npmmirror.com
+npm config get registry
+```
+
+验证：第二条命令返回 `https://registry.npmmirror.com/` 即成功。
+
+旧的 `registry.npm.taobao.org` 已失效，请使用新的 `registry.npmmirror.com`。
+
 ## 仍然搞不定？
 
 带上这些信息去求助，效率最高：`GET /info` 的返回、浏览器控制台报错、你请求的完整 URL 与返回体。
