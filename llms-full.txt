@@ -14,7 +14,7 @@
 - **从书到人升** — docs/books-to-lifeup.md
 - **地球 Online 梗词表** — docs/earth-online-glossary.md
 - **docs/mcp-quickstart.md** — docs/mcp-quickstart.md
-- **docs/mcp-skills.md** — docs/mcp-skills.md
+- **MCP 与 Skills 指南** — docs/mcp-skills.md
 - **世界观 / 主题参考** — docs/samples.md
 - **docs/theme-spec-template.md** — docs/theme-spec-template.md
 - **排错 · 常见坑** — docs/troubleshooting.md
@@ -1352,7 +1352,7 @@ MCP 提供可调用的工具；Skill 提供 Agent 的任务说明和操作流程
 - [本仓库实现方案](custom-ui-ai-mcp.md) — 自定义界面、代理与机器人开发。
 - [排错指南](troubleshooting.md) — 本仓库示例的连接问题排查。
 
-<!-- ===== docs/mcp-skills.md (docs/mcp-skills.md) ===== -->
+<!-- ===== MCP 与 Skills 指南 (docs/mcp-skills.md) ===== -->
 
 # LifeUp MCP 与 Skills 指南
 
