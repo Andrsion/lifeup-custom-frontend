@@ -8,7 +8,7 @@
 | --- | --- |
 | **我想直接运行示例** | 进入 [minimal-html](examples/minimal-html/)，按示例说明配置并启动；需要大屏时用 [desktop-dashboard](examples/desktop-dashboard/)。 |
 | **我想让 AI 帮我做** | 先读 [llms.txt](llms.txt)，再按任务读取 [实现方案](docs/custom-ui-ai-mcp.md) 和 [AI 施工标准](docs/ai-build-standard.md)。群机器人示例见 [group-bot](examples/group-bot/)。 |
-| **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端，不需要自己开发界面。 |
+| **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端；需要了解 Skills 时看 [MCP 与 Skills 指南](docs/mcp-skills.md)，不需要自己开发界面。 |
 | **我遇到问题了** | 先运行下面的只读诊断，再查 [排错指南](docs/troubleshooting.md)；接口细节见 [API 速查表](docs/api-cheatsheet.md)。 |
 
 ## 开工前 5 分钟自检
@@ -45,7 +45,7 @@
 
 > 按这份文档帮我安装 LifeUp MCP 并完成首次连接：[https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md)
 
-Agent 需要能操作本机 MCP 配置、执行命令并访问手机所在的局域网；它应保留已有 MCP 配置，缺少设备地址或 Token 时先询问你，并通过只读查询验证连接。若无法操作本机或访问局域网，它应说明哪些步骤需要你手动完成。详细步骤与排错见 [MCP 安装与使用指南](docs/mcp-quickstart.md)。
+Agent 需要能操作本机 MCP 配置、执行命令并访问手机所在的局域网；它应保留已有 MCP 配置，缺少设备地址或 Token 时先询问你，并通过只读查询验证连接。若无法操作本机或访问局域网，它应说明哪些步骤需要你手动完成。详细步骤与排错见 [MCP 安装与使用指南](docs/mcp-quickstart.md)；Skills 的安装差异和进阶工作流见 [MCP 与 Skills 指南](docs/mcp-skills.md)。
 
 ## 版本门槛：按能力分别核对
 
