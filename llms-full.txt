@@ -7,118 +7,67 @@
 
 <!-- ===== README (README.md) ===== -->
 
-## ⚠️ 先分清：这不是「人升自带的外观设置」
+# 自定义人升 · 自定义界面 + AI + MCP
 
-| 你想干嘛 | 该去哪儿 |
+> 在《人升》(LifeUp) 之上构建第三方自定义界面：网页看板、桌面仪表盘、AI 助手或群机器人。人升与云人升负责真实数据和业务规则；本项目提供展示、交互与转发层。本项目不是人升 App 自带的外观设置，也不是官方仓库。
+
+## 你想做什么？
+
+| 目标 | 从这里开始 |
 | --- | --- |
-| 调人升**自带**的外观（主题色、简洁模式、Material You、卡片背景） | App 内「**设置**」，或 `lifeup://api/app_settings` 接口（v1.98+） |
-| 在**人升之外**搭自己的界面（看板 / AI 助手 / 机器人） | ✅ **本项目** |
+| 让 AI 帮你搭建自定义界面 | 阅读[实现方案](docs/custom-ui-ai-mcp.md)与[AI 施工标准](docs/ai-build-standard.md)，再把这两份文档交给本地运行的 AI Agent |
+| 查接口方法、参数、响应与版本要求 | [API 速查表](docs/api-cheatsheet.md)，并以对应的[官方资料](llms.txt#权威来源与分工)核对 |
+| 排查连接、Token、CORS 或写操作问题 | [排错指南](docs/troubleshooting.md) |
+| 直接运行或改造示例 | [minimal-html](examples/minimal-html/)、[desktop-dashboard](examples/desktop-dashboard/)、[group-bot](examples/group-bot/) |
+| 制作特定世界观的界面 | [主题施工稿目录](docs/specs/)；每个主题稿是设计参考，不是 API 规范 |
+| 让 AI 快速理解整个仓库 | 先读 [llms.txt](llms.txt)；需要完整上下文时再读 [llms-full.txt](llms-full.txt) |
 
-> 本项目**不是**人升自带的外观 / 主题设置，而是**在人升 App 之外**、基于「云人升」HTTP 服务另做的一层**第三方界面**。
+## 给 AI Agent 的启动指令
 
-# 自定义人升 · 自定义界面 + AI + MCP 实现方案
+将下面的指令和本仓库的主文档交给你正在使用的 AI 工具。请优先使用能在你自己的电脑上运行代码、访问手机局域网的 Agent；云端托管环境通常无法直接访问手机上的云人升服务。
 
-> 在《人升》(LifeUp) 之上做一层**「自定义界面」** —— 自己搭看板、接 AI 助手、做桌面 / 语音 / 群机器人外壳。
->
-> 所有数据与规则都在**手机端人升 App** 里跑，网页只做「展示 + 转发」。**不需要会写代码** —— 把方案整篇喂给 AI 工具即可。
+```text
+我要基于本仓库搭建 LifeUp（人升）的自定义界面。请先读取：
+1. llms.txt（任务路由与硬性规则）
+2. docs/custom-ui-ai-mcp.md（实现方案）
+3. docs/ai-build-standard.md（施工、安全与验证标准）
 
----
+然后按文档中的快速上手流程检查现有项目、运行环境和配置，先进行只读连通测试，再逐步实现。接口名、参数、请求体、响应结构、权限与版本门槛必须依据对应官方资料核对，不得臆造。不得用假数据冒充真实用户数据；写操作不得自动重试；Token / API Key 不得放进前端或日志。完成后运行可用检查，并明确列出已验证与未验证的内容。
 
-## 🤖 直接交给 AI（推荐入口）
-
-> 🧭 **AI 请先读** [`llms.txt`](llms.txt) —— 仓库根目录，列出核心文档与示例入口。新增的施工规范和检查工具也请查看下方「开发规范与工具」。让 AI 先读索引再回答，减少遗漏。
-
-把下面这段**整段复制**给你用的 AI / Agent（把 `<>` 换成你自己的信息）：
-
-```
-我要做一个人升（LifeUp）的自定义界面。请先完整读取这份方案：
-https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp.md
-同时读取 AI 施工标准：https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/ai-build-standard.md
-读完直接按文档里的「快速上手」开始做，别再问我"你想做什么"。
-我的玩法体系：<主题 / 货币叫法 / 清单叫法；不填则读我的 MCP 数据>
-我要的页面：<任务 + 商店 + 金币属性栏>
-我的环境：<Windows / macOS / Linux；Node.js 已安装 / 未安装 / 不确定>
-规则：① 先读仓库的 AI 施工标准与官方文档；接口路径、参数、请求体、响应和版本要求必须以官方资料为准，不得臆造；② 先检查现有项目和环境，先做只读连通测试，不用假数据冒充真实数据；③ 写操作必须检查业务结果，超时不自动重试；④ 默认只监听本机，Token 不得放进前端或日志；⑤ 运行可用的检查，最后说明已验证和未验证的部分。
+我的主题与需求：<在此填写；也可以留空>
+我的运行环境：<Windows / macOS / Linux；Node.js 状态>
 ```
 
-**给 AI 的文档链接**（任选其一，raw 是纯文本、最好抓）：
+## 可运行示例
 
-- **Gitee（国内推荐）**：`https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp.md`
-- **GitHub**：`https://raw.githubusercontent.com/Andrsion/lifeup-custom-frontend/main/docs/custom-ui-ai-mcp.md`
-
-> ⚠️ 若 AI 反馈"读不了链接"：改用**网页版**（把 `raw/main` 换成 `blob/main`），或干脆把文档内容**粘贴**给它。
-> 分支名是 **`main`**（写成 `master` 会 404）。
-
-## 这是什么
-
-《人升》是一款把任务 / 习惯变成 RPG 的游戏化待办 App。它配套的**「云人升」**会在手机上开一个 HTTP 服务（局域网，默认端口 `13276`），于是你可以在它之上做一层自己的界面：
-
-- 🎨 **任意皮肤的看板**：动物森友会 / 修仙 / 赛博朋克……（Web、桌面、平板大屏）
-- 🤖 **AI 助手**：说一句「把今天的日常做完」，AI 自动调接口完成
-- 👥 **社群机器人**：群友打卡 → 自动建任务 / 发奖励
-- 🔌 **官方 MCP**：配一次，就能用人话直接操作人升
-
-## 快速开始（三步）
-
-| 步骤 | 做什么 |
+| 示例 | 用途 |
 | --- | --- |
-| 1️⃣ 手机侧 | 装 **人升 v1.106.0+** 与 **云人升 3.0.1+**（官方当前 MCP Skills 要求）；人升开「设置 → 实验 → MCP」，云人升里开「读取人升数据」；手机与电脑连**同一个 Wi-Fi** |
-| 2️⃣ 电脑侧 | 挑一个**在你电脑本地运行**的 AI 工具（Trae / 通义灵码 / CodeBuddy / WorkBuddy / dsh…），并装好 **Node.js 20+** |
-| 3️⃣ 开做 | 把 👉 **[docs/custom-ui-ai-mcp.md](docs/custom-ui-ai-mcp.md)** **整篇复制**，丢给第 2 步的工具，照它说的做 |
+| [minimal-html](examples/minimal-html/) | 简单网页看板与本地代理 |
+| [desktop-dashboard](examples/desktop-dashboard/) | 大屏仪表盘 |
+| [group-bot](examples/group-bot/) | 群机器人基础示例 |
 
-> ⚠️ 别用「云端生成 + 云端托管」的平台（秒哒、Bolt.new、v0、Lovable 等）—— 它们访问不到你家 Wi-Fi 里的手机。
+具体配置与启动步骤以各示例目录中的说明为准；不要假设所有示例都能通过双击启动或无需配置。
 
-## 🧩 想直接跑？看 `examples/`
+## 核心文档
 
-| 示例 | 形态 |
-| --- | --- |
-| [**minimal-html**](examples/minimal-html/) | 单文件看板 + 本地代理，**双击即用** |
-| [**desktop-dashboard**](examples/desktop-dashboard/) | 大屏看板（大字号、自动刷新） |
-| [**group-bot**](examples/group-bot/) | 群机器人骨架（打卡 → 完成任务） |
+- [实现方案](docs/custom-ui-ai-mcp.md)：项目边界、快速开始、架构、接口调用与 MCP 接入。
+- [API 速查表](docs/api-cheatsheet.md)：常用 HTTP 接口、错误处理、字段与版本提示。
+- [AI 施工标准](docs/ai-build-standard.md)：接口核对、安全、测试与交付检查。
+- [排错指南](docs/troubleshooting.md)：连接、认证、跨域与写操作排错。
+- [世界观 / 主题参考](docs/samples.md)、[从书到人升](docs/books-to-lifeup.md)、[地球 Online 梗词表](docs/earth-online-glossary.md)：玩法与内容灵感。
+- [主题规格模板](docs/theme-spec-template.md) 与 [主题施工稿](docs/specs/)：将主题想法转成可实施的界面规格。
 
-> 改 `config.json`（填手机 `IP:13276`）→ 双击启动 → 打开浏览器，就跑起来了。详见 [examples/](examples/)。
+## 官方资料与版本要求
 
-## 文档
+官方资料入口和冲突处理规则集中维护在 [llms.txt](llms.txt#权威来源与分工)。不同能力的版本门槛必须分别核对；不要将基础 HTTP、URL Scheme、MCP 和 Skills 的要求混为一个数字。
 
-| 文档 | 内容 |
-| --- | --- |
-| **[实现方案](docs/custom-ui-ai-mcp.md)** | 定位 · 快速上手（含可粘贴的提示词）· 原理与接口（读 / 写 / AI 两条接法）· 坑与限制 · 客户端接入 MCP（WorkBuddy / dsh）· **附录：组件清单 & 灵感库** |
-| **[接口速查表](docs/api-cheatsheet.md)** | 云人升 HTTP 读 / 写接口 · 返回码 · 字段取值 · `gid` 用法 —— **一页纸**，防臆造 |
-| **[排错 · 常见坑](docs/troubleshooting.md)** | 连不上 / `10001` / Token 认证 / CORS / 写操作不幂等 / 用不了的云平台 |
-| **[从书到人升](docs/books-to-lifeup.md)** | **16 本书**的方法论 → 一张「在人升上的用法」表（怎么设计自己的体系） |
-| **[世界观 / 主题参考](docs/samples.md)** | 可借用的世界观与主题（大众 IP / 社区体系 / 同类产品）+ **9 个**「换名对照表」案例 |
-| **[地球 Online 梗词表](docs/earth-online-glossary.md)** | 用游戏术语解构人生的公共梗词速查 + 可直接用的文案模板 |
-| **[星露谷农场界面 spec](docs/specs/stardew-farm.md)** | 把「完成待办」包装成经营一座农场 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
-| **[原神 · 界面 spec](docs/specs/genshin.md)** | 把「完成待办」包装成提瓦特冒险 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
-| **[星穹铁道 · 界面 spec](docs/specs/star-rail.md)** | 把「完成待办」包装成银河开拓 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
+## 仓库维护
 
-## 开发规范与工具
+- 运行 `python3 scripts/build_llms.py` 可重建 `llms-full.txt`。
+- 运行 `python3 scripts/check_repo.py` 可检查配置、脚本语法、本地 Markdown 链接与全文生成稳定性。
+- `llms-full.txt` 是生成文件，请修改源文档或生成脚本，不要手工编辑它。
 
-- [AI 施工标准](docs/ai-build-standard.md)：接口核对、真实数据、安全与交付检查清单。
-- [主题规格模板](docs/theme-spec-template.md)：把主题灵感整理成可复用的界面规范。
-- [只读诊断工具](scripts/doctor.js)：在仓库根目录运行 `node scripts/doctor.js examples/minimal-html`，检查配置并只读调用官方文档列出的 `/info`。
-- [仓库质量检查](scripts/check_repo.py)：检查配置 JSON、脚本语法、本地 Markdown 链接与 `llms-full.txt` 生成稳定性。
-
-## 权威文档（一切以官方为准）
-
-- 云人升 HTTP 接口 · <https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>
-- 人升 URL Scheme / API · <https://wiki.lifeupapp.fun/zh-cn/guide/api.md>
-- MCP & Skills · <https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md>
-- 官方 SDK / skills 源码 · <https://github.com/Ayagikei/LifeUp-SDK>
-- 人升 Wiki · <https://wiki.lifeupapp.fun/>
-
-## 版本门槛
-
-- **人升 v1.106.0+**
-- 云人升版本按具体能力核对官方文档：HTTP 接口要求见 [云人升 HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md)；完整 MCP 能力还应核对 [官方 MCP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md) 与 [SDK 当前 Skills](https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud)。不同能力的最低版本不应混为一个门槛。
-
-## 许可
-
-本文档采用 **CC BY-NC-SA 4.0** 许可：可自由转载 / 改编，需署名、非商业、相同方式共享。详见 [LICENSE](LICENSE)。
-
----
-
-> 本仓库为社区整理的公开镜像版，非官方仓库；接口与参数细节**以官方文档为准**。
+本仓库为社区整理的公开镜像版，非 LifeUp 官方仓库。接口和参数细节以官方文档为准。许可信息见 [LICENSE](LICENSE)。
 
 <!-- ===== 实现方案 (docs/custom-ui-ai-mcp.md) ===== -->
 
