@@ -9,7 +9,7 @@
 > * MCP & Skills · https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md
 > * 官方 SDK / skills 源码 · https://github.com/Ayagikei/LifeUp-SDK
 >
-> **版本门槛**：人升 v1.106.0 正式（2026/09/23）＋ 云人升 3.0.0+。
+> **版本要求**：人升 v1.106.0+；云人升版本要求按所用能力对应的官方文档核对。官方 HTTP 文档与 MCP/Skills 的版本提示可能不同；官方 SDK 当前 Skills 提示完整 MCP 能力需要云人升 3.0.1+，不要把 3.0.0+ 当作所有能力的统一门槛。
 >
 > 本文档为**公开镜像版**（整理自人升社区），可自由传播；接口与参数细节**以官方文档为准**。
 
