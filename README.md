@@ -82,7 +82,14 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 | **[原神 · 界面 spec](docs/specs/genshin.md)** | 把「完成待办」包装成提瓦特冒险 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
 | **[星穹铁道 · 界面 spec](docs/specs/star-rail.md)** | 把「完成待办」包装成银河开拓 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
 
-## 开发规范与工具\n\n- [AI 施工标准](docs/ai-build-standard.md)：接口核对、真实数据、安全与交付检查清单。\n- [主题规格模板](docs/theme-spec-template.md)：把主题灵感整理成可复用的界面规范。\n- [只读诊断工具](scripts/doctor.js)：在仓库根目录运行 `node scripts/doctor.js examples/minimal-html`，检查配置并只读调用官方文档列出的 `/info`。\n- [仓库质量检查](scripts/check_repo.py)：检查配置 JSON、脚本语法、本地 Markdown 链接与 `llms-full.txt` 生成稳定性。\n\n## 权威文档（一切以官方为准）
+## 开发规范与工具
+
+- [AI 施工标准](docs/ai-build-standard.md)：接口核对、真实数据、安全与交付检查清单。
+- [主题规格模板](docs/theme-spec-template.md)：把主题灵感整理成可复用的界面规范。
+- [只读诊断工具](scripts/doctor.js)：在仓库根目录运行 `node scripts/doctor.js examples/minimal-html`，检查配置并只读调用官方文档列出的 `/info`。
+- [仓库质量检查](scripts/check_repo.py)：检查配置 JSON、脚本语法、本地 Markdown 链接与 `llms-full.txt` 生成稳定性。
+
+## 权威文档（一切以官方为准）
 
 - 云人升 HTTP 接口 · <https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>
 - MCP & Skills · <https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md>
