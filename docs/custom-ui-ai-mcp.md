@@ -64,7 +64,7 @@
 > 你是资深全栈工程师。请帮我做一个**本地网页界面**，我不是程序员，请用最少的文件、最简单的依赖，让我照着做就能跑起来。
 >
 > **背景**：人升（LifeUp）是安卓上的游戏化任务管理 App，配套的「云人升」在手机上开了 HTTP 服务（局域网，默认端口 13276），提供两类接口：
-> ① 读：`GET http://<手机IP>:13276/tasks`、`/items`、`/synthesis`、`/coin`、`/skills`、`/info` —— 返回 `{ code, message, data }`，`data` 是列表，支持 `offset` / `limit` 分页；
+> ① 读：按官方文档请求 `GET /tasks`、`/items`、`/synthesis`、`/coin`、`/skills`、`/info` 等；响应结构为 `{ code, message, data }`，列表接口的 `data` 是数组，而 `/coin`、`/info` 的 `data` 是对象；分页参数和适用接口以官方文档为准；
 > ② 写：通过官方定义的 `POST /api/contentprovider` 调用 URL Scheme；JSON 请求体使用 `urls` 数组，例如 `{ "urls": ["lifeup://api/complete?id=<任务ID>"] }`。官方响应为 `{ code, message, data }`；业务结果需要检查 `data[].result.api_result`。**写操作不幂等，请勿自动重试。**
 >
 > **接口依据（重要）**：以上只是常用示例，**完整接口以官方文档为准** → https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md 。**写代码前先核对方法名与参数，不要臆造**（参数写错会直接连不上）。
