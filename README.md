@@ -53,7 +53,7 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 
 | 步骤 | 做什么 |
 | --- | --- |
-| 1️⃣ 手机侧 | 装 **人升 v1.106.0+** 与 **云人升 3.0.0+**；人升开「设置 → 实验 → MCP」，云人升里开「读取人升数据」；手机与电脑连**同一个 Wi-Fi** |
+| 1️⃣ 手机侧 | 装 **人升 v1.106.0+** 与 **云人升 3.0.1+**（官方当前 MCP Skills 要求）；人升开「设置 → 实验 → MCP」，云人升里开「读取人升数据」；手机与电脑连**同一个 Wi-Fi** |
 | 2️⃣ 电脑侧 | 挑一个**在你电脑本地运行**的 AI 工具（Trae / 通义灵码 / CodeBuddy / WorkBuddy / dsh…），并装好 **Node.js 20+** |
 | 3️⃣ 开做 | 把 👉 **[docs/custom-ui-ai-mcp.md](docs/custom-ui-ai-mcp.md)** **整篇复制**，丢给第 2 步的工具，照它说的做 |
 
