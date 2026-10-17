@@ -4,19 +4,20 @@
 > 修改内容请改源文件，然后重跑：`python3 scripts/build_llms.py`
 > 自动收录 `README.md` 与 `docs/` 下的 Markdown 文档；`docs/specs/` 是可选的单主题材料，不并入本文件，索引见 `llms.txt`。
 > 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。文件开头自动生成收录目录。
+> 体量：60943 字符 · 11 篇（正文口径）（由脚本统计，随每次重建更新）。
 
 ## 文档目录（自动生成）
 
 - **README** — README.md
 - **实现方案** — docs/custom-ui-ai-mcp.md
-- **docs/ai-build-standard.md** — docs/ai-build-standard.md
+- **AI 施工标准** — docs/ai-build-standard.md
 - **接口速查表** — docs/api-cheatsheet.md
 - **从书到人升** — docs/books-to-lifeup.md
 - **地球 Online 梗词表** — docs/earth-online-glossary.md
-- **docs/mcp-quickstart.md** — docs/mcp-quickstart.md
+- **MCP 安装与使用指南** — docs/mcp-quickstart.md
 - **MCP 与 Skills 指南** — docs/mcp-skills.md
 - **世界观 / 主题参考** — docs/samples.md
-- **docs/theme-spec-template.md** — docs/theme-spec-template.md
+- **主题规格模板** — docs/theme-spec-template.md
 - **排错 · 常见坑** — docs/troubleshooting.md
 
 > 目录用于快速定位章节；各章节下方的源路径标记是稳定标识。
@@ -501,7 +502,7 @@ args: ['-y', '@lifeup/mcp']
 * **桌面小部件 / 番茄钟联动**
 * **自动化**：Tasker / MacroDroid 触发 → 调人升 API（Tasker / MacroDroid 见人升官方文档）
 
-<!-- ===== docs/ai-build-standard.md (docs/ai-build-standard.md) ===== -->
+<!-- ===== AI 施工标准 (docs/ai-build-standard.md) ===== -->
 
 # AI 施工标准：先核对、再实现、最后验证
 
@@ -1195,7 +1196,7 @@ curl http://192.168.1.23:13276/info
 
 > 本页由社区整理，仅收录网络公共梗表达；不含任何平台账号、链接或第三方原文，可自由用于你自己的玩法命名与文案。
 
-<!-- ===== docs/mcp-quickstart.md (docs/mcp-quickstart.md) ===== -->
+<!-- ===== MCP 安装与使用指南 (docs/mcp-quickstart.md) ===== -->
 
 # LifeUp MCP 安装与使用指南
 
@@ -1755,7 +1756,7 @@ cd LifeUp-SDK
 
 > 本页由社区整理，仅作设计参考，与上述产品无任何关联；不提供任何产品链接。发现值得参考的主题 / 产品，欢迎补充。
 
-<!-- ===== docs/theme-spec-template.md (docs/theme-spec-template.md) ===== -->
+<!-- ===== 主题规格模板 (docs/theme-spec-template.md) ===== -->
 
 # 主题规格模板
 
