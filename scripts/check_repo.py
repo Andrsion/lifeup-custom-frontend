@@ -43,6 +43,10 @@ def check_javascript() -> list[str]:
     # 检查两个 HTML 中的内嵌脚本，避免只检查代理而漏掉前端脚本。
     for html in sorted((ROOT / "examples").rglob("index.html")):
         content = html.read_text(encoding="utf-8")
+        if "innerHTML" in content or "insertAdjacentHTML" in content:
+            errors.append(f"{html.relative_to(ROOT)}: 动态数据渲染不得使用 innerHTML / insertAdjacentHTML")
+        if "api_result !== true" not in content:
+            errors.append(f"{html.relative_to(ROOT)}: 写操作必须明确检查官方业务结果")
         scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script\s*>", content, re.I | re.S)
         for index, script in enumerate(scripts):
             with tempfile.NamedTemporaryFile("w", suffix=".js", encoding="utf-8", delete=False) as handle:
