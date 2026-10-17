@@ -14,6 +14,7 @@
 - 全面对照官方云人升 HTTP 文档与 LifeUp-SDK：补全成就解锁条件、隐藏清单、备份 / 上传等路由说明，核对分页默认值、时间范围、响应结构、权限与版本门槛。
 - 校正 URL Scheme 方法名：番茄计时为 `pomodoro_timer`，领取成就奖励为 `complete_achievement`；区分通用 `reward` 与成就领奖。
 - 将 Token 认证错误与 JSON `code` 分开说明，并明确 HTTP 基础要求、特定字段版本要求及 MCP / Skills 版本要求不同。
+- 将官方 LifeUp-Wiki 纳入主要核对来源：区分 URL Scheme、Cloud HTTP、MCP 接入和当前 Skills 的资料职责；记录 Wiki MCP 页的 3.0.0+ 与当前 SDK Skill 的 3.0.1+ 差异，并明确 HTTP 文档提示滞后时需交叉核对服务端实现。
 
 ## v19 · 2026-10-13
 
