@@ -36,7 +36,7 @@ HEADER = """# 自定义人升 · 核心文档（llms-full.txt）
 > 本文件由 `scripts/build_llms.py` 从仓库各源文档**自动生成**，请勿手改。
 > 修改内容请改源文件，然后重跑：`python3 scripts/build_llms.py`
 > 自动收录 `README.md` 与 `docs/` 下的 Markdown 文档；`docs/specs/` 是可选的单主题材料，不并入本文件，索引见 `llms.txt`。
-> 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。
+> 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。文件开头自动生成收录目录。
 
 """
 
@@ -73,8 +73,15 @@ def discover_sources() -> list[Path]:
 
 
 def main() -> None:
-    parts = [HEADER]
     sources = discover_sources()
+    parts = [HEADER, "## 文档目录（自动生成）\n\n"]
+    for path in sources:
+        rel = path.relative_to(ROOT).as_posix()
+        name = SECTION_NAMES.get(rel, rel)
+        # Stable source paths remain useful even if display titles change.
+        parts.append(f"- **{name}** — \`{rel}\`\n")
+    parts.append("\n> 目录用于快速定位章节；各章节下方的源路径标记是稳定标识。\n\n")
+
     for path in sources:
         rel = path.relative_to(ROOT).as_posix()
         name = SECTION_NAMES.get(rel, rel)
@@ -88,7 +95,6 @@ def main() -> None:
         f"已生成 {out.name}：{len(output.encode('utf-8'))} 字节 / "
         f"{output.count(chr(10))} 行 / {len(sources)} 个文档"
     )
-
 
 if __name__ == "__main__":
     main()
