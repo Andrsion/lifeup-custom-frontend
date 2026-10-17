@@ -2,6 +2,14 @@
 
 > 本文帮助你将支持 MCP 的 AI 客户端连接到手机上的云人升。客户端界面和官方步骤如有变化，以[官方 MCP & Skills 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md)为准。
 
+## 快速使用
+
+不想一步步手动配置？把下面这句话复制给有权限操作你电脑的 AI Agent，让它按官方文档协助完成 MCP 安装与首次连接：
+
+> 按这份文档帮我安装 LifeUp MCP 并完成首次连接：[https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md)
+
+Agent 需要能在本机读取和修改 MCP 客户端配置、执行命令，并访问手机所在的局域网。执行过程中应先检查环境和现有配置、保留其他 MCP 服务设置；需要设备地址或 Token 时向你询问，不要猜测。完成后用只读查询验证连接，并报告实际结果；如果它无法操作本机或无法访问局域网，应明确指出需要你手动完成的步骤。
+
 ## 1. MCP 是什么？
 
 LifeUp MCP 让 AI 客户端通过局域网连接云人升，读取人升数据，并在你的明确指令下调用人升功能。
