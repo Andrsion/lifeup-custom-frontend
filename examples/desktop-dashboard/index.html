@@ -91,8 +91,9 @@ async function load(){
           if(!operation.length||operation.some(item=>!item||!item.result||item.result.api_result!==true)) throw new Error("官方响应未明确确认操作成功");
           b.textContent="✔"; setTimeout(load,600);
         }catch(e){
-          b.disabled=false; b.textContent=UI.done;
-          showErr("完成结果未确认："+e.message+"。请刷新列表确认状态，不要连续重试。");
+          // 写请求可能已送达；保持禁用，要求先刷新状态，避免立即重复执行。
+          b.disabled=true; b.textContent="结果待确认";
+          showErr("操作结果未确认："+e.message+"。请刷新列表确认状态，不要连续重试。");
         }
       };
       el.appendChild(b); box.appendChild(el);
