@@ -19,7 +19,7 @@ start.bat / start.command  ← 双击启动
 4. 复制 `config.example.json` 为 `config.json`，把 `host` 改成你的 `IP:13276`。代理默认只监听本机 `127.0.0.1`，不要将其直接暴露到局域网。
 5. 双击 **`start.bat`**（Windows）或 **`start.command`**（macOS，首次可能需 `chmod +x start.command`）；或命令行 `node proxy.js`。
 6. 浏览器打开 **http://127.0.0.1:8787**。
-7. 如需排错，可在仓库根目录运行 `node scripts/doctor.js examples/minimal-html`；它只读检查 `/info`，不执行任何写操作。
+7. 最省事：直接双击同目录的 `check.bat`（Windows）/ `check.command`（macOS），它等价于下面这条命令。可在仓库根目录运行 `node scripts/doctor.js examples/minimal-html`；它只读检查 `/info`，不执行任何写操作。
 
 ## 换主题（很简单）
 
