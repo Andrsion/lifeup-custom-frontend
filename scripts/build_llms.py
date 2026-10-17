@@ -24,6 +24,7 @@ SOURCE_PRIORITY = {
 SECTION_NAMES = {
     "README.md": "README",
     "docs/custom-ui-ai-mcp.md": "实现方案",
+    "docs/mcp-skills.md": "MCP 与 Skills 指南",
     "docs/api-cheatsheet.md": "接口速查表",
     "docs/troubleshooting.md": "排错 · 常见坑",
     "docs/books-to-lifeup.md": "从书到人升",
