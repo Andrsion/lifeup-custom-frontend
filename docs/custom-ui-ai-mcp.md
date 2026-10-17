@@ -4,13 +4,16 @@
 >
 > **给谁看**：想自己搭人升看板、或用 AI（MCP）直接操作人升的玩家。**不需要会写代码** —— 把本文整篇喂给 AI 工具 / Agent 即可。
 >
-> **配套官方文档（权威源，一切以它为准）**
-> * 云人升 HTTP 接口 · https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
-> * 人升 URL Scheme / API · https://wiki.lifeupapp.fun/zh-cn/guide/api.md
-> * MCP & Skills · https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md
-> * 官方 SDK / skills 源码 · https://github.com/Ayagikei/LifeUp-SDK
+> **配套官方资料（按用途交叉核对，不只看单一源码）**
+> * 云人升 HTTP 路由、权限与基础版本要求 · https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
+> * 人升 URL Scheme 方法名与参数 · https://wiki.lifeupapp.fun/zh-cn/guide/api.md
+> * MCP 安装与客户端接入说明 · https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md
+> * 当前 MCP / Skills 实际能力与版本要求 · https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud
+> * HTTP 服务端当前实现 · https://github.com/Ayagikei/LifeUp-SDK/blob/main/http/src/main/java/net/lifeupapp/lifeup/http/service/KtorService.kt
 >
-> **版本要求**：人升 v1.106.0+；云人升版本要求按所用能力对应的官方文档核对。官方 HTTP 文档与 MCP/Skills 的版本提示可能不同；官方 SDK 当前 Skills 提示完整 MCP 能力需要云人升 3.0.1+，不要把 3.0.0+ 当作所有能力的统一门槛。
+> **资料冲突时的核对规则**：URL Scheme 方法和参数先查官方 `api.md`；HTTP 接口先查 `api_cloud.md`，但该页明确提示部分接口定义可能滞后，因此路由、参数或响应与实际实现冲突时，再核对它指向的 `KtorService.kt`；MCP 安装步骤参考 `api_mcp.md`，当前 Skills 的具体版本门槛与工具行为参考 SDK 中的 `lifeup-cloud/SKILL.md` 及其 references。
+>
+> **版本要求**：基础 HTTP 查询按官方云人升文档要求人升 v1.91+ 与最新版云人升；特定字段另有门槛。MCP / Skills 需人升 v1.106.0+。官方 Wiki 的 MCP 页面目前写云人升 3.0.0+，而 SDK 当前 `lifeup-cloud` Skill 明确要求 3.0.1+；为获得当前完整 Skills 工作流，按更具体的 Skill 要求使用 **3.0.1+**，不要把它误写成所有 HTTP 路由的统一门槛。
 >
 > 本文档为**公开镜像版**（整理自人升社区），可自由传播；接口与参数细节**以官方文档为准**。
 
@@ -265,7 +268,7 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 | 人升官方 SDK / skills 源码 | https://github.com/Ayagikei/LifeUp-SDK |
 | MCP 自带知识（装好即在） | AI 侧 `help` / `help api-index` / `help <方法名>` |
 
-> **一句话原则**：凡涉及**版本号、接口名、参数、步骤**，先查上面这些；**查不到就明说「不确定」，不要臆造**。与官方 web 冲突时，**以 web 为准**。
+> **一句话原则**：凡涉及**版本号、接口名、参数、步骤**，按上面的资料分工交叉核对；官方资料互相冲突时，指出冲突并按对应能力选择更具体的依据，**查不到就明说「不确定」，不要臆造**。HTTP 路由以当前服务端实现校验，URL Scheme 以官方 API 列表为准，MCP / Skills 的当前要求以对应 Skill 文档为准。
 
 
 ### 客户端接入 MCP
