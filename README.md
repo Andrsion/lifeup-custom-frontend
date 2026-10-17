@@ -8,6 +8,7 @@
 | --- | --- |
 | **我想直接运行示例** | 进入 [minimal-html](examples/minimal-html/)，按示例说明配置并启动；需要大屏时用 [desktop-dashboard](examples/desktop-dashboard/)。 |
 | **我想让 AI 帮我做** | 先读 [llms.txt](llms.txt)，再按任务读取 [实现方案](docs/custom-ui-ai-mcp.md) 和 [AI 施工标准](docs/ai-build-standard.md)。群机器人示例见 [group-bot](examples/group-bot/)。 |
+| **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端，不需要自己开发界面。 |
 | **我遇到问题了** | 先运行下面的只读诊断，再查 [排错指南](docs/troubleshooting.md)；接口细节见 [API 速查表](docs/api-cheatsheet.md)。 |
 
 ## 开工前 5 分钟自检
@@ -37,6 +38,10 @@
 我的主题与需求：<可选填写>
 我的运行环境：<Windows / macOS / Linux；Node.js 版本；所用本地 Agent>
 ```
+
+## 直接让 AI 操作人升（MCP）
+
+如果你不需要自定义网页，只想让 AI 查询任务、分析数据或按你的指令操作人升，请从 [MCP 安装与使用指南](docs/mcp-quickstart.md) 开始。指南包含环境准备、客户端配置、首次连接验证、常见提问和安全注意事项。
 
 ## 版本门槛：按能力分别核对
 
