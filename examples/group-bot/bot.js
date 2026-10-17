@@ -76,7 +76,18 @@ async function handleMessage(user, text) {
   if (!m) return null;                       // 不是打卡消息，交给别的逻辑
   const name = m[1].trim();
   try {
-    const j = await doApi(`lifeup://api/complete?name=${encodeURIComponent(name)}`);
+    // 先只读查找，避免官方 name 参数的模糊匹配误完成相似名称的任务。
+    const tasks = await listOpenTasks();
+    const matches = tasks.filter(task => String(task.name || "").trim() === name);
+    if (matches.length === 0) return `@${user} 未找到名称完全一致的未完成任务「${name}」，未执行打卡。`;
+    if (matches.length > 1) return `@${user} 找到多个名称相同的未完成任务「${name}」，为避免误操作，本次未执行。`;
+    const task = matches[0];
+    const identity = task.id != null
+      ? "id=" + encodeURIComponent(String(task.id))
+      : task.gid != null ? "gid=" + encodeURIComponent(String(task.gid)) : null;
+    if (!identity) return `@${user} 找到任务但缺少官方完成接口所需的标识，未执行打卡。`;
+
+    const j = await doApi(`lifeup://api/complete?${identity}`);
     if (j.code !== 200) {
       return `@${user} 打卡失败：${mapErr(j.code)}（${j.message || "接口请求失败"}）`;
     }
