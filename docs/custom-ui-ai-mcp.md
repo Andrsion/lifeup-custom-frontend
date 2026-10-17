@@ -8,6 +8,7 @@
 > * 云人升 HTTP 路由、权限与基础版本要求 · https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
 > * 人升 URL Scheme 方法名与参数 · https://wiki.lifeupapp.fun/zh-cn/guide/api.md
 > * MCP 安装与客户端接入说明 · https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md
+> * 本仓库补充指南：[MCP 安装与使用](mcp-quickstart.md) · [MCP 与 Skills](mcp-skills.md)
 > * 当前 MCP / Skills 实际能力与版本要求 · https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud
 > * HTTP 服务端当前实现 · https://github.com/Ayagikei/LifeUp-SDK/blob/main/http/src/main/java/net/lifeupapp/lifeup/http/service/KtorService.kt
 >
