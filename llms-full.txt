@@ -334,7 +334,7 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 3. **本地代理**：Node / Python 写薄层，转发 Query 与 Action（若云人升设了 Token，用 **raw token 头**，不是 Bearer）
 4. **连接配置页**：输入地址 + Token，调 `GET /info` 测连通，可扫码
 5. **角色面板 / 资源栏**：`GET /coin`、`/skills` 渲染金币与属性
-6. **任务列表**：读 `/tasks` + `/task_categories` 渲染卡片；「完成 / 放弃」调 `complete` / `give_up`；再做新建任务（单次 / 循环）
+6. **任务列表**：读 `/tasks` + `/tasks_categories` 渲染卡片；「完成 / 放弃」调 `complete` / `give_up`；再做新建任务（单次 / 循环）
 7. **仓库 + 宝箱（开箱）**：`use_item` / `loot_box`；**商店兑换**：`purchase_item`；**合成**：`synthesize`
 8. **AI 助手**：接 LLM + tools（读 + 写），system prompt 里交代人升语义（任务 / 金币 / 里数 / 成就）
 9. **实时刷新（可选）**：定时轮询 Query，或监听云人升广播事件
@@ -479,8 +479,8 @@ args: ['-y', '@lifeup/mcp']
 
 | 页签（可改名） | 读 | 写 |
 | --- | --- | --- |
-| 任务 | `GET /tasks` + `/task_categories` | `complete` / `give_up` / `add_task` |
-| 商店 | `GET /items` + `/item_categories` | `purchase_item` |
+| 任务 | `GET /tasks` + `/tasks_categories` | `complete` / `give_up` / `add_task` |
+| 商店 | `GET /items` + `/items_categories` | `purchase_item` |
 | 仓库 | 物品持有（见官方文档 `items` / `inventory_records`） | `use_item` / `loot_box` |
 | 合成 | `GET /synthesis` | `synthesize` |
 | 成长 | `GET /skills` + `/level_defines` | — |
