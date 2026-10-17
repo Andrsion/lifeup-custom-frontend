@@ -17,7 +17,8 @@ start.bat / start.command  ← 双击启动
 3. 同 Wi‑Fi 下，查手机 IP（云人升首页会显示 `IP:13276`）。
 4. 复制 `config.example.json` 为 `config.json`，把 `host` 改成你的 `IP:13276`。代理默认只监听本机 `127.0.0.1`，不要将其直接暴露到局域网。
 5. 双击 **`start.bat`**（Windows）或 **`start.command`**（macOS，首次可能需 `chmod +x start.command`）；或命令行 `node proxy.js`。
-6. 浏览器打开 **http://127.0.0.1:8787**。\n7. 如需排错，可在仓库根目录运行 `node scripts/doctor.js examples/minimal-html`；它只读检查 `/info`，不执行任何写操作。
+6. 浏览器打开 **http://127.0.0.1:8787**。
+7. 如需排错，可在仓库根目录运行 `node scripts/doctor.js examples/minimal-html`；它只读检查 `/info`，不执行任何写操作。
 
 ## 换主题（很简单）
 
@@ -30,7 +31,13 @@ const UI = { coin: "金币", tasks: "任务", done: "完成", empty: "今天没�
 想更彻底（清单名 / 货币名 / 文案 / 配色），照 [世界观 / 主题参考](../../docs/samples.md) 的「换名对照表」来改。
 （例：动物森友会主题 → 金币改「铃钱」、任务改「岛屿待办」。）
 
-## 安全说明\n\n- 代理默认只绑定本机回环地址，不开放给局域网；也不再设置通配符 CORS。\n- Token 仅由本地代理读取，不放进浏览器代码。不要将真实的 `config.json` 提交到 Git。\n- 任务名和属性名会被当作不可信文本安全渲染。\n\n## 说明
+## 安全说明
+
+- 代理默认只绑定本机回环地址，不开放给局域网；也不再设置通配符 CORS。
+- Token 仅由本地代理读取，不放进浏览器代码。不要将真实的 `config.json` 提交到 Git。
+- 任务名和属性名会被当作不可信文本安全渲染。
+
+## 说明
 
 - 这里**只用到了「读 + 完成」两个动作**。更多动作（商店购买 `purchase_item`、开箱 `loot_box`、合成 `synthesize`…）见
   [接口速查表](../../docs/api-cheatsheet.md)。
