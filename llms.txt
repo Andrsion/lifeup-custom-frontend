@@ -1,49 +1,51 @@
-# 自定义人升 · 自定义界面 + AI + MCP
+# 自定义人升 · AI 导航入口
 
-> 在《人升》(LifeUp) 之上做一层「**自定义界面**」的开源方案。所有数据与规则都在**手机端人升 App** 里跑，界面只做「展示 + 转发」。
-> 本仓库用途：让任意 AI Agent 读懂方案后，帮用户搭出自己的看板 / AI 助手 / 机器人。
+> 给 AI Agent 的任务路由与执行约束。这里是索引，不是完整手册；按任务读取最少且足够的文档。项目是基于《人升》(LifeUp) 与云人升的第三方自定义界面方案，不是人升官方外观设置。
 
-## 先读
+## 开始前：默认阅读顺序
 
-- [实现方案（主文档）](docs/custom-ui-ai-mcp.md)：定位 · 快速上手 · 可粘贴提示词 · 原理与接口 · 坑 · MCP 接入
-- [接口速查表](docs/api-cheatsheet.md)：读 / 写接口 · 返回码 · 字段取值 · `gid` —— **防臆造**
-- [排错](docs/troubleshooting.md)：连不上 / `10001` / `401` / CORS / 写操作不幂等
+1. [实现方案](docs/custom-ui-ai-mcp.md) — 项目边界、快速开始、架构、MCP 与可复制的施工提示词。
+2. [AI 施工标准](docs/ai-build-standard.md) — 代码施工、安全、验证与交付要求。
+3. 根据当前任务读取下方对应资料；不要默认把所有主题稿或全部示例一次性塞进上下文。
 
-## 参考
+## 按任务路由
 
-- [世界观 / 主题参考](docs/samples.md)：主题换名表（9 个案例）
-- [从书到人升](docs/books-to-lifeup.md)：16 本书 → 任务设计
-- [地球 Online 梗词表](docs/earth-online-glossary.md)
+| 当前任务 | 必读 / 优先读取 |
+| --- | --- |
+| 新建自定义看板 / 网页 / 桌面端 | [实现方案](docs/custom-ui-ai-mcp.md) → [AI 施工标准](docs/ai-build-standard.md) → [minimal-html 示例](examples/minimal-html/) |
+| 核对接口、参数、响应或版本 | [API 速查表](docs/api-cheatsheet.md) → 对应的官方资料（见下方权威来源） |
+| 连接失败、认证失败、CORS 或写入异常 | [排错指南](docs/troubleshooting.md) |
+| 连接 LifeUp MCP / Skills | [实现方案中的 MCP 章节](docs/custom-ui-ai-mcp.md) → 官方 [MCP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md) → 当前 [lifeup-cloud Skill](https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud) |
+| 制作某个主题的界面 | 先读 [主题施工稿目录](docs/specs/) 中对应的一份；不要将所有主题稿当成通用 API 规范 |
+| 想直接运行 / 改造现有项目 | [可运行示例](#examples) 与 [仓库质量检查](scripts/check_repo.py) |
 
-## 主题施工稿（specs）
+## AI 必须遵守的规则
 
-- [主题施工稿目录](docs/specs/)：一主题一份 —— 界面规格 + **可直接粘贴给 Agent 的提示词**
-- [🌾 星露谷农场](docs/specs/stardew-farm.md)：赛季 · 长线投资 · 延迟满足
-- [🏔️ 原神](docs/specs/genshin.md)：分层货币 · 保底抽卡 · 体力控节奏
-- [🚄 崩坏：星穹铁道](docs/specs/star-rail.md)：活跃度制 · 保底跨期继承 · 反焦虑
+- **不臆造接口**：方法名、参数、请求体、响应字段、权限与版本门槛必须有官方资料依据。示例、主题设定与梗词表不是 API 事实来源。
+- **按能力核对版本**：不要把基础 HTTP、URL Scheme、MCP 和 Skills 的最低版本混成一个通用门槛。
+- **先只读验证**：先检查项目、配置、环境与连通性，再执行任何会改变数据的操作；不得用假数据冒充用户真实数据。
+- **写操作不自动重试**：完成、放弃、奖励、购买等操作可能不幂等。超时先核验实际业务结果，未经确认不得重放。
+- **保护凭据与网络边界**：Token / LLM API Key 不得进入前端代码、公开仓库或日志；默认只监听本机，浏览器通过本地代理访问手机局域网服务。
+- **如实报告**：区分已验证、未验证与推测；不能声称已运行或连接，除非确实执行并得到结果。
+- **资料冲突要明说**：说明冲突的具体能力与来源，不要静默拼接或用一个来源覆盖所有领域。
+- **用户真实数据优先**：只有在实际 MCP 工具可用且读取成功时，才能声称读到了用户数据；否则明确说明限制并暂停依赖真实数据的步骤。
 
-## 可运行示例
+## 权威来源与分工
 
-- [examples/minimal-html](examples/minimal-html/)：单文件看板 + 本地代理
-- [examples/desktop-dashboard](examples/desktop-dashboard/)：大屏看板
-- [examples/group-bot](examples/group-bot/)：群机器人骨架
+- **云人升 HTTP 路由、权限、基础版本要求**：[官方 Cloud HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md)。该页提示部分接口定义可能滞后；仅当路由、参数或响应存在冲突时，再核对其指向的当前 [HTTP 服务端实现 KtorService.kt](https://github.com/Ayagikei/LifeUp-SDK/blob/main/http/src/main/java/net/lifeupapp/lifeup/http/service/KtorService.kt)。
+- **LifeUp URL Scheme 方法名与参数**：[官方 API 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api.md)。
+- **MCP 安装与客户端接入**：[官方 MCP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md)。
+- **当前 MCP / Skills 行为与具体版本要求**：[SDK 的 lifeup-cloud Skill](https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud) 及其 references。
+- **版本冲突示例**：官方 Wiki MCP 页面写云人升 3.0.0+，当前 Skill 写 3.0.1+；完整当前 Skills 工作流按更具体的 Skill 要求使用 3.0.1+。这不是所有 HTTP 路由的统一最低版本。
 
-## 权威（一切以官方为准）
+## 其他文档与示例
 
-- 云人升 HTTP 接口、权限与基础版本要求：https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
-- 人升 URL Scheme 方法名与参数：https://wiki.lifeupapp.fun/zh-cn/guide/api.md
-- MCP 安装与客户端接入：https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md
-- 当前 MCP / Skills 版本与行为：https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud
-- HTTP 服务端实现（官方 Wiki 明示接口定义可能滞后时用于核对）：https://github.com/Ayagikei/LifeUp-SDK/blob/main/http/src/main/java/net/lifeupapp/lifeup/http/service/KtorService.kt
+- [API 速查表](docs/api-cheatsheet.md) · [排错指南](docs/troubleshooting.md) · [AI 施工标准](docs/ai-build-standard.md)
+- [世界观与主题参考](docs/samples.md) · [从书到人升](docs/books-to-lifeup.md) · [地球 Online 梗词表](docs/earth-online-glossary.md)
+- [主题规格模板](docs/theme-spec-template.md) · [主题施工稿目录](docs/specs/)
+- <a id="examples"></a>[minimal-html](examples/minimal-html/) · [desktop-dashboard](examples/desktop-dashboard/) · [group-bot](examples/group-bot/)
+- [只读诊断工具](scripts/doctor.js) · [仓库质量检查](scripts/check_repo.py)
 
-## 硬规则（给 AI）
+## 完整文档包
 
-- 先读 [实现方案](docs/custom-ui-ai-mcp.md) 再写代码；接口名 / 参数以官方文档为准，**不要臆造**。
-- 写操作（`complete` / `give_up` / `reward`…）**不幂等**，超时**不要自动重试**。
-- 任务的 `id` **每周期会变**，跨周期识别 / 缓存用 **`gid`**。
-- 浏览器**直连会被 CORS 拦** → 必须加一层**本地代理**。
-- 不要用「云端生成 + 云端托管」平台（秒哒 / Bolt.new / v0 / Lovable）—— 它们连不到用户的局域网。
-- 版本门槛（MCP / Skills）：人升 **v1.106.0+**。官方 Wiki 的 MCP 页面目前写云人升 **3.0.0+**，但 SDK 当前 `lifeup-cloud` Skill 要求 **3.0.1+**；完整 Skills 工作流按更具体的 Skill 要求使用 **3.0.1+**。
-- 基础 HTTP 查询的版本要求不同：人升 **v1.91+** ＋最新版云人升；具体以[官方云人升 HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md)为准。若 HTTP 路由定义与实际服务端实现不一致，按该 Wiki 页面指向的 `KtorService.kt` 进一步核对。
-- 来源分工：URL Scheme 方法 / 参数看官方 `api.md`；MCP 安装看官方 `api_mcp.md`；HTTP 以 `api_cloud.md` 为入口，留意该页的滞后提示；MCP / Skills 的当前版本与行为核对 SDK 的 `lifeup-cloud/SKILL.md`。发现冲突时应说明冲突，不要把不同能力的版本门槛混为一谈。
-- 要按某个主题搭界面 → 先读 `docs/specs/` 里对应主题的施工稿（已含可粘贴提示词），再动手写代码。
+需要一次性读取大部分核心说明时，使用 [llms-full.txt](llms-full.txt)。它由 `scripts/build_llms.py` 自动生成，修改源文档后由 GitHub Actions 重建；不要直接编辑生成文件。
