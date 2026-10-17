@@ -84,7 +84,7 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 | --- | --- |
 | **[实现方案](docs/custom-ui-ai-mcp.md)** | 定位 · 快速上手（含可粘贴的提示词）· 原理与接口（读 / 写 / AI 两条接法）· 坑与限制 · 客户端接入 MCP（WorkBuddy / dsh）· **附录：组件清单 & 灵感库** |
 | **[接口速查表](docs/api-cheatsheet.md)** | 云人升 HTTP 读 / 写接口 · 返回码 · 字段取值 · `gid` 用法 —— **一页纸**，防臆造 |
-| **[排错 · 常见坑](docs/troubleshooting.md)** | 连不上 / `10001` / `401` / CORS / 写操作不幂等 / 用不了的云平台 |
+| **[排错 · 常见坑](docs/troubleshooting.md)** | 连不上 / `10001` / Token 认证 / CORS / 写操作不幂等 / 用不了的云平台 |
 | **[从书到人升](docs/books-to-lifeup.md)** | **16 本书**的方法论 → 一张「在人升上的用法」表（怎么设计自己的体系） |
 | **[世界观 / 主题参考](docs/samples.md)** | 可借用的世界观与主题（大众 IP / 社区体系 / 同类产品）+ **9 个**「换名对照表」案例 |
 | **[地球 Online 梗词表](docs/earth-online-glossary.md)** | 用游戏术语解构人生的公共梗词速查 + 可直接用的文案模板 |
@@ -299,10 +299,10 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 
 * 默认 `POST /api/contentprovider`，JSON body 使用官方定义的 `urls` 数组（例如 `{ "urls": ["lifeup://api/..."] }`）；具体方法与参数必须按官方文档核对。
 * 需要 UI（页面跳转 / 确认弹窗 / 番茄钟启动）才考虑 `POST /api`（start-activity 机制；部分设备可能限制后台弹界面）。具体返回行为按官方文档 / 当前 SDK 确认
-* 常用方法：`complete` / `give_up` / `purchase_item` / `use_item` / `synthesize` / `add_task` / `reward` / `loot_box`
+* 常用方法：`complete` / `give_up` / `purchase_item` / `use_item` / `synthesize` / `add_task` / `reward` / `loot_box` / `complete_achievement`；领取成就奖励使用 `complete_achievement`，通用发放奖励使用 `reward`
 * 批量：`call_api_batch`（≤20 个方法，顺序保持；批内后续调用看不到前面结果）
 * ⚠️ **写操作不幂等**（complete / skip / reward）：超时**不要自动重试**
-* 检查返回：顶层 `code=200` 只代表请求已被处理，不等于游戏内操作成功；按官方响应检查 `data[].result.api_result`。
+* 检查返回：顶层 `code=200` 只代表云人升请求处理层返回成功，不等于游戏内操作成功；按官方响应检查 `data[].result.api_result`。
 
 ### AI：两条接法
 
