@@ -1,6 +1,6 @@
 # 云人升 HTTP 接口 · 速查表
 
-> ⚠️ 本表仅供**速查 / 防臆造**。**一切以官方文档为准**：<https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>
+> ⚠️ 本表仅供**速查 / 防臆造**。HTTP 路径与响应以 [官方云人升文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md) 为准；`lifeup://api/...` 方法名和参数以 [人升官方 API 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api.md) 为准。
 >
 > 本表按官方文档整理，核对日期：2026-10-17。官方 Wiki 明确提示部分接口定义可能滞后；如有冲突，请按官方文档指向的 [LifeUp-SDK 服务端源码](https://github.com/Ayagikei/LifeUp-SDK) 核对。
 >
