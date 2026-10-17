@@ -3,7 +3,21 @@
 > 本文件由 `scripts/build_llms.py` 从仓库各源文档**自动生成**，请勿手改。
 > 修改内容请改源文件，然后重跑：`python3 scripts/build_llms.py`
 > 自动收录 `README.md` 与 `docs/` 下的 Markdown 文档；`docs/specs/` 是可选的单主题材料，不并入本文件，索引见 `llms.txt`。
-> 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。
+> 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。文件开头自动生成收录目录。
+
+## 文档目录（自动生成）
+
+- **README** — \`README.md\`
+- **实现方案** — \`docs/custom-ui-ai-mcp.md\`
+- **docs/ai-build-standard.md** — \`docs/ai-build-standard.md\`
+- **接口速查表** — \`docs/api-cheatsheet.md\`
+- **从书到人升** — \`docs/books-to-lifeup.md\`
+- **地球 Online 梗词表** — \`docs/earth-online-glossary.md\`
+- **世界观 / 主题参考** — \`docs/samples.md\`
+- **docs/theme-spec-template.md** — \`docs/theme-spec-template.md\`
+- **排错 · 常见坑** — \`docs/troubleshooting.md\`
+
+> 目录用于快速定位章节；各章节下方的源路径标记是稳定标识。
 
 <!-- ===== README (README.md) ===== -->
 
