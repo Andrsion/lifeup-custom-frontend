@@ -81,6 +81,19 @@ ws://{host}/events?after={id} ← 广播事件（WebSocket 推送）
 GET /files/{url}
 ```
 
+### 进阶文件 / 备份路由（当前 SDK 实现；旧版不保证具备）
+
+```http
+GET /data/export?withMedia=true
+POST /data/import
+POST /files/upload
+```
+
+- `/data/export` 当前 SDK 默认 `withMedia=true`，返回备份数据响应。
+- `/data/import` 使用 multipart 上传备份，并交由人升打开导入流程。
+- `/files/upload` 使用 multipart 上传文件并返回 URI。
+- 这些不是普通只读看板的必需接口；导入 / 上传会触发文件处理或应用流程。只有明确需要且已核对当前官方实现时才使用，不要在自动化测试中对真实账户执行导入。
+
 ## 2. 分页、权限与版本注意事项
 
 - `/history`：`offset` / `limit` 分页，`gid` 可选，用于筛选某个重复任务组的历史记录；当前官方 SDK 默认 `0` / `100`。
@@ -90,7 +103,7 @@ GET /files/{url}
 - `/events`：当前 SDK 默认 `after=0`、`limit=50`；事件数据是否产生取决于人升「广播事件」设置，WebSocket 推送另受云人升开关控制。
 - 不要擅自给 `/tasks`、`/items`、`/skills` 等接口加分页参数；以各接口官方定义为准。
 - 官方云人升文档标注部分接口定义可能滞后；本表的默认值以核对时的官方 SDK `KtorService.kt` 为准，旧版云人升可能不同。
-- 版本：官方 HTTP 文档的基础要求为人升 v1.91+ 与最新版云人升；`weekdays` 字段标注人升 v1.106.0+，技能 ContentProvider 查询标注 v1.103.0+。MCP / Skills 的版本门槛属于另一套能力，不要把它当成所有 HTTP 路由的统一最低版本。使用前通过 `/info` 核对当前版本。
+- 版本：官方 HTTP 文档的基础要求为人升 v1.91+ 与最新版云人升；`weekdays` 字段标注人升 v1.106.0+，技能 ContentProvider 查询标注 v1.103.0+。MCP / Skills 的版本门槛属于另一套能力：官方 SDK 当前 `lifeup-cloud` Skill 要求人升 v1.106.0+、云人升 3.0.1+，不要把它当成所有 HTTP 路由的统一最低版本。使用前通过 `/info` 核对当前版本。
 
 ## 3. 写（调用 `lifeup://api/…`）
 
