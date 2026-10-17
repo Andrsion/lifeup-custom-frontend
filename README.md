@@ -17,7 +17,7 @@
 - 手机与电脑连**同一个 Wi-Fi**
 - **Node.js 20+**（去 [nodejs.org](https://nodejs.org/) 下 LTS 版本；
   官网慢就用国内镜像，见[排错指南](docs/troubleshooting.md)「装 Node / 下依赖很慢」）
-- 手机上是**人升 + 云人升**，并开启「读取人升数据」
+- 手机上是**人升 + 云人升**，并开启「读取人升数据」。云人升在应用商店搜不到：国内版在人升「侧边栏 → 设置 → 实验」里点《云人升》下载（官方说明面向会员）；看不到就走 Google Play 版《云人升》（`net.lifeupapp.lifeup.http`）
 - **人升会员**（调用接口属于会员能力；云人升本身免费）—— 详见 [会员与接口门槛](docs/membership.md)
 
 **只有手机、没有电脑？** 做不了 —— 自定义界面要在电脑上跑本地代理；MCP 也一样，需要电脑上装 Node.js 并运行客户端。可以先了解概念，有条件时再动手。
@@ -26,9 +26,9 @@
 
 | 你的目标 | 从这里开始 |
 | --- | --- |
-| **我想直接运行示例** | 进入 [minimal-html](examples/minimal-html/)（一个单页看板：顶部金币与属性、中间任务列表带「完成」按钮，跑起来就能点），按说明配置并启动；需要大屏时用 [desktop-dashboard](examples/desktop-dashboard/)。 |
+| **我想直接运行示例** | 进入 [minimal-html](examples/minimal-html/README.md)（一个单页看板：顶部金币与属性、中间任务列表带「完成」按钮，跑起来就能点），按说明配置并启动；需要大屏时用 [desktop-dashboard](examples/desktop-dashboard/)。 |
 | **我想让 AI 帮我做（本地 Agent）** | 用能在本机读写文件、执行命令的 AI 工具（Cursor / Trae / Claude Code / CodeBuddy 等）。先读 [llms.txt](llms.txt)，再按任务读 [实现方案](docs/custom-ui-ai-mcp.md) 与 [AI 施工标准](docs/ai-build-standard.md)；群机器人示例见 [group-bot](examples/group-bot/)。 |
-| **我只有网页版 AI**（豆包 / Kimi / DeepSeek 网页） | **仍然必须有电脑**（Windows / macOS），只有手机不行。网页版 AI 连不到你家局域网，也跑不了本地程序，因此做不了自动搭建；但你可以不用 AI，改为在电脑上进入 [minimal-html](examples/minimal-html/)，按说明填写手机 IP 并双击启动。想改风格则需自己动手或找人帮忙。（**仍需人升会员**） |
+| **我只有网页版 AI**（豆包 / Kimi / DeepSeek 网页） | **仍然必须有电脑**（Windows / macOS），只有手机不行。网页版 AI 连不到你家局域网，也跑不了本地程序，因此做不了自动搭建；但你可以不用 AI，改为在电脑上进入 [minimal-html](examples/minimal-html/README.md)，按说明填写手机 IP 并双击启动。想改风格则需自己动手或找人帮忙。（**仍需人升会员**） |
 | **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端；需要了解 Skills 时看 [MCP 与 Skills 指南](docs/mcp-skills.md)，不需要自己开发界面。 |
 | **我遇到问题了** | 先运行下面的只读诊断，再查 [排错指南](docs/troubleshooting.md)；接口细节见 [API 速查表](docs/api-cheatsheet.md)。 |
 
@@ -46,8 +46,9 @@
 1. **确认手机侧版本与权限**：人升与云人升已装好，并开启「读取人升数据」；具体版本门槛按所用能力不同，见下方「版本门槛」表。
 2. **确认网络**：手机与电脑通常需要在同一局域网；确认云人升显示的 IP 和端口，默认端口为 `13276`。
 3. **确认运行环境**：本地示例需要 Node.js 20+；没装的话先去 [nodejs.org](https://nodejs.org/) 安装 LTS；AI 工具与 Agent 的要求见上面「先选一条路」。
-4. **准备本地配置**：进入要运行的示例目录，将 `config.example.json` 复制为 `config.json`，按示例说明填写云人升地址。不要提交真实配置或 Token。
-5. **执行只读诊断**：在仓库根目录运行：
+4. **把仓库弄到电脑上**：在 GitHub 仓库页面点绿色 **Code** → **Download ZIP** → 解压到任意文件夹（记下路径，后面所有命令都在这个文件夹里跑）。
+5. **准备本地配置**：进入要运行的示例目录，将 `config.example.json` 复制为 `config.json`，按示例说明填写云人升地址。不要提交真实配置或 Token。
+6. **执行只读诊断**：打开终端——Windows 在开始菜单搜 `PowerShell` 打开，macOS 打开「终端」——先 `cd` 到刚才解压的文件夹，再运行：
 
    ```bash
    node scripts/doctor.js examples/minimal-html
@@ -78,6 +79,8 @@
 Agent 需要能操作本机 MCP 配置、执行命令并访问手机所在的局域网；它应保留已有 MCP 配置，缺少设备地址或 Token 时先询问你，并通过只读查询验证连接。若无法操作本机或访问局域网，它应说明哪些步骤需要你手动完成。详细步骤与排错见 [MCP 安装与使用指南](docs/mcp-quickstart.md)；Skills 的安装差异和进阶工作流见 [MCP 与 Skills 指南](docs/mcp-skills.md)。
 
 ## 版本门槛：按能力分别核对
+
+> 不知道自己的版本？人升在「设置 → 关于」查看；云人升打开 App 首页即可看到版本与 `IP:13276`。
 
 | 能力 | 当前文档口径 |
 | --- | --- |
