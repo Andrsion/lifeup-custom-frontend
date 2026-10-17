@@ -42,7 +42,7 @@ HEADER_TEMPLATE = """# 自定义人升 · 核心文档（llms-full.txt）
 > 自动收录 `README.md` 与 `docs/` 下的 Markdown 文档；`docs/specs/` 是可选的单主题材料，不并入本文件，索引见 `llms.txt`。
 > 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。文件开头自动生成收录目录。
 > 本文档体量：{stats}（正文口径，由脚本统计，随每次重建更新）。
-> 使用建议：整包较大，token受限时建议不要整篇投喂，改用 llms.txt 的路由逐篇读取。
+> 使用建议：此文档较大，token 受限时不要整篇投喂，改用 llms.txt 的路由逐篇读取。
 
 """
 
