@@ -11,7 +11,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 README = ROOT / "README.md"
 DOCS = ROOT / "docs"
-EXCLUDED_DIRS = { "specs" }
+EXCLUDED_DIRS = {"specs"}
+EXCLUDE_MARKER = "<!-- llms:exclude -->"
+
+# README 置顶，项目主文档紧随其后；其余文档按路径稳定排序。
+SOURCE_PRIORITY = {
+    "README.md": 0,
+    "docs/custom-ui-ai-mcp.md": 1,
+}
 
 # 为现有核心文档保留更易读的章节标题；新增文档默认使用相对路径。
 SECTION_NAMES = {
@@ -29,31 +36,46 @@ HEADER = """# 自定义人升 · 核心文档（llms-full.txt）
 > 本文件由 `scripts/build_llms.py` 从仓库各源文档**自动生成**，请勿手改。
 > 修改内容请改源文件，然后重跑：`python3 scripts/build_llms.py`
 > 自动收录 `README.md` 与 `docs/` 下的 Markdown 文档；`docs/specs/` 是可选的单主题材料，不并入本文件，索引见 `llms.txt`。
+> 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。
 
 """
 
 
+def should_exclude(path: Path) -> bool:
+    """排除下划线前缀路径、可选 specs 目录和带显式排除标记的文档。"""
+    relative_parts = path.relative_to(ROOT).parts
+    if any(part.startswith("_") for part in relative_parts):
+        return True
+    if any(part in EXCLUDED_DIRS for part in path.relative_to(DOCS).parts[:-1]) if path != README else False:
+        return True
+    return EXCLUDE_MARKER in path.read_text(encoding="utf-8")
+
+
 def discover_sources() -> list[Path]:
-    """README 固定置顶，其余 docs/**/*.md 按路径稳定排序，排除 docs/specs/。"""
+    """README 与 docs/**/*.md 自动发现；README 置顶，主文档随后，其余稳定排序。"""
     if not README.is_file():
         raise SystemExit("缺少源文件：README.md")
     if not DOCS.is_dir():
         raise SystemExit("缺少源目录：docs/")
 
-    docs = sorted(
-        (
-            path for path in DOCS.rglob("*.md")
-            if path.is_file()
-            and not any(part in EXCLUDED_DIRS for part in path.relative_to(DOCS).parts[:-1])
+    candidates = [README, *DOCS.rglob("*.md")]
+    sources = [
+        path for path in candidates
+        if path.is_file() and not should_exclude(path)
+    ]
+    return sorted(
+        sources,
+        key=lambda path: (
+            SOURCE_PRIORITY.get(path.relative_to(ROOT).as_posix(), 2),
+            path.relative_to(ROOT).as_posix().casefold(),
         ),
-        key=lambda path: path.relative_to(ROOT).as_posix().casefold(),
     )
-    return [README, *docs]
 
 
 def main() -> None:
     parts = [HEADER]
-    for path in discover_sources():
+    sources = discover_sources()
+    for path in sources:
         rel = path.relative_to(ROOT).as_posix()
         name = SECTION_NAMES.get(rel, rel)
         body = path.read_text(encoding="utf-8").strip()
@@ -64,7 +86,7 @@ def main() -> None:
     out.write_text(output, encoding="utf-8")
     print(
         f"已生成 {out.name}：{len(output.encode('utf-8'))} 字节 / "
-        f"{output.count(chr(10))} 行 / {len(parts) - 1} 个文档"
+        f"{output.count(chr(10))} 行 / {len(sources)} 个文档"
     )
 
 
