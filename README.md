@@ -99,8 +99,8 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 
 ## 版本门槛
 
-- **人升 v1.106.0 正式**（2026/09/23）或更高
-- **云人升 v3.0.0+**
+- **人升 v1.106.0+**
+- 云人升版本按具体能力核对官方文档：HTTP 接口要求见 [云人升 HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md)；完整 MCP 能力还应核对 [官方 MCP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md) 与 [SDK 当前 Skills](https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud)。不同能力的最低版本不应混为一个门槛。
 
 ## 许可
 
