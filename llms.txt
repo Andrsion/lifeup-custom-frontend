@@ -15,7 +15,8 @@
 | 新建自定义看板 / 网页 / 桌面端 | [实现方案](docs/custom-ui-ai-mcp.md) → [AI 施工标准](docs/ai-build-standard.md) → [minimal-html 示例](examples/minimal-html/) |
 | 核对接口、参数、响应或版本 | [API 速查表](docs/api-cheatsheet.md) → 对应的官方资料（见下方权威来源） |
 | 连接失败、认证失败、CORS 或写入异常 | [排错指南](docs/troubleshooting.md) |
-| 连接 LifeUp MCP / Skills | [MCP 安装与使用指南](docs/mcp-quickstart.md) → [实现方案中的 MCP 章节](docs/custom-ui-ai-mcp.md) → 官方 [MCP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md) → 当前 [lifeup-cloud Skill](https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud) |
+| 安装 MCP、首次连接 | [MCP 安装与使用指南](docs/mcp-quickstart.md) → 官方 [MCP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md) |
+| Skills 是否需要单独安装、客户端差异、进阶工具与事件工作流 | [MCP 与 Skills 指南](docs/mcp-skills.md) → 官方 [MCP 包说明](https://github.com/Ayagikei/LifeUp-SDK/blob/main/mcp/README.md) → 当前 [lifeup-cloud Skill](https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud) → [官方 MCP Wiki](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md) |
 | 制作某个主题的界面 | 先读 [主题施工稿目录](docs/specs/) 中对应的一份；不要将所有主题稿当成通用 API 规范 |
 | 想直接运行 / 改造现有项目 | [可运行示例](#examples) 与 [仓库质量检查](scripts/check_repo.py) |
 
@@ -46,7 +47,7 @@
 
 ## 其他文档与示例
 
-- [MCP 安装与使用指南](docs/mcp-quickstart.md) · [API 速查表](docs/api-cheatsheet.md) · [排错指南](docs/troubleshooting.md) · [AI 施工标准](docs/ai-build-standard.md)
+- [MCP 安装与使用指南](docs/mcp-quickstart.md) · [MCP 与 Skills 指南](docs/mcp-skills.md) · [API 速查表](docs/api-cheatsheet.md) · [排错指南](docs/troubleshooting.md) · [AI 施工标准](docs/ai-build-standard.md)
 - [世界观与主题参考](docs/samples.md) · [从书到人升](docs/books-to-lifeup.md) · [地球 Online 梗词表](docs/earth-online-glossary.md)
 - [主题规格模板](docs/theme-spec-template.md) · [主题施工稿目录](docs/specs/)
 - <a id="examples"></a>[minimal-html](examples/minimal-html/) · [desktop-dashboard](examples/desktop-dashboard/) · [group-bot](examples/group-bot/)
