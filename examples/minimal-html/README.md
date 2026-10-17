@@ -13,7 +13,7 @@ start.bat / start.command  ← 双击启动
 ## 跑起来
 
 0. **把示例拿到电脑上**：在仓库页面点绿色 **Code** → **Download ZIP** → 解压到任意文件夹。
-1. **手机侧**：装好人升 v1.91+ 与最新版云人升（国内版：人升「侧边栏 → 设置 → 实验」→《云人升》下载；Google Play 版：商店搜《云人升》），并在云人升里开「**读取人升数据**」。接口细节见[官方 Cloud HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md)；特定字段 / 功能可能需要更高版本，先请求 `/info` 并核对官方文档。
+1. **手机侧**：装好人升 v1.91+ 与最新版云人升（国内版需先有会员，非会员看不到这个入口；Google Play 版在商店搜《云人升》），并在云人升里开「**读取人升数据**」。接口细节见[官方 Cloud HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md)；特定字段 / 功能可能需要更高版本，先请求 `/info` 并核对官方文档。
 2. **电脑侧**：装 **Node.js 20+**。
 3. 同 Wi‑Fi 下，查手机 IP（云人升首页会显示 `IP:13276`）。
 4. 复制 `config.example.json` 为 `config.json`，把 `host` 改成你的 `IP:13276`。代理默认只监听本机 `127.0.0.1`，不要将其直接暴露到局域网。
