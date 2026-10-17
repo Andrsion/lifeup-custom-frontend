@@ -146,9 +146,10 @@ async function load(){
           btn.textContent = "✔";
           setTimeout(load, 600);
         } catch (e) {
-          btn.disabled = false;
-          btn.textContent = UI.done;
-          showErr("完成结果未确认：" + e.message + "\\n若请求可能已送达，请先刷新任务列表确认状态，不要连续重试。");
+          // 写请求可能已送达；保持禁用，要求先刷新状态，避免立即重复执行。
+          btn.disabled = true;
+          btn.textContent = "结果待确认";
+          showErr("操作结果未确认：" + e.message + "\\n请刷新任务列表确认状态，不要连续重试。");
         }
       };
       el.appendChild(btn);
