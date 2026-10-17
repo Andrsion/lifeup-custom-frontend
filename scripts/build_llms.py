@@ -30,14 +30,18 @@ SECTION_NAMES = {
     "docs/books-to-lifeup.md": "从书到人升",
     "docs/samples.md": "世界观 / 主题参考",
     "docs/earth-online-glossary.md": "地球 Online 梗词表",
+    "docs/ai-build-standard.md": "AI 施工标准",
+    "docs/mcp-quickstart.md": "MCP 安装与使用指南",
+    "docs/theme-spec-template.md": "主题规格模板",
 }
 
-HEADER = """# 自定义人升 · 核心文档（llms-full.txt）
+HEADER_TEMPLATE = """# 自定义人升 · 核心文档（llms-full.txt）
 
 > 本文件由 `scripts/build_llms.py` 从仓库各源文档**自动生成**，请勿手改。
 > 修改内容请改源文件，然后重跑：`python3 scripts/build_llms.py`
 > 自动收录 `README.md` 与 `docs/` 下的 Markdown 文档；`docs/specs/` 是可选的单主题材料，不并入本文件，索引见 `llms.txt`。
 > 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。文件开头自动生成收录目录。
+> 体量：{stats}（由脚本统计，随每次重建更新）。
 
 """
 
@@ -75,7 +79,7 @@ def discover_sources() -> list[Path]:
 
 def main() -> None:
     sources = discover_sources()
-    parts = [HEADER, "## 文档目录（自动生成）\n\n"]
+    parts = ["## 文档目录（自动生成）\n\n"]
     for path in sources:
         rel = path.relative_to(ROOT).as_posix()
         name = SECTION_NAMES.get(rel, rel)
@@ -89,13 +93,16 @@ def main() -> None:
         body = path.read_text(encoding="utf-8").strip()
         parts.append(f"<!-- ===== {name} ({rel}) ===== -->\n\n{body}\n\n")
 
-    output = "".join(parts).rstrip() + "\n"
+    body = "".join(parts)
+    stats = f"{len(body)} 字符 · {len(sources)} 篇（正文口径）"
+    output = (HEADER_TEMPLATE.format(stats=stats) + body).rstrip() + "\n"
     out = ROOT / "llms-full.txt"
     out.write_text(output, encoding="utf-8")
     print(
         f"已生成 {out.name}：{len(output.encode('utf-8'))} 字节 / "
         f"{output.count(chr(10))} 行 / {len(sources)} 个文档"
     )
+    print(f"体量：{stats}")
 
 if __name__ == "__main__":
     main()

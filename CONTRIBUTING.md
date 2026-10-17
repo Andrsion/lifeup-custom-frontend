@@ -24,3 +24,15 @@
 
 - 主分支是 **`main`**（写成 `master` 会 404）。
 - 说明「改了什么、为什么」；示例请附一张截图或一段命令输出。
+
+## 文档收录约定
+
+`llms-full.txt` 由 `scripts/build_llms.py` 自动生成，收录规则按位置：
+
+- 根目录 `README.md`：收录，固定第一
+- `docs/**/*.md`：自动收录（主文档 `docs/custom-ui-ai-mcp.md` 排第二）
+- `docs/specs/`：不收录（可选主题材料，单独在 `docs/specs/README.md` 索引）
+- 文件或目录以 `_` 开头：不收录
+- 正文含 `<!-- llms:exclude -->`：不收录
+
+新增普通文档只需放进 `docs/`，不必改脚本；改完运行 `python3 scripts/build_llms.py`（CI 也会自动重建）。

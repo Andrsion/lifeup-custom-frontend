@@ -55,4 +55,4 @@
 
 ## 完整文档包
 
-需要一次性读取大部分核心说明时，使用 [llms-full.txt](llms-full.txt)。它由 `scripts/build_llms.py` 自动生成，修改源文档后由 GitHub Actions 重建；不要直接编辑生成文件。
+需要一次性读取大部分核心说明时，使用 [llms-full.txt](llms-full.txt)。它由 `scripts/build_llms.py` 自动生成，修改源文档后由 GitHub Actions 重建；不要直接编辑生成文件。整包较大；能按上面的路由逐篇取时，优先逐篇取，不要默认整包加载。
