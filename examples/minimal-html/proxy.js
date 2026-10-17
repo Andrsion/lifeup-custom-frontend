@@ -1,85 +1,194 @@
 /**
- * 人升 · 自定义界面 —— 最小本地代理（零依赖，只需 Node.js 20+）
+ * 人升自定义界面本地代理（Node.js 20+，零依赖）。
+ * 安全默认值：仅监听回环地址；仅代理到 config.json 中指定的单一上游；
+ * 只允许官方云人升 HTTP 接口需要的 GET/POST；不提供跨域开放访问。
  *
- * 作用：
- *   1) 把前端发到 /cloud/* 的请求，转发给手机上的「云人升」（默认 :13276）
- *      —— 解决浏览器 CORS，并让 Token 留在本地、不进浏览器。
- *   2) 顺带把当前目录当作静态站点跑，直接提供 index.html。
- *
- * 用法：
- *   1) 复制 config.example.json 为 config.json，填上你手机的 IP
- *   2) node proxy.js   （或双击 start.bat / start.command）
- *   3) 浏览器打开 http://localhost:8787
- *
- * ⚠️ 接口以官方为准：https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
+ * 官方接口文档：https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
+ * 文档若与官方 SDK/服务端实现不一致，以官方源码为准。
  */
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
+"use strict";
+const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
 
-const cfgPath = path.join(__dirname, "config.json");
+const ROOT = path.resolve(__dirname);
+const cfgPath = path.join(ROOT, "config.json");
 if (!fs.existsSync(cfgPath)) {
-  console.error("✖ 找不到 config.json，请先复制 config.example.json 为 config.json 并填写手机 IP。");
+  console.error("✖ 缺少 config.json。请复制 config.example.json 并填写云人升地址。");
   process.exit(1);
 }
-const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
-const [HOST, PORT = "13276"] = String(cfg.host || "").split(":");
-const LISTEN = cfg.port || 8787;
+
+let cfg;
+try {
+  cfg = JSON.parse(fs.readFileSync(cfgPath, "utf8"));
+} catch {
+  console.error("✖ config.json 不是合法 JSON。");
+  process.exit(1);
+}
+
+const hostInput = String(cfg.host || "").trim();
+const hostParts = hostInput.match(/^([^:\s/]+)(?::(\d{1,5}))?$/);
+if (!hostParts) {
+  console.error("✖ config.json 的 host 格式应为手机 IP 或 IP:端口。");
+  process.exit(1);
+}
+const UPSTREAM_HOST = hostParts[1];
+const UPSTREAM_PORT = Number(hostParts[2] || 13276);
+if (!Number.isInteger(UPSTREAM_PORT) || UPSTREAM_PORT < 1 || UPSTREAM_PORT > 65535) {
+  console.error("✖ 上游端口无效。");
+  process.exit(1);
+}
+const LISTEN_PORT = Number(cfg.port ?? 8787);
+if (!Number.isInteger(LISTEN_PORT) || LISTEN_PORT < 1 || LISTEN_PORT > 65535) {
+  console.error("✖ 本地端口无效。");
+  process.exit(1);
+}
+const LISTEN_HOST = String(cfg.listenHost || "127.0.0.1");
+if (!["127.0.0.1", "::1", "localhost"].includes(LISTEN_HOST)) {
+  console.error("✖ 默认仅允许监听本机回环地址。若确需局域网访问，请先自行评估安全风险并修改配置与访问控制。");
+  process.exit(1);
+}
 
 const MIME = {
-  ".html": "text/html", ".js": "text/javascript", ".css": "text/css",
-  ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png",
-  ".jpg": "image/jpeg", ".ico": "image/x-icon", ".woff2": "font/woff2"
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".ico": "image/x-icon",
+  ".woff2": "font/woff2"
 };
+const TOKEN_HEADER = String(cfg.tokenHeader || "").trim();
+const TOKEN = String(cfg.token || "");
+if (TOKEN_HEADER && !/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(TOKEN_HEADER)) {
+  console.error("✖ tokenHeader 不是合法的 HTTP 请求头名称。");
+  process.exit(1);
+}
+if (TOKEN_HEADER.toLowerCase() === "host" || TOKEN_HEADER.toLowerCase() === "connection") {
+  console.error("✖ tokenHeader 不能覆盖 Host 或 Connection 请求头。");
+  process.exit(1);
+}
 
-function json(res, code, obj) {
-  res.writeHead(code, { "Content-Type": "application/json; charset=utf-8" });
-  res.end(JSON.stringify(obj));
+function send(res, status, message) {
+  if (res.headersSent) return res.destroy();
+  res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" });
+  res.end(JSON.stringify({ code: -1, message }));
+}
+
+function isLoopbackHostHeader(value) {
+  if (!value) return false;
+  try {
+    const parsed = new URL("http://" + value);
+    return ["localhost", "127.0.0.1", "[::1]"].includes(parsed.hostname);
+  } catch {
+    return false;
+  }
 }
 
 const server = http.createServer((req, res) => {
-  const u = new URL(req.url, `http://${req.headers.host}`);
-
-  // —— 1) 代理：/cloud/* → 云人升 ——
-  if (u.pathname.startsWith("/cloud/")) {
-    const upstreamPath = u.pathname.slice("/cloud".length) + (u.search || "");
-    const headers = {};
-    // 若云人升设了访问 Token：原样放进请求头（不要加 "Bearer "）
-    if (cfg.tokenHeader && cfg.token) headers[cfg.tokenHeader] = cfg.token;
-
-    const preq = http.request(
-      { host: HOST, port: PORT, method: req.method, path: upstreamPath, headers },
-      (pres) => {
-        res.writeHead(pres.statusCode, {
-          "Content-Type": "application/json; charset=utf-8",
-          "Access-Control-Allow-Origin": "*"
-        });
-        pres.pipe(res);
+  // 防止 DNS rebinding 将本地代理暴露给其他网页。
+  if (!isLoopbackHostHeader(req.headers.host)) return send(res, 403, "仅允许通过 localhost / 127.0.0.1 访问。");
+  if (req.headers.origin) {
+    try {
+      const origin = new URL(req.headers.origin);
+      if (origin.protocol !== "http:" || origin.host !== req.headers.host) {
+        return send(res, 403, "跨来源请求已拒绝。");
       }
-    );
-    preq.on("error", (e) => json(res, 502, {
-      code: -1,
-      message: "连不上云人升：" + e.message + `（检查 config.json 的 host 是否为 ${HOST}:${PORT}，且手机与电脑同一 Wi‑Fi）`
-    }));
-    if (req.method === "POST" || req.method === "PUT") req.pipe(preq);
-    else preq.end();
+    } catch {
+      return send(res, 403, "Origin 请求头无效。");
+    }
+  }
+
+  let url;
+  try {
+    url = new URL(req.url, "http://" + req.headers.host);
+  } catch {
+    return send(res, 400, "请求 URL 无效。");
+  }
+
+  if (url.pathname.startsWith("/cloud/")) {
+    if (!["GET", "POST"].includes(req.method)) return send(res, 405, "代理仅允许 GET 和 POST。");
+    const upstreamPath = url.pathname.slice("/cloud".length) + url.search;
+    if (!upstreamPath.startsWith("/") || upstreamPath.startsWith("//") || /\\/.test(upstreamPath)) {
+      return send(res, 400, "上游路径无效。");
+    }
+
+    const headers = { Accept: req.headers.accept || "application/json" };
+    if (TOKEN_HEADER && TOKEN) headers[TOKEN_HEADER] = TOKEN;
+    if (req.method === "POST" && req.headers["content-type"]) headers["content-type"] = req.headers["content-type"];
+
+    const upstream = http.request({
+      host: UPSTREAM_HOST,
+      port: UPSTREAM_PORT,
+      method: req.method,
+      path: upstreamPath,
+      headers,
+      timeout: 10000
+    }, (upstreamRes) => {
+      const responseHeaders = {
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff"
+      };
+      if (upstreamRes.headers["content-type"]) responseHeaders["Content-Type"] = upstreamRes.headers["content-type"];
+      res.writeHead(upstreamRes.statusCode || 502, responseHeaders);
+      upstreamRes.pipe(res);
+    });
+
+    upstream.on("timeout", () => upstream.destroy(new Error("请求云人升超时")));
+    upstream.on("error", (error) => send(res, 502, "无法连接云人升或请求超时。请检查手机网络、IP、端口和服务状态。"));
+    req.on("aborted", () => upstream.destroy());
+    if (req.method === "POST") req.pipe(upstream);
+    else upstream.end();
     return;
   }
 
-  // —— 2) 静态站点 ——
-  let rel = u.pathname === "/" ? "/index.html" : u.pathname;
-  const file = path.join(__dirname, decodeURIComponent(rel));
-  if (!file.startsWith(__dirname) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
-    res.writeHead(404); return res.end("Not found");
+  if (!["GET", "HEAD"].includes(req.method)) return send(res, 405, "静态文件仅允许 GET 和 HEAD。");
+  let decoded;
+  try {
+    decoded = decodeURIComponent(url.pathname);
+  } catch {
+    return send(res, 400, "文件路径编码无效。");
   }
-  const ext = path.extname(file).toLowerCase();
-  res.writeHead(200, { "Content-Type": (MIME[ext] || "application/octet-stream") + "; charset=utf-8" });
-  fs.createReadStream(file).pipe(res);
+  if (decoded.includes("\0") || decoded.includes("\\")) return send(res, 400, "文件路径无效。");
+
+  const relative = decoded === "/" ? "index.html" : decoded.replace(/^\/+/, "");
+  const file = path.resolve(ROOT, relative);
+  if (file !== ROOT && !file.startsWith(ROOT + path.sep)) return send(res, 403, "禁止访问目录外文件。");
+  // 不通过 Web 暴露配置、隐藏文件或源代码仓库元数据。
+  const relParts = path.relative(ROOT, file).split(path.sep);
+  if (relParts.some(part => part.startsWith(".")) || path.basename(file) === "config.json") {
+    return send(res, 404, "Not found");
+  }
+  let stat;
+  try {
+    stat = fs.statSync(file);
+  } catch {
+    return send(res, 404, "Not found");
+  }
+  if (!stat.isFile()) return send(res, 404, "Not found");
+
+  const headers = {
+    "Content-Type": MIME[path.extname(file).toLowerCase()] || "application/octet-stream",
+    "Content-Length": stat.size,
+    "X-Content-Type-Options": "nosniff",
+    "Content-Security-Policy": "default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+  };
+  res.writeHead(200, headers);
+  if (req.method === "HEAD") return res.end();
+  fs.createReadStream(file).on("error", () => {
+    if (!res.headersSent) send(res, 500, "读取文件失败。");
+    else res.destroy();
+  }).pipe(res);
 });
 
-server.listen(LISTEN, () => {
-  console.log("✔ 已启动：");
-  console.log(`   前端      http://localhost:${LISTEN}`);
-  console.log(`   云人升    http://${HOST}:${PORT}  (config.json 里可改)`);
-  console.log("   按 Ctrl+C 停止");
+server.requestTimeout = 15000;
+server.headersTimeout = 10000;
+server.listen(LISTEN_PORT, LISTEN_HOST, () => {
+  console.log("✔ 本地看板代理已启动");
+  console.log(`   页面：http://127.0.0.1:${LISTEN_PORT}`);
+  console.log(`   云人升上游：http://${UPSTREAM_HOST}:${UPSTREAM_PORT}`);
+  console.log("   默认只接受本机访问；按 Ctrl+C 停止。");
 });
