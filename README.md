@@ -35,7 +35,7 @@
 
 | 难度 | 从这几篇开始 |
 | --- | --- |
-| 入门 | [MCP 安装与使用指南](docs/mcp-quickstart.md) · [排错指南](docs/troubleshooting.md) |
+| 入门 | [会员与接口门槛](docs/membership.md) · [MCP 安装与使用指南](docs/mcp-quickstart.md) · [排错指南](docs/troubleshooting.md) |
 | 参考 | [API 速查表](docs/api-cheatsheet.md) · [世界观 / 主题参考](docs/samples.md) · [从书到人升](docs/books-to-lifeup.md) |
 | 进阶 | [实现方案](docs/custom-ui-ai-mcp.md) · [AI 施工标准](docs/ai-build-standard.md) · [MCP 与 Skills 指南](docs/mcp-skills.md) |
 | 主题施工稿 | [docs/specs/](docs/specs/)：星露谷农场 / 原神 / 崩坏：星穹铁道（界面规格 + 可粘贴提示词） |
