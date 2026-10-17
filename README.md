@@ -27,8 +27,8 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 读完直接按文档里的「快速上手」开始做，别再问我"你想做什么"。
 我的玩法体系：<主题 / 货币叫法 / 清单叫法；不填则读我的 MCP 数据>
 我要的页面：<任务 + 商店 + 金币属性栏>
-我的环境：，已装 Node.js 20+ 和
-规则：① 先读文档再写代码，接口以文档里的官方链接为准，不要臆造；② 不确定就按文档「开工前自检」处理；③ 做成双击就能启动，最后给我用法说明。
+我的环境：<Windows / macOS / Linux；Node.js 已安装 / 未安装 / 不确定>
+规则：① 先读仓库的 AI 施工标准与官方文档；接口路径、参数、请求体、响应和版本要求必须以官方资料为准，不得臆造；② 先检查现有项目和环境，先做只读连通测试，不用假数据冒充真实数据；③ 写操作必须检查业务结果，超时不自动重试；④ 默认只监听本机，Token 不得放进前端或日志；⑤ 运行可用的检查，最后说明已验证和未验证的部分。
 ```
 
 **给 AI 的文档链接**（任选其一，raw 是纯文本、最好抓）：
@@ -82,7 +82,7 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 | **[原神 · 界面 spec](docs/specs/genshin.md)** | 把「完成待办」包装成提瓦特冒险 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
 | **[星穹铁道 · 界面 spec](docs/specs/star-rail.md)** | 把「完成待办」包装成银河开拓 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
 
-## 权威文档（一切以官方为准）
+## 开发规范与工具\n\n- [AI 施工标准](docs/ai-build-standard.md)：接口核对、真实数据、安全与交付检查清单。\n- [主题规格模板](docs/theme-spec-template.md)：把主题灵感整理成可复用的界面规范。\n- [只读诊断工具](scripts/doctor.js)：在仓库根目录运行 `node scripts/doctor.js examples/minimal-html`，检查配置并只读调用官方文档列出的 `/info`。\n- [仓库质量检查](scripts/check_repo.py)：检查配置 JSON、脚本语法、本地 Markdown 链接与 `llms-full.txt` 生成稳定性。\n\n## 权威文档（一切以官方为准）
 
 - 云人升 HTTP 接口 · <https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>
 - MCP & Skills · <https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md>
