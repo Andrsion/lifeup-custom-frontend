@@ -211,7 +211,7 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 > 1. 因为浏览器跨域限制，请把「**后端代理 + 前端页面**」做成**一个本地服务**：前端只访问这个本地服务，由它转发到手机 `IP:13276`。页面用本地地址打开（如 `http://localhost:3000`），**不要依赖任何在线托管或云部署**；
 > 2. **做成双击就能启动**：Windows 给 `.bat`、macOS 给 `.command`，别让我自己配置运行环境（依赖越少越好）；
 > 3. 手机 IP、端口、LLM Key 放在一个配置文件里，方便我自己改；
-> 4. 把错误码翻译成中文提示：`10001` = 人升没在运行或未授权；`401` = Token 错误；请求超时 = 手机休眠或离开了同一 Wi-Fi；
+> 4. 把错误码翻译成中文提示：`10001` = 人升没在运行或未授权；Token 认证失败时，按云人升当前配置与实际 HTTP 响应排查；请求超时 = 手机休眠或离开了同一 Wi-Fi；
 > 5. **先只实现第 1、2 项（读 + 完成按钮）**，跑通后再帮我加 AI 助手部分；
 > 6. 最后给我「双击启动 → 浏览器打开本地地址」两步说明。
 >
@@ -287,8 +287,8 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 
 ### 读：Query 层（GET）
 
-* 资源清单：`tasks` / `task_categories` / `items` / `item_categories` / `skills` / `achievements` / `synthesis` / `history` / `coin` / `info` / `statistics` / `level_defines` / `pomodoro_records` / `coin_records` / `inventory_records` / `exp_records` / `step_records`
-* 取数规则：默认 **compact 行 + limit=20 + offset 分页**（看 `hasMore`）；**只在要修改的那几行**加 `detail=true`，不要全量 detail
+* 资源清单：`tasks` / `tasks_categories` / `items` / `items_categories` / `achievement_categories` / `achievement_conditions/{id}` / `skills` / `skill_groups` / `achievements` / `synthesis` / `synthesis_categories` / `history` / `coin` / `info` / `statistics` / `level_defines` / `pomodoro_records` / `coin_records` / `inventory_records` / `exp_records` / `step_records` / `events`
+* 取数规则：**HTTP 接口只使用各自官方定义的参数**。不要把 MCP 工具的分页、compact / detail 选项或 `hasMore` 结构套用到 Cloud HTTP 路由；HTTP 分页及默认值见 [接口速查表](api-cheatsheet.md)，具体能力以官方文档与 SDK 为准。
 * 关键字段：
   * 任务 `status`：0 未完成 / 1 完成 / 2 逾期 / 3 放弃
   * 成就 `status`：**1 = 已完成可领奖**（0 未完成、2 已领）
@@ -298,7 +298,7 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 ### 写：Action 层（POST）
 
 * 默认 `POST /api/contentprovider`，JSON body 使用官方定义的 `urls` 数组（例如 `{ "urls": ["lifeup://api/..."] }`）；具体方法与参数必须按官方文档核对。
-* 需要 UI（页面跳转 / 确认弹窗 / 番茄钟启动）才用 `POST /api`（launch，只保证送达、拿不到返回值）
+* 需要 UI（页面跳转 / 确认弹窗 / 番茄钟启动）才考虑 `POST /api`（start-activity 机制；部分设备可能限制后台弹界面）。具体返回行为按官方文档 / 当前 SDK 确认
 * 常用方法：`complete` / `give_up` / `purchase_item` / `use_item` / `synthesize` / `add_task` / `reward` / `loot_box`
 * 批量：`call_api_batch`（≤20 个方法，顺序保持；批内后续调用看不到前面结果）
 * ⚠️ **写操作不幂等**（complete / skip / reward）：超时**不要自动重试**
@@ -323,7 +323,7 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 * **形态怎么选**：最省 = 单文件 HTML + JS；要组件化 = React / Vue；桌面端 = Tauri / Electron；不想做界面 = 直接接 QQ / 微信机器人
 * **必须有中间件**：本地代理层（解决浏览器 CORS + 藏 Token）
 * **刷新策略**：定时轮询（如 30 秒）或监听云人升广播事件
-* **体验兜底**：把 `10001`（人升未运行 / 未授权）、`401`（Token 错误）翻译成用户看得懂的提示，而不是显示错误码
+* **体验兜底**：把 `10001`（人升未运行 / 未授权）等官方 JSON `code` 翻译成用户看得懂的提示；Token 认证错误则按实际 HTTP 状态与当前云人升配置单独处理，而不是显示错误码
 
 **B. 官方 MCP（零代码接入现成 AI 客户端）**
 
@@ -332,7 +332,7 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 
 ### 实现步骤
 
-1. **手机侧达标**：人升 v1.106.0 与 云人升 3.0.0+；云人升开启「读取人升数据」；记下 `IP:13276`
+1. **手机侧达标**：按所用功能对应的官方版本要求准备人升与云人升；基础 HTTP 查询需人升 v1.91+、最新版云人升，并开启「读取人升数据」；记下 `IP:13276`
 2. **连通自测**：请求 `GET /info`，返回应用 / 云版本即通
 3. **本地代理**：Node / Python 写薄层，转发 Query 与 Action（若云人升设了 Token，用 **raw token 头**，不是 Bearer）
 4. **连接配置页**：输入地址 + Token，调 `GET /info` 测连通，可扫码
@@ -351,7 +351,7 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 
 **⚠️ 三个关键前提（先确认）**
 
-1. **手机侧先达标**：人升 v1.106.0 ＋ 云人升 3.0.0+，并开启「读取人升数据」。
+1. **手机侧先达标**：按所用功能对应的官方版本要求准备人升与云人升，并开启「读取人升数据」。
 2. **同一局域网**：手机与电脑在同一 Wi-Fi（路由器开了 AP 隔离也会失败）。
 3. **跨域（CORS）**：浏览器直连云人升会被拦、Token 也会暴露 → **必须加一层薄代理**。
    * 开发阶段：用 **Vite 的 `server.proxy`** 代理转发（`vite dev` 同时充当本地代理）；
@@ -362,12 +362,12 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 | 现象 | 原因 / 处理 |
 | --- | --- |
 | `code 10001` | 人升没运行，或云人升未获「读取数据」授权 |
-| `HTTP 401` | 云人升设了 Token，需带 **raw token 头** |
+| `Token 认证失败` | 仅在云人升配置了 Token 时适用；核对当前配置和请求认证方式，不要混淆 HTTP 状态码与 JSON `code` |
 | 找不到实例 | 不在同一 Wi-Fi / 路由器开了 AP 隔离 → 手动填 IP:端口 |
 | 手机休眠后超时（10s） | 重连一次即可，**不要死循环 discover** |
 | 写操作重复执行 | 不幂等，超时**别重试** |
 | 缓存错乱 | 用 `gid` 而非会变的 `id` |
-| 版本不够 | 需人升 v1.106.0 正式 + 云人升 3.0.0+ |
+| 版本不够 | 需满足所用功能对应的官方版本要求；基础 HTTP 查询按官方云人升文档使用人升 v1.91+ 与最新版云人升，MCP / Skills 的门槛另行核对 |
 
 **两条铁律**
 
@@ -434,7 +434,7 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 * 只往配置文件**合并**新的 `mcpServers` 条目，别整文件覆盖；
 * 连接器**不点「信任」不生效**（圆点不变绿 = 没连上，常见错觉）；
 * macOS 图形端常找不到 `npx` → 用 `npx` / `node` 的**绝对路径**；
-* 版本不够：需人升 **v1.106.0**＋、云人升 **3.0.0**＋。
+* 版本不够：需按所用能力对应的官方文档核对版本要求。
 
 
 **B. 进阶：dsh（DeepSeek Harness）· 本地 Agent**
@@ -631,7 +631,7 @@ args: ['-y', '@lifeup/mcp']
   - `10001`：人升未运行 / 未授「读取数据」
   - `10002`：ContentProvider 查询失败
   - Token 认证失败：仅当云人升配置了 Token 时适用；检查当前云人升设置与请求认证方式。HTTP 状态码和 JSON `code` 是不同层次，不把未由官方文档明确保证的状态码当作稳定业务码。
-- 列表接口 `data` 是**数组**；`/coin`、`/info` 的 `data` 是**对象**
+- 常见列表接口的 `data` 是**数组**；`/coin`、`/info`、`/events`、`/statistics` 返回对象结构（其中 `/events` 的事件列表位于对象内部）。`/files/{url}` 返回文件流，不套用 JSON 响应包装
 - 当前官方 SDK 默认值：`/history`、`/feelings`、五种 `*_records` 接口均为 `offset=0`、`limit=100`；`/events` 为 `after=0`、`limit=50`。这些默认值是核对时 SDK 的实现，不保证旧版完全一致。
 - 时间范围参数 `time_range_start` 与 `time_range_end` 是 Unix 时间戳毫秒，必须成对传入，且结束时间大于起始时间；缺失一项或区间非法可能返回 `invalid_parameter`。
 - 查询数据需先在云人升申请「读取人升数据」权限。官方文档列出的基础要求为人升 v1.91+ 与最新版云人升；特定字段 / 功能有单独版本要求，不能将单个功能的版本门槛套用到全部接口。
@@ -671,7 +671,7 @@ GET /achievement_conditions/{成就id}
 GET /feelings?offset=0&limit=100
 GET /synthesis
 GET /synthesis/{清单id}
-GET /synthesis_categories[?include_hidden=true]
+GET /synthesis_categories[?include_hidden=true]\nGET /synthesis_categories/{清单ID}
 GET /skills
 GET /skill_groups[?include_hidden=true]
 ```
@@ -773,7 +773,7 @@ GET http://{host}:{port}/api?url={ENCODED}
 > ⚠️ **任务的 `id` 每个周期会变，`gid` 不变** —— 跨周期识别 / 缓存请用 **`gid`**。
 > 写 URL Scheme 用 **snake_case**（`category_id` / `stock_number` / `title_color_string`）；Cloud JSON 读出来是 **camelCase**。
 
-## 6. 连通自测
+## 5. 连通自测
 
 ```bash
 curl http://192.168.1.23:13276/info
