@@ -30,6 +30,12 @@
 - **资料冲突要明说**：说明冲突的具体能力与来源，不要静默拼接或用一个来源覆盖所有领域。
 - **用户真实数据优先**：只有在实际 MCP 工具可用且读取成功时，才能声称读到了用户数据；否则明确说明限制并暂停依赖真实数据的步骤。
 
+## 项目文档的主源
+
+- 本项目文档以 [GitHub 仓库 main 分支](https://github.com/Andrsion/lifeup-custom-frontend) 当前内容为主源。
+- 若通过 Gitee 或其他镜像读取，先核对镜像同步状态；项目镜像不是 LifeUp 官方接口的权威来源。
+- LifeUp / 云人升接口事实仍以本节列出的官方 Wiki 与官方 SDK 为准。
+
 ## 权威来源与分工
 
 - **云人升 HTTP 路由、权限、基础版本要求**：[官方 Cloud HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md)。该页提示部分接口定义可能滞后；仅当路由、参数或响应存在冲突时，再核对其指向的当前 [HTTP 服务端实现 KtorService.kt](https://github.com/Ayagikei/LifeUp-SDK/blob/main/http/src/main/java/net/lifeupapp/lifeup/http/service/KtorService.kt)。
