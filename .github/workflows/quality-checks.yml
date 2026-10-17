@@ -35,3 +35,6 @@ jobs:
 
       - name: Check standalone bot entry point
         run: node --check examples/group-bot/bot.js
+
+      - name: Test local proxy security boundaries
+        run: node scripts/test_proxy.js
