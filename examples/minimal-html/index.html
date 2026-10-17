@@ -78,36 +78,80 @@ async function load(){
     const sk    = await getJSON(API.skills);
     const tasks = await getJSON(API.tasks);
 
-    // 顶部：金币 + 前 5 个属性
+    // 所有来自接口的文本均通过 textContent 写入，避免任务名/属性名触发 HTML 注入。
     const stats = document.getElementById("stats");
-    stats.innerHTML = "";
-    const coinVal = (coin.data && (coin.data.value !== undefined ? coin.data.value : coin.data)) ?? "-";
-    stats.insertAdjacentHTML("beforeend",
-      `<div class="stat"><div class="k">${UI.coin}</div><div class="v">${coinVal}</div></div>`);
-    (sk.data || []).slice(0, 5).forEach(s => {
-      stats.insertAdjacentHTML("beforeend",
-        `<div class="stat"><div class="k">${s.name ?? "属性"}</div><div class="v">Lv.${s.level ?? "-"}</div></div>`);
+    stats.replaceChildren();
+    const coinCard = document.createElement("div");
+    coinCard.className = "stat";
+    const coinLabel = document.createElement("div");
+    coinLabel.className = "k";
+    coinLabel.textContent = UI.coin;
+    const coinValue = document.createElement("div");
+    coinValue.className = "v";
+    coinValue.textContent = String((coin.data && (coin.data.value !== undefined ? coin.data.value : coin.data)) ?? "-");
+    coinCard.append(coinLabel, coinValue);
+    stats.appendChild(coinCard);
+
+    (Array.isArray(sk.data) ? sk.data : []).slice(0, 5).forEach(s => {
+      const card = document.createElement("div");
+      card.className = "stat";
+      const label = document.createElement("div");
+      label.className = "k";
+      label.textContent = String(s.name ?? "属性");
+      const value = document.createElement("div");
+      value.className = "v";
+      value.textContent = "Lv." + String(s.level ?? "-");
+      card.append(label, value);
+      stats.appendChild(card);
     });
 
     // 任务列表（仅未完成）
     const box = document.getElementById("tasks");
-    box.innerHTML = "";
-    const list = (tasks.data || []).filter(t => t.status === 0);
-    if (!list.length) box.innerHTML = `<p class="muted">${UI.empty}</p>`;
+    box.replaceChildren();
+    const list = (Array.isArray(tasks.data) ? tasks.data : []).filter(t => t && t.status === 0);
+    if (!list.length) {
+      const empty = document.createElement("p");
+      empty.className = "muted";
+      empty.textContent = UI.empty;
+      box.appendChild(empty);
+    }
     list.forEach(t => {
-      const key = t.gid ?? t.id;   // 跨周期识别用 gid（id 每周期会变）
+      const key = t.gid ?? t.id;
       const el = document.createElement("div");
       el.className = "card";
-      el.innerHTML = `<span class="name">${t.name}<span class="freq">#${key}</span></span>`;
+      const name = document.createElement("span");
+      name.className = "name";
+      name.textContent = String(t.name ?? "未命名任务");
+      const freq = document.createElement("span");
+      freq.className = "freq";
+      freq.textContent = "#" + String(key ?? "?");
+      name.appendChild(freq);
+      el.appendChild(name);
+
       const btn = document.createElement("button");
       btn.textContent = UI.done;
       btn.onclick = async () => {
-        btn.disabled = true; btn.textContent = "…";
-        try{
-          await getJSON(API.do + encodeURIComponent(`lifeup://api/complete?gid=${key}`));
+        // 写操作超时或结果不明确时不自动重试，避免重复执行。
+        btn.disabled = true;
+        btn.textContent = "…";
+        try {
+          const result = await getJSON(API.do + encodeURIComponent("lifeup://api/complete?gid=" + encodeURIComponent(String(key))));
+          const operation = result.data && Array.isArray(result.data) ? result.data : [];
+          if (operation.some(item => item && item.result && item.result.api_result === false)) {
+            throw new Error(operation.find(item => item && item.result && item.result.api_result === false).result.error_message || "官方接口返回业务失败");
+          }
           btn.textContent = "✔";
           setTimeout(load, 600);
-        }catch(e){
+        } catch (e) {
+          btn.disabled = false;
+          btn.textContent = UI.done;
+          showErr("完成结果未确认：" + e.message + "\\n若请求可能已送达，请先刷新任务列表确认状态，不要连续重试。");
+        }
+      };
+      el.appendChild(btn);
+      box.appendChild(el);
+    });
+  }catch(e){
           btn.disabled = false; btn.textContent = UI.done;
           showErr("完成失败：" + e.message + "\n（写操作不幂等，请勿反复重试）");
         }
