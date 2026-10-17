@@ -14,7 +14,7 @@
   - `10002`：ContentProvider 查询失败
   - `401`：Token 错误（仅当云人升设了访问 Token）
 - 列表接口 `data` 是**数组**；`/coin`、`/info` 的 `data` 是**对象**
-- 分页参数：`offset`、`limit`（默认 limit 100，看返回里有没有更多）
+- 分页参数：官方文档列出的分页接口可使用 `offset`、`limit`；时间范围参数 `time_range_start` 与 `time_range_end` 需要按官方文档成对传入。具体适用接口和默认值以官方文档为准。
 
 ## 1. 读（GET，需先开「读取人升数据」）
 
@@ -60,10 +60,10 @@ GET /skill_groups[?include_hidden=true]
 GET /coin                     ← 金币余额（data 是对象）
 GET /info                     ← 人升 / 云人升版本（连通自测用；data 是对象）
 GET /pomodoro_records?offset=&limit=&time_range_start=&time_range_end=
-GET /coin_records
-GET /inventory_records
-GET /exp_records
-GET /step_records
+GET /coin_records?offset=&limit=&time_range_start=&time_range_end=
+GET /inventory_records?offset=&limit=&time_range_start=&time_range_end=
+GET /exp_records?offset=&limit=&time_range_start=&time_range_end=
+GET /step_records?offset=&limit=&time_range_start=&time_range_end=
 GET /level_defines
 GET /statistics?time_range_start=&time_range_end=
 GET /events?after=&limit=50   ← 广播事件（GET 轮询）
