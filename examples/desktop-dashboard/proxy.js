@@ -67,7 +67,8 @@ if (TOKEN_HEADER && !/^[!#$%&'*+.^_`|~0-9A-Za-z-]+$/.test(TOKEN_HEADER)) {
   console.error("✖ tokenHeader 不是合法的 HTTP 请求头名称。");
   process.exit(1);
 }
-if (TOKEN_HEADER.toLowerCase() === "host" || TOKEN_HEADER.toLowerCase() === "connection") {
+const FORBIDDEN_TOKEN_HEADERS = new Set(["host", "connection", "content-length", "transfer-encoding", "upgrade", "proxy-connection", "keep-alive", "te", "trailer"]);
+if (FORBIDDEN_TOKEN_HEADERS.has(TOKEN_HEADER.toLowerCase())) {
   console.error("✖ tokenHeader 不能覆盖 Host 或 Connection 请求头。");
   process.exit(1);
 }
