@@ -7,15 +7,15 @@
 
 ## 文档目录（自动生成）
 
-- **README** — \`README.md\`
-- **实现方案** — \`docs/custom-ui-ai-mcp.md\`
-- **docs/ai-build-standard.md** — \`docs/ai-build-standard.md\`
-- **接口速查表** — \`docs/api-cheatsheet.md\`
-- **从书到人升** — \`docs/books-to-lifeup.md\`
-- **地球 Online 梗词表** — \`docs/earth-online-glossary.md\`
-- **世界观 / 主题参考** — \`docs/samples.md\`
-- **docs/theme-spec-template.md** — \`docs/theme-spec-template.md\`
-- **排错 · 常见坑** — \`docs/troubleshooting.md\`
+- **README** — README.md
+- **实现方案** — docs/custom-ui-ai-mcp.md
+- **docs/ai-build-standard.md** — docs/ai-build-standard.md
+- **接口速查表** — docs/api-cheatsheet.md
+- **从书到人升** — docs/books-to-lifeup.md
+- **地球 Online 梗词表** — docs/earth-online-glossary.md
+- **世界观 / 主题参考** — docs/samples.md
+- **docs/theme-spec-template.md** — docs/theme-spec-template.md
+- **排错 · 常见坑** — docs/troubleshooting.md
 
 > 目录用于快速定位章节；各章节下方的源路径标记是稳定标识。
 
