@@ -36,8 +36,8 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 读完直接按文档里的「快速上手」开始做，别再问我"你想做什么"。
 我的玩法体系：<主题 / 货币叫法 / 清单叫法；不填则读我的 MCP 数据>
 我要的页面：<任务 + 商店 + 金币属性栏>
-我的环境：，已装 Node.js 20+ 和
-规则：① 先读文档再写代码，接口以文档里的官方链接为准，不要臆造；② 不确定就按文档「开工前自检」处理；③ 做成双击就能启动，最后给我用法说明。
+我的环境：<Windows / macOS / Linux；Node.js 已安装 / 未安装 / 不确定>
+规则：① 先读仓库的 AI 施工标准与官方文档；接口路径、参数、请求体、响应和版本要求必须以官方资料为准，不得臆造；② 先检查现有项目和环境，先做只读连通测试，不用假数据冒充真实数据；③ 写操作必须检查业务结果，超时不自动重试；④ 默认只监听本机，Token 不得放进前端或日志；⑤ 运行可用的检查，最后说明已验证和未验证的部分。
 ```
 
 **给 AI 的文档链接**（任选其一，raw 是纯文本、最好抓）：
@@ -91,6 +91,13 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 | **[原神 · 界面 spec](docs/specs/genshin.md)** | 把「完成待办」包装成提瓦特冒险 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
 | **[星穹铁道 · 界面 spec](docs/specs/star-rail.md)** | 把「完成待办」包装成银河开拓 —— 界面规格 + 可直接粘贴给 AI 的主题提示词 |
 
+## 开发规范与工具
+
+- [AI 施工标准](docs/ai-build-standard.md)：接口核对、真实数据、安全与交付检查清单。
+- [主题规格模板](docs/theme-spec-template.md)：把主题灵感整理成可复用的界面规范。
+- [只读诊断工具](scripts/doctor.js)：在仓库根目录运行 `node scripts/doctor.js examples/minimal-html`，检查配置并只读调用官方文档列出的 `/info`。
+- [仓库质量检查](scripts/check_repo.py)：检查配置 JSON、脚本语法、本地 Markdown 链接与 `llms-full.txt` 生成稳定性。
+
 ## 权威文档（一切以官方为准）
 
 - 云人升 HTTP 接口 · <https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>
@@ -131,6 +138,8 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 ---
 
 ## 🚀 一、快速上手（多数人只看这里）
+
+> 施工时请同时遵循 [AI 施工标准](ai-build-standard.md)：先核对官方接口、先做只读测试、写操作不自动重试。
 
 ### 1｜先懂一句话原理
 
@@ -177,8 +186,8 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 > 你是资深全栈工程师。请帮我做一个**本地网页界面**，我不是程序员，请用最少的文件、最简单的依赖，让我照着做就能跑起来。
 >
 > **背景**：人升（LifeUp）是安卓上的游戏化任务管理 App，配套的「云人升」在手机上开了 HTTP 服务（局域网，默认端口 13276），提供两类接口：
-> ① 读：`GET http://<手机IP>:13276/tasks`、`/items`、`/synthesis`、`/coin`、`/skills`、`/info` —— 返回 `{ code, message, data }`，`data` 是列表，支持 `offset` / `limit` 分页；
-> ② 写：`POST http://<手机IP>:13276/api/contentprovider`，请求体 `{ "url": "lifeup://api/complete?id=<任务ID>" }` —— 返回 `{ result }`。**写操作不幂等，请勿自动重试。**
+> ① 读：按官方文档请求 `GET /tasks`、`/items`、`/synthesis`、`/coin`、`/skills`、`/info` 等；响应结构为 `{ code, message, data }`，列表接口的 `data` 是数组，而 `/coin`、`/info` 的 `data` 是对象；分页参数和适用接口以官方文档为准；
+> ② 写：通过官方定义的 `POST /api/contentprovider` 调用 URL Scheme；JSON 请求体使用 `urls` 数组，例如 `{ "urls": ["lifeup://api/complete?id=<任务ID>"] }`。官方响应为 `{ code, message, data }`；业务结果需要检查 `data[].result.api_result`。**写操作不幂等，请勿自动重试。**
 >
 > **接口依据（重要）**：以上只是常用示例，**完整接口以官方文档为准** → https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md 。**写代码前先核对方法名与参数，不要臆造**（参数写错会直接连不上）。
 >
@@ -285,12 +294,12 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 
 ### 写：Action 层（POST）
 
-* 默认 `POST /api/contentprovider`，body `{ "url": "lifeup://api/..." }`，**返回结果**
+* 默认 `POST /api/contentprovider`，JSON body 使用官方定义的 `urls` 数组（例如 `{ "urls": ["lifeup://api/..."] }`）；具体方法与参数必须按官方文档核对。
 * 需要 UI（页面跳转 / 确认弹窗 / 番茄钟启动）才用 `POST /api`（launch，只保证送达、拿不到返回值）
 * 常用方法：`complete` / `give_up` / `purchase_item` / `use_item` / `synthesize` / `add_task` / `reward` / `loot_box`
 * 批量：`call_api_batch`（≤20 个方法，顺序保持；批内后续调用看不到前面结果）
 * ⚠️ **写操作不幂等**（complete / skip / reward）：超时**不要自动重试**
-* 检查返回：`HTTP 200 + code=200` 只代表送达，必须再看 `ok` 与 `data`
+* 检查返回：顶层 `code=200` 只代表请求已被处理，不等于游戏内操作成功；按官方响应检查 `data[].result.api_result`。
 
 ### AI：两条接法
 
@@ -608,7 +617,9 @@ args: ['-y', '@lifeup/mcp']
 
 > ⚠️ 本表仅供**速查 / 防臆造**。**一切以官方文档为准**：<https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>
 >
-> 前置：人升 **v1.91+**（本方案建议 **v1.106.0+**）＋ **云人升**；先在云人升里开「**读取人升数据**」。地址形如 `http://<手机IP>:13276`（局域网）。
+> 本表按官方文档整理，核对日期：2026-10-17。官方 Wiki 明确提示部分接口定义可能滞后；如有冲突，请按官方文档指向的 [LifeUp-SDK 服务端源码](https://github.com/Ayagikei/LifeUp-SDK) 核对。
+>
+> 前置条件、权限和版本要求请按 [官方云人升 HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md) 当前内容确认，不要把本表中的版本描述当作高于官方的要求。地址形如 `http://<手机IP>:13276`（局域网）。
 
 ## 0. 基础
 
@@ -618,7 +629,7 @@ args: ['-y', '@lifeup/mcp']
   - `10002`：ContentProvider 查询失败
   - `401`：Token 错误（仅当云人升设了访问 Token）
 - 列表接口 `data` 是**数组**；`/coin`、`/info` 的 `data` 是**对象**
-- 分页参数：`offset`、`limit`（默认 limit 100，看返回里有没有更多）
+- 分页参数：官方文档列出的分页接口可使用 `offset`、`limit`；时间范围参数 `time_range_start` 与 `time_range_end` 需要按官方文档成对传入。具体适用接口和默认值以官方文档为准。
 
 ## 1. 读（GET，需先开「读取人升数据」）
 
@@ -664,10 +675,10 @@ GET /skill_groups[?include_hidden=true]
 GET /coin                     ← 金币余额（data 是对象）
 GET /info                     ← 人升 / 云人升版本（连通自测用；data 是对象）
 GET /pomodoro_records?offset=&limit=&time_range_start=&time_range_end=
-GET /coin_records
-GET /inventory_records
-GET /exp_records
-GET /step_records
+GET /coin_records?offset=&limit=&time_range_start=&time_range_end=
+GET /inventory_records?offset=&limit=&time_range_start=&time_range_end=
+GET /exp_records?offset=&limit=&time_range_start=&time_range_end=
+GET /step_records?offset=&limit=&time_range_start=&time_range_end=
 GET /level_defines
 GET /statistics?time_range_start=&time_range_end=
 GET /events?after=&limit=50   ← 广播事件（GET 轮询）
@@ -700,7 +711,7 @@ GET http://{host}:{port}/api?url={ENCODED}
 ```
 
 > ⚠️ **写操作不幂等**：`complete` / `give_up` / `reward` 等超时后**不要自动重试**。
-> ⚠️ `/api/contentprovider` 的顶层 `code=200` 只代表**送达**，业务成败要再看 `data[].result.api_result`：
+> ⚠️ `/api/contentprovider` 的顶层 `code=200` 不应单独作为操作成功依据。按官方响应契约检查 `data[].result.api_result`：
 
 ```json
 {"code":200,"message":"success","data":[{"url":"lifeup://api/item?id=1","result":{"api_result":true}}]}
