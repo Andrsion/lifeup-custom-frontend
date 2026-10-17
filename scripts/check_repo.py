@@ -115,9 +115,10 @@ def check_llms_deterministic() -> list[str]:
         return ["llms-full.txt 的主文档排序不正确"]
     if "## 文档目录（自动生成）" not in content:
         return ["llms-full.txt 缺少自动生成的文档目录"]
-    if "- **API 速查表** — docs/api-cheatsheet.md" not in content:
+    toc = content.split("<!-- ===== ", 1)[0]
+    if "— docs/api-cheatsheet.md" not in toc:
         return ["llms-full.txt 文档目录缺少 API 速查表"]
-    if "- **AI 施工标准** — docs/ai-build-standard.md" not in content:
+    if "— docs/ai-build-standard.md" not in toc:
         return ["llms-full.txt 文档目录缺少 AI 施工标准"]
     if "<!-- ===== docs/specs/" in content:
         return ["llms-full.txt 不应收录 docs/specs/ 可选主题文档"]
