@@ -15,6 +15,7 @@ NODE_FILES = [
     ROOT / "examples/desktop-dashboard/proxy.js",
     ROOT / "examples/group-bot/bot.js",
     ROOT / "scripts/doctor.js",
+    ROOT / "scripts/test_proxy.js",
 ]
 MARKDOWN_LINK = re.compile(r"!??\[[^\]]*\]\(([^)]+)\)")
 
