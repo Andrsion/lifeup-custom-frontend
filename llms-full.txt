@@ -65,7 +65,11 @@
 
 ## 直接让 AI 操作人升（MCP）
 
-如果你不需要自定义网页，只想让 AI 查询任务、分析数据或按你的指令操作人升，请从 [MCP 安装与使用指南](docs/mcp-quickstart.md) 开始。指南包含环境准备、客户端配置、首次连接验证、常见提问和安全注意事项。
+如果你不需要自定义网页，只想让 AI 查询任务、分析数据或按你的指令操作人升，可以先把下面这句话复制给有权限操作你电脑的 AI Agent：
+
+> 按这份文档帮我安装 LifeUp MCP 并完成首次连接：[https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md)
+
+Agent 需要能操作本机 MCP 配置、执行命令并访问手机所在的局域网；它应保留已有 MCP 配置，缺少设备地址或 Token 时先询问你，并通过只读查询验证连接。若无法操作本机或访问局域网，它应说明哪些步骤需要你手动完成。详细步骤与排错见 [MCP 安装与使用指南](docs/mcp-quickstart.md)。
 
 ## 版本门槛：按能力分别核对
 
