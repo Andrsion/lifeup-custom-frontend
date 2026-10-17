@@ -16,7 +16,7 @@
 - 一台**电脑**（Windows / macOS）
 - 手机与电脑连**同一个 Wi-Fi**
 - 能装 **Node.js 20+**（示例与本地代理都靠它）
-- 手机上是**人升+ 云人升**，并开启「读取人升数据」
+- 手机上是**人升 + 云人升**，并开启「读取人升数据」
 - **人升会员**（调用接口属于会员能力；云人升本身免费）—— 详见 [会员与接口门槛](docs/membership.md)
 
 **只有手机、没有电脑？** 做不了 —— 自定义界面要在电脑上跑本地代理；MCP 也一样，需要电脑上装 Node.js 并运行客户端。可以先了解概念，有条件时再动手。
@@ -27,7 +27,7 @@
 | --- | --- |
 | **我想直接运行示例** | 进入 [minimal-html](examples/minimal-html/)（一个单页看板：顶部金币与属性、中间任务列表带「完成」按钮，跑起来就能点），按说明配置并启动；需要大屏时用 [desktop-dashboard](examples/desktop-dashboard/)。 |
 | **我想让 AI 帮我做（本地 Agent）** | 用能在本机读写文件、执行命令的 AI 工具（Cursor / Trae / Claude Code / CodeBuddy 等）。先读 [llms.txt](llms.txt)，再按任务读 [实现方案](docs/custom-ui-ai-mcp.md) 与 [AI 施工标准](docs/ai-build-standard.md)；群机器人示例见 [group-bot](examples/group-bot/)。 |
-| **我只有网页版 AI**（豆包 / Kimi / DeepSeek 网页） | **仍然必须有电脑**（Windows / macOS），只有手机不行。网页版 AI 连不到你家局域网，也跑不了本地程序，因此做不了自动搭建；但你可以不用 AI，改为在电脑上进入 [minimal-html](examples/minimal-html/)，按说明填写手机 IP 并双击启动。想改风格则需自己动手或找人帮忙。 |
+| **我只有网页版 AI**（豆包 / Kimi / DeepSeek 网页） | **仍然必须有电脑**（Windows / macOS），只有手机不行。网页版 AI 连不到你家局域网，也跑不了本地程序，因此做不了自动搭建；但你可以不用 AI，改为在电脑上进入 [minimal-html](examples/minimal-html/)，按说明填写手机 IP 并双击启动。想改风格则需自己动手或找人帮忙。（**仍需人升会员**） |
 | **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端；需要了解 Skills 时看 [MCP 与 Skills 指南](docs/mcp-skills.md)，不需要自己开发界面。 |
 | **我遇到问题了** | 先运行下面的只读诊断，再查 [排错指南](docs/troubleshooting.md)；接口细节见 [API 速查表](docs/api-cheatsheet.md)。 |
 
