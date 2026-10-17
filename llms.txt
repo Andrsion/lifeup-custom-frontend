@@ -30,9 +30,11 @@
 
 ## 权威（一切以官方为准）
 
-- 云人升 HTTP 接口：https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
-- MCP & Skills：https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md
-- 官方 SDK / skills 源码：https://github.com/Ayagikei/LifeUp-SDK
+- 云人升 HTTP 接口、权限与基础版本要求：https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
+- 人升 URL Scheme 方法名与参数：https://wiki.lifeupapp.fun/zh-cn/guide/api.md
+- MCP 安装与客户端接入：https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md
+- 当前 MCP / Skills 版本与行为：https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud
+- HTTP 服务端实现（官方 Wiki 明示接口定义可能滞后时用于核对）：https://github.com/Ayagikei/LifeUp-SDK/blob/main/http/src/main/java/net/lifeupapp/lifeup/http/service/KtorService.kt
 
 ## 硬规则（给 AI）
 
@@ -41,6 +43,7 @@
 - 任务的 `id` **每周期会变**，跨周期识别 / 缓存用 **`gid`**。
 - 浏览器**直连会被 CORS 拦** → 必须加一层**本地代理**。
 - 不要用「云端生成 + 云端托管」平台（秒哒 / Bolt.new / v0 / Lovable）—— 它们连不到用户的局域网。
-- 版本门槛（MCP / Skills）：人升 **v1.106.0+** ＋ 云人升 **3.0.1+**。
-- 基础 HTTP 查询的版本要求不同：人升 **v1.91+** ＋最新版云人升；具体以[官方云人升 HTTP 接口文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md)为准。
+- 版本门槛（MCP / Skills）：人升 **v1.106.0+**。官方 Wiki 的 MCP 页面目前写云人升 **3.0.0+**，但 SDK 当前 `lifeup-cloud` Skill 要求 **3.0.1+**；完整 Skills 工作流按更具体的 Skill 要求使用 **3.0.1+**。
+- 基础 HTTP 查询的版本要求不同：人升 **v1.91+** ＋最新版云人升；具体以[官方云人升 HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md)为准。若 HTTP 路由定义与实际服务端实现不一致，按该 Wiki 页面指向的 `KtorService.kt` 进一步核对。
+- 来源分工：URL Scheme 方法 / 参数看官方 `api.md`；MCP 安装看官方 `api_mcp.md`；HTTP 以 `api_cloud.md` 为入口，留意该页的滞后提示；MCP / Skills 的当前版本与行为核对 SDK 的 `lifeup-cloud/SKILL.md`。发现冲突时应说明冲突，不要把不同能力的版本门槛混为一谈。
 - 要按某个主题搭界面 → 先读 `docs/specs/` 里对应主题的施工稿（已含可粘贴提示词），再动手写代码。
