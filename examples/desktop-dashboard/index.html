@@ -41,7 +41,7 @@
 <script>
 const UI = { coin: "金币", tasks: "今日待办", done: "打卡" };
 const API = { info:"/cloud/info", coin:"/cloud/coin", skills:"/cloud/skills",
-              tasks:"/cloud/tasks?limit=200", do:"/cloud/api/contentprovider?url=" };
+              tasks:"/cloud/tasks", do:"/cloud/api/contentprovider?url=" };
 
 const $err = document.getElementById("err");
 function showErr(m){ $err.style.display="block"; $err.textContent=m; }
