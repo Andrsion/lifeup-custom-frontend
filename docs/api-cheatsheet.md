@@ -13,7 +13,7 @@
   - `10001`：人升未运行 / 未授「读取数据」
   - `10002`：ContentProvider 查询失败
   - Token 认证失败：仅当云人升配置了 Token 时适用；检查当前云人升设置与请求认证方式。HTTP 状态码和 JSON `code` 是不同层次，不把未由官方文档明确保证的状态码当作稳定业务码。
-- 列表接口 `data` 是**数组**；`/coin`、`/info` 的 `data` 是**对象**
+- 常见列表接口的 `data` 是**数组**；`/coin`、`/info`、`/events`、`/statistics` 返回对象结构（其中 `/events` 的事件列表位于对象内部）。`/files/{url}` 返回文件流，不套用 JSON 响应包装
 - 当前官方 SDK 默认值：`/history`、`/feelings`、五种 `*_records` 接口均为 `offset=0`、`limit=100`；`/events` 为 `after=0`、`limit=50`。这些默认值是核对时 SDK 的实现，不保证旧版完全一致。
 - 时间范围参数 `time_range_start` 与 `time_range_end` 是 Unix 时间戳毫秒，必须成对传入，且结束时间大于起始时间；缺失一项或区间非法可能返回 `invalid_parameter`。
 - 查询数据需先在云人升申请「读取人升数据」权限。官方文档列出的基础要求为人升 v1.91+ 与最新版云人升；特定字段 / 功能有单独版本要求，不能将单个功能的版本门槛套用到全部接口。
@@ -53,7 +53,7 @@ GET /achievement_conditions/{成就id}
 GET /feelings?offset=0&limit=100
 GET /synthesis
 GET /synthesis/{清单id}
-GET /synthesis_categories[?include_hidden=true]
+GET /synthesis_categories[?include_hidden=true]\nGET /synthesis_categories/{清单ID}
 GET /skills
 GET /skill_groups[?include_hidden=true]
 ```
@@ -155,7 +155,7 @@ GET http://{host}:{port}/api?url={ENCODED}
 > ⚠️ **任务的 `id` 每个周期会变，`gid` 不变** —— 跨周期识别 / 缓存请用 **`gid`**。
 > 写 URL Scheme 用 **snake_case**（`category_id` / `stock_number` / `title_color_string`）；Cloud JSON 读出来是 **camelCase**。
 
-## 6. 连通自测
+## 5. 连通自测
 
 ```bash
 curl http://192.168.1.23:13276/info
