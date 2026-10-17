@@ -108,7 +108,9 @@ POST http://{host}:{port}/api/contentprovider
 start activity 机制（部分设备会限制后台弹界面，可能失败）：
 
 ```
-GET http://{host}:{port}/api?url={ENCODED}
+GET  http://{host}:{port}/api?url={ENCODED}
+POST http://{host}:{port}/api
+     { "urls": ["lifeup://api/goto?page=lab"] }
 ```
 
 > ⚠️ **写操作不幂等**：`complete` / `give_up` / `reward` 等超时后**不要自动重试**。
@@ -128,12 +130,14 @@ GET http://{host}:{port}/api?url={ENCODED}
 | 使用物品 | `use_item` |
 | 合成 | `synthesize` |
 | 新建任务 | `add_task` |
-| 领奖 | `reward` |
+| 发放奖励（金币 / 经验 / 物品等） | `reward` |
 | 开箱 | `loot_box` |
-| 番茄钟 | `pomodoro` |
+| 番茄计时控制 | `pomodoro_timer` |
+| 完成 / 领取成就奖励 | `complete_achievement?id=…`（人升 v1.105.1+） |
+| 解锁成就条件 | `unlock_condition?id=…` |
 | 跳转页面 | `goto?page=…` |
 
-> 💡 **命名注意**：**原生 URL Scheme 方法名 ≠ MCP 工具名**。原生里是 `complete`，MCP 工具里才叫 `complete_task`——别写混。
+> 💡 **命名注意**：**原生 URL Scheme 方法名 ≠ MCP 工具名**。原生里是 `complete`，MCP 工具里才可能使用 `complete_task` 等工具名——别写混。领取成就奖励使用 `complete_achievement`，不要用发放通用奖励的 `reward` 代替。
 
 ## 4. 关键字段取值
 
@@ -142,7 +146,7 @@ GET http://{host}:{port}/api?url={ENCODED}
 | `/tasks` `/history` | `status` | `0` 未完成 · `1` 已完成 · `2` 逾期 · `3` 放弃 |
 | `/tasks` | `frequency` | `0` 一次 · `1` 每日 · `N>1` 每 N 天 · `-1` 无限制 · `-3` 艾宾浩斯 · `-4` 每月 · `-5` 每年 |
 | `/tasks` | `weekdays` | `"1,3,5"`（1=周一 … 7=周日）；非每周几为空；**v1.106.0+** |
-| `/achievements` | `status` | `0` 未解锁 · `1` 已解锁未领奖 · `2` 已解锁已领奖 |
+| `/achievements` | `status` | `0` 未解锁 · `1` 已解锁未领奖 · `2` 已解锁已领奖；完成 / 领取奖励调用 `complete_achievement`（v1.105.1+） |
 | `/achievements` | `type` | `0` 普通 · `1` 子分类 |
 | `/achievement_categories` | `type` | `0` 用户 · `1` 系统 |
 | `/feelings` | `type` | `0` 任务 · `1` 成就 · `2` 纯文本 · `3` 使用物品 |
