@@ -671,7 +671,8 @@ GET /achievement_conditions/{成就id}
 GET /feelings?offset=0&limit=100
 GET /synthesis
 GET /synthesis/{清单id}
-GET /synthesis_categories[?include_hidden=true]\nGET /synthesis_categories/{清单ID}
+GET /synthesis_categories[?include_hidden=true]
+GET /synthesis_categories/{清单ID}\nGET /synthesis_categories/{清单ID}
 GET /skills
 GET /skill_groups[?include_hidden=true]
 ```
