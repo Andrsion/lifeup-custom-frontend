@@ -57,22 +57,43 @@ async function load(){
   try{
     await getJSON(API.info);
     const coin=await getJSON(API.coin), sk=await getJSON(API.skills), tk=await getJSON(API.tasks);
-    const stats=document.getElementById("stats"); stats.innerHTML="";
+    // 接口返回的任务名/属性名一律使用 textContent，避免 HTML 注入。
+    const stats=document.getElementById("stats");
+    stats.replaceChildren();
     const cv=(coin.data&&(coin.data.value!==undefined?coin.data.value:coin.data))??"-";
-    stats.insertAdjacentHTML("beforeend",`<div class="stat"><div class="k">${UI.coin}</div><div class="v">${cv}</div></div>`);
-    (sk.data||[]).slice(0,6).forEach(s=>stats.insertAdjacentHTML("beforeend",
-      `<div class="stat"><div class="k">${s.name??"属性"}</div><div class="v">${s.level??"-"}</div></div>`));
-    const box=document.getElementById("tasks"); box.innerHTML="";
-    const list=(tk.data||[]).filter(t=>t.status===0);
-    if(!list.length) box.innerHTML='<p style="color:var(--sub)">全部完成 🎉</p>';
+    const coinCard=document.createElement("div"); coinCard.className="stat";
+    const coinLabel=document.createElement("div"); coinLabel.className="k"; coinLabel.textContent=UI.coin;
+    const coinValue=document.createElement("div"); coinValue.className="v"; coinValue.textContent=String(cv);
+    coinCard.append(coinLabel,coinValue); stats.appendChild(coinCard);
+    (Array.isArray(sk.data)?sk.data:[]).slice(0,6).forEach(s=>{
+      const card=document.createElement("div"); card.className="stat";
+      const label=document.createElement("div"); label.className="k"; label.textContent=String(s.name??"属性");
+      const value=document.createElement("div"); value.className="v"; value.textContent=String(s.level??"-");
+      card.append(label,value); stats.appendChild(card);
+    });
+    const box=document.getElementById("tasks"); box.replaceChildren();
+    const list=(Array.isArray(tk.data)?tk.data:[]).filter(t=>t&&t.status===0);
+    if(!list.length){ const empty=document.createElement("p"); empty.style.color="var(--sub)"; empty.textContent="全部完成 🎉"; box.appendChild(empty); }
     list.forEach(t=>{
       const key=t.gid??t.id;
       const el=document.createElement("div"); el.className="card";
-      el.innerHTML=`<span class="name">${t.name}<span class="freq">#${key}</span></span>`;
+      const name=document.createElement("span"); name.className="name"; name.textContent=String(t.name??"未命名任务");
+      const freq=document.createElement("span"); freq.className="freq"; freq.textContent="#"+String(key??"?");
+      name.appendChild(freq); el.appendChild(name);
       const b=document.createElement("button"); b.textContent=UI.done;
-      b.onclick=async()=>{ b.disabled=true;b.textContent="…";
-        try{ await getJSON(API.do+encodeURIComponent(`lifeup://api/complete?gid=${key}`)); b.textContent="✔"; setTimeout(load,600); }
-        catch(e){ b.disabled=false;b.textContent=UI.done; showErr("打卡失败："+e.message); } };
+      b.onclick=async()=>{
+        b.disabled=true; b.textContent="…";
+        try{
+          const result=await getJSON(API.do+encodeURIComponent("lifeup://api/complete?gid="+String(key)));
+          const operation=Array.isArray(result.data)?result.data:[];
+          const failed=operation.find(item=>item&&item.result&&item.result.api_result===false);
+          if(failed) throw new Error(failed.result.error_message||"官方接口返回业务失败");
+          b.textContent="✔"; setTimeout(load,600);
+        }catch(e){
+          b.disabled=false; b.textContent=UI.done;
+          showErr("完成结果未确认："+e.message+"。请刷新列表确认状态，不要连续重试。");
+        }
+      };
       el.appendChild(b); box.appendChild(el);
     });
     $err.style.display="none";
