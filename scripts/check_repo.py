@@ -64,7 +64,7 @@ def check_javascript() -> list[str]:
 
 def check_local_links() -> list[str]:
     errors: list[str] = []
-    markdown_files = [ROOT / "README.md", ROOT / "CONTRIBUTING.md", ROOT / "CHANGELOG.md"]
+    markdown_files = [ROOT / "README.md", ROOT / "llms.txt", ROOT / "CONTRIBUTING.md", ROOT / "CHANGELOG.md"]
     markdown_files += list((ROOT / "docs").rglob("*.md"))
     markdown_files += list((ROOT / "examples").rglob("*.md"))
     for source in markdown_files:
@@ -113,8 +113,21 @@ def check_llms_deterministic() -> list[str]:
         return ["llms-full.txt 缺少 README 主章节"]
     if content.find("<!-- ===== README (README.md) ===== -->") > content.find("<!-- ===== 实现方案 (docs/custom-ui-ai-mcp.md) ===== -->"):
         return ["llms-full.txt 的主文档排序不正确"]
+    if "## 文档目录（自动生成）" not in content:
+        return ["llms-full.txt 缺少自动生成的文档目录"]
+    if "- **API 速查表** — docs/api-cheatsheet.md" not in content:
+        return ["llms-full.txt 文档目录缺少 API 速查表"]
+    if "- **AI 施工标准** — docs/ai-build-standard.md" not in content:
+        return ["llms-full.txt 文档目录缺少 AI 施工标准"]
     if "<!-- ===== docs/specs/" in content:
         return ["llms-full.txt 不应收录 docs/specs/ 可选主题文档"]
+    llms_index = ROOT / "llms.txt"
+    if not llms_index.is_file():
+        return ["缺少 llms.txt AI 导航入口"]
+    index_text = llms_index.read_text(encoding="utf-8")
+    for required in ("按任务路由", "不臆造接口", "写操作不自动重试", "权威来源与分工", "llms-full.txt"):
+        if required not in index_text:
+            return [f"llms.txt 缺少关键导航规则：{required}"]
     return []
 
 
