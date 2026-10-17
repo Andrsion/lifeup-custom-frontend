@@ -18,14 +18,20 @@ start.bat / start.command
 2. 电脑：Node.js **20+**；与手机同一 Wi‑Fi。
 3. 复制 `config.example.json` 为 `config.json`，改 `host` 为 `IP:13276`。
 4. 双击 `start.bat` / `start.command`（或 `node proxy.js`）。
-5. 打开 **http://127.0.0.1:8787**，按 `F11` 全屏。\n6. 排错可运行 `node scripts/doctor.js examples/desktop-dashboard`（在仓库根目录执行）；它只读检查官方文档列出的 `/info`。
+5. 打开 **http://127.0.0.1:8787**，按 `F11` 全屏。
+6. 排错可运行 `node scripts/doctor.js examples/desktop-dashboard`（在仓库根目录执行）；它只读检查官方文档列出的 `/info`。
 
 ## 想更"游戏化"？
 
 - 把 `UI.coin` 改成你的货币叫法（铃钱 / 灵石 / 丁尼…），背景色改成主题色。
 - 需要整屏皮肤、立绘、进度条，就把 [实现方案](../../docs/custom-ui-ai-mcp.md) 丢给本地 AI 工具，让它在这份样板基础上改。
 
-## 安全说明\n\n- 本地代理默认只监听回环地址，不开放局域网访问；Token 保存在本地代理配置中。\n- 不要把真实的 `config.json` 提交到仓库。\n\n## 提醒
+## 安全说明
+
+- 本地代理默认只监听回环地址，不开放局域网访问；Token 保存在本地代理配置中。
+- 不要把真实的 `config.json` 提交到仓库。
+
+## 提醒
 
 - 桌面浏览器建议用 Chrome / Edge / Safari 最新版。
 - 大屏常驻时，可把 `load()` 的自动刷新间隔从 15000ms 调长一点，省电。
