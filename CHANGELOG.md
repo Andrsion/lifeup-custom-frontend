@@ -15,6 +15,8 @@
 - 校正 URL Scheme 方法名：番茄计时为 `pomodoro_timer`，领取成就奖励为 `complete_achievement`；区分通用 `reward` 与成就领奖。
 - 将 Token 认证错误与 JSON `code` 分开说明，并明确 HTTP 基础要求、特定字段版本要求及 MCP / Skills 版本要求不同。
 - 将官方 LifeUp-Wiki 纳入主要核对来源：区分 URL Scheme、Cloud HTTP、MCP 接入和当前 Skills 的资料职责；记录 Wiki MCP 页的 3.0.0+ 与当前 SDK Skill 的 3.0.1+ 差异，并明确 HTTP 文档提示滞后时需交叉核对服务端实现。
+- 重构 `llms.txt` 为 AI 任务路由入口，明确按任务读取路径、硬性安全规则和官方资料冲突处理；精简 README 的重复启动说明。
+- 为 `llms-full.txt` 生成自动文档目录，并扩展仓库检查，验证导航规则、核心章节、主题稿排除与生成稳定性。
 
 ## v19 · 2026-10-13
 
