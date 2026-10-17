@@ -79,7 +79,7 @@ def main() -> None:
         rel = path.relative_to(ROOT).as_posix()
         name = SECTION_NAMES.get(rel, rel)
         # Stable source paths remain useful even if display titles change.
-        parts.append(f"- **{name}** — \`{rel}\`\n")
+        parts.append(f"- **{name}** — {rel}\\n")
     parts.append("\n> 目录用于快速定位章节；各章节下方的源路径标记是稳定标识。\n\n")
 
     for path in sources:
