@@ -24,6 +24,7 @@
 ```
 我要做一个人升（LifeUp）的自定义界面。请先完整读取这份方案：
 https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp.md
+同时读取 AI 施工标准：https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/ai-build-standard.md
 读完直接按文档里的「快速上手」开始做，别再问我"你想做什么"。
 我的玩法体系：<主题 / 货币叫法 / 清单叫法；不填则读我的 MCP 数据>
 我要的页面：<任务 + 商店 + 金币属性栏>
