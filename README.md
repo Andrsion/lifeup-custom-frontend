@@ -27,8 +27,7 @@
 | 你的目标 | 从这里开始 |
 | --- | --- |
 | **我想直接运行示例** | 进入 [minimal-html](examples/minimal-html/README.md)（一个单页看板：顶部金币与属性、中间任务列表带「完成」按钮，跑起来就能点），按说明配置并启动；需要大屏时用 [desktop-dashboard](examples/desktop-dashboard/)。 |
-| **我想让 AI 帮我做（本地 Agent）** | 用能在本机读写文件、执行命令的 AI 工具（Cursor / Trae / Claude Code / WorkBuddy 等）。先读 [llms.txt](llms.txt)，再按任务读 [实现方案](docs/custom-ui-ai-mcp.md) 与 [AI 施工标准](docs/ai-build-standard.md)；群机器人示例见 [group-bot](examples/group-bot/)。 |
-| **我只有网页版 AI**（豆包 / Kimi / DeepSeek 网页） | **仍然必须有电脑**（Windows / macOS），只有手机不行。网页版 AI 连不到你家局域网，也跑不了本地程序，因此做不了自动搭建；但你可以不用 AI，改为在电脑上进入 [minimal-html](examples/minimal-html/README.md)，按说明填写手机 IP 并双击启动。想改风格则需自己动手或找人帮忙。（**仍需人升会员**） |
+| **我想让 AI 帮我做** | **推荐使用本地 Agent**：例如 Cursor / Trae / Claude Code / WorkBuddy。它们可以调用大模型，并在授权范围内读写本地文件、执行命令，适合自动搭建和修改项目。先读 [llms.txt](llms.txt)，再按任务阅读 [实现方案](docs/custom-ui-ai-mcp.md) 与 [AI 施工标准](docs/ai-build-standard.md)；群机器人示例见 [group-bot](examples/group-bot/)。<br><br>**目前只用网页版 AI（豆包 / Kimi / DeepSeek）？** 网页版 AI 本身无法直接操作你电脑上的项目或运行本地程序，因此仍需要 Windows / macOS 电脑和本地执行工具。如果不想使用 Agent，也可以进入 [minimal-html](examples/minimal-html/README.md)，按说明填写手机 IP 并双击启动；修改风格需自行操作或找人帮忙。<br><br>**前提**：仍需满足人升会员及接口调用条件。 |
 | **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端；需要了解 Skills 时看 [MCP 与 Skills 指南](docs/mcp-skills.md)，不需要自己开发界面。 |
 | **我遇到问题了** | 先运行下面的只读诊断，再查 [排错指南](docs/troubleshooting.md)；接口细节见 [API 速查表](docs/api-cheatsheet.md)。 |
 
