@@ -2,7 +2,9 @@
 
 > ⚠️ 本表仅供**速查 / 防臆造**。**一切以官方文档为准**：<https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>
 >
-> 本表按官方文档整理，核对日期：2026-10-17。官方 Wiki 明确提示部分接口定义可能滞后；如有冲突，请按官方文档指向的 [LifeUp-SDK 服务端源码](https://github.com/Ayagikei/LifeUp-SDK) 核对。\n>\n> 前置条件、权限和版本要求请按 [官方云人升 HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md) 当前内容确认，不要把本表中的版本描述当作高于官方的要求。地址形如 `http://<手机IP>:13276`（局域网）。
+> 本表按官方文档整理，核对日期：2026-10-17。官方 Wiki 明确提示部分接口定义可能滞后；如有冲突，请按官方文档指向的 [LifeUp-SDK 服务端源码](https://github.com/Ayagikei/LifeUp-SDK) 核对。
+>
+> 前置条件、权限和版本要求请按 [官方云人升 HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md) 当前内容确认，不要把本表中的版本描述当作高于官方的要求。地址形如 `http://<手机IP>:13276`（局域网）。
 
 ## 0. 基础
 
