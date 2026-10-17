@@ -155,14 +155,6 @@ async function load(){
       box.appendChild(el);
     });
   }catch(e){
-          btn.disabled = false; btn.textContent = UI.done;
-          showErr("完成失败：" + e.message + "\n（写操作不幂等，请勿反复重试）");
-        }
-      };
-      el.appendChild(btn);
-      box.appendChild(el);
-    });
-  }catch(e){
     showErr(e.message + "\n（先确认手机与电脑同一 Wi‑Fi，且 config.json 里的 IP 正确）");
   }
 }
