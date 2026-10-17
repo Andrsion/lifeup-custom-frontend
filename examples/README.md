@@ -14,7 +14,17 @@
 - 电脑：**Node.js 20+**；与手机**同一 Wi‑Fi**
 - 每个示例都是「**改 config.json → 双击启动 → 打开浏览器**」
 
-## 首次运行诊断\n\n在仓库根目录执行：\n\n\`\`\`bash\nnode scripts/doctor.js examples/minimal-html\n\`\`\`\n\n工具只检查配置并调用官方文档列出的只读 `GET /info`，不会完成任务、发奖励或购买商品。接口行为以官方文档为准。\n\n## 三层架构（看板示例）
+## 首次运行诊断
+
+在仓库根目录执行：
+
+```bash
+node scripts/doctor.js examples/minimal-html
+```
+
+工具只检查配置并调用官方文档列出的只读 `GET /info`，不会完成任务、发奖励或购买商品。接口行为以官方文档为准。
+
+## 三层架构（看板示例）
 
 ```
 你的前端（任意皮肤）
