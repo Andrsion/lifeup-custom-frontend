@@ -14,7 +14,7 @@ start.bat / start.command
 
 和 [minimal-html](../minimal-html/) 完全一样：
 
-1. 手机：人升 **v1.106.0+** ＋ 云人升 **3.0.0+**，开「读取人升数据」。
+1. 手机：按官方云人升 HTTP 文档准备人升 v1.91+ 与最新版云人升，并开「读取人升数据」；特定字段 / 功能可能需要更高版本，先请求 `/info` 并核对官方文档。
 2. 电脑：Node.js **20+**；与手机同一 Wi‑Fi。
 3. 复制 `config.example.json` 为 `config.json`，改 `host` 为 `IP:13276`。
 4. 双击 `start.bat` / `start.command`（或 `node proxy.js`）。
