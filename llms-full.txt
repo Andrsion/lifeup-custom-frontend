@@ -81,6 +81,9 @@ https://gitee.com/Andrsion/lifeup-custom-frontend/raw/main/docs/custom-ui-ai-mcp
 | **[排错 · 常见坑](docs/troubleshooting.md)** | 连不上 / `10001` / `401` / CORS / 写操作不幂等 / 用不了的云平台 |
 | **[从书到人升](docs/books-to-lifeup.md)** | **16 本书**的方法论 → 一张「在人升上的用法」表（怎么设计自己的体系） |
 | **[世界观 / 主题参考](docs/samples.md)** | 可借用的世界观与主题（大众 IP / 社区体系 / 同类产品）+ **9 个**「换名对照表」案例 |
+| **[主题施工稿 · 星露谷农场](docs/specs/stardew-farm.md)** | 界面规格 + 可粘贴提示词：赛季制 · 长线投资 · 延迟满足 |
+| **[主题施工稿 · 原神](docs/specs/genshin.md)** | 界面规格 + 可粘贴提示词：分层货币 · 保底抽卡 · 体力控节奏 |
+| **[主题施工稿 · 崩坏：星穹铁道](docs/specs/star-rail.md)** | 界面规格 + 可粘贴提示词：活跃度制 · 保底跨期继承 · 反焦虑 |
 | **[地球 Online 梗词表](docs/earth-online-glossary.md)** | 用游戏术语解构人生的公共梗词速查 + 可直接用的文案模板 |
 
 ## 权威文档（一切以官方为准）

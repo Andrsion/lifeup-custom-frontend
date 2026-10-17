@@ -15,6 +15,13 @@
 - [从书到人升](docs/books-to-lifeup.md)：16 本书 → 任务设计
 - [地球 Online 梗词表](docs/earth-online-glossary.md)
 
+## 主题施工稿（specs）
+
+- [主题施工稿目录](docs/specs/)：一主题一份 —— 界面规格 + **可直接粘贴给 Agent 的提示词**
+- [🌾 星露谷农场](docs/specs/stardew-farm.md)：赛季 · 长线投资 · 延迟满足
+- [🏔️ 原神](docs/specs/genshin.md)：分层货币 · 保底抽卡 · 体力控节奏
+- [🚄 崩坏：星穹铁道](docs/specs/star-rail.md)：活跃度制 · 保底跨期继承 · 反焦虑
+
 ## 可运行示例
 
 - [examples/minimal-html](examples/minimal-html/)：单文件看板 + 本地代理
@@ -35,3 +42,4 @@
 - 浏览器**直连会被 CORS 拦** → 必须加一层**本地代理**。
 - 不要用「云端生成 + 云端托管」平台（秒哒 / Bolt.new / v0 / Lovable）—— 它们连不到用户的局域网。
 - 版本门槛：人升 **v1.106.0+** ＋ 云人升 **3.0.0+**。
+- 要按某个主题搭界面 → 先读 `docs/specs/` 里对应主题的施工稿（已含可粘贴提示词），再动手写代码。
