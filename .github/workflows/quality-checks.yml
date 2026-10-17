@@ -1,0 +1,37 @@
+name: quality-checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check Python syntax
+        run: python -m py_compile scripts/build_llms.py scripts/check_repo.py
+
+      - name: Check repository quality
+        run: python scripts/check_repo.py
+
+      - name: Check standalone bot entry point
+        run: node --check examples/group-bot/bot.js
