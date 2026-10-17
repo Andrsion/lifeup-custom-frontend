@@ -25,16 +25,31 @@ const [HOST, PORT = "13276"] = String(CFG.host || "").split(":");
 function request(method, urlPath, body) {
   return new Promise((resolve, reject) => {
     const headers = {};
-    if (CFG.tokenHeader && CFG.token) headers[CFG.tokenHeader] = CFG.token; // 原始 Token，不加 Bearer
-    if (body) { headers["Content-Type"] = "application/json"; headers["Content-Length"] = Buffer.byteLength(body); }
-    const req = http.request({ host: HOST, port: PORT, method, path: urlPath, headers }, (res) => {
+    if (CFG.tokenHeader && CFG.token) headers[CFG.tokenHeader] = CFG.token;
+    if (body) {
+      headers["Content-Type"] = "application/json";
+      headers["Content-Length"] = Buffer.byteLength(body);
+    }
+    const req = http.request({
+      host: HOST, port: PORT, method, path: urlPath, headers, timeout: 10000
+    }, (res) => {
       let data = "";
-      res.on("data", (c) => (data += c));
+      res.setEncoding("utf8");
+      res.on("data", (chunk) => {
+        data += chunk;
+        if (data.length > 1024 * 1024) req.destroy(new Error("响应超过 1 MiB"));
+      });
       res.on("end", () => {
-        let j; try { j = JSON.parse(data); } catch (e) { return reject(new Error("返回非 JSON：" + data.slice(0, 120))); }
+        if (res.statusCode < 200 || res.statusCode >= 300) {
+          return reject(new Error("HTTP 状态码 " + res.statusCode));
+        }
+        let j;
+        try { j = JSON.parse(data); }
+        catch { return reject(new Error("返回非 JSON：" + data.slice(0, 120))); }
         resolve(j);
       });
     });
+    req.on("timeout", () => req.destroy(new Error("请求超时；写操作结果可能未知，请勿自动重试")));
     req.on("error", reject);
     if (body) req.write(body);
     req.end();
@@ -62,11 +77,18 @@ async function handleMessage(user, text) {
   const name = m[1].trim();
   try {
     const j = await doApi(`lifeup://api/complete?name=${encodeURIComponent(name)}`);
-    const r = j.data && j.data[0] && j.data[0].result;
-    if (r && r.api_result === false) {
-      return `@${user} 打卡失败：${r.error_message || "任务不存在或参数不对"}`;
+    if (j.code !== 200) {
+      return `@${user} 打卡失败：${mapErr(j.code)}（${j.message || "接口请求失败"}）`;
     }
-    return `✅ @${user} 已完成「${name}」，金币已到账！`;
+    const results = Array.isArray(j.data) ? j.data : [];
+    const r = results[0] && results[0].result;
+    if (r && r.api_result === false) {
+      return `@${user} 打卡失败：${r.error_message || "官方接口返回业务失败"}`;
+    }
+    if (!r || r.api_result !== true) {
+      return `@${user} 请求已发送，但结果未确认。请先检查人升中的任务状态，不要重复打卡。`;
+    }
+    return `✅ @${user} 已完成「${name}」，官方接口已确认操作成功。`;
   } catch (e) {
     return `@${user} 打卡出错：${e.message}（检查手机是否在线、是否同一 Wi‑Fi）`;
   }
