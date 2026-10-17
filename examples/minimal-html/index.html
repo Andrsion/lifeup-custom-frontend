@@ -62,9 +62,10 @@ function friendly(code){
 }
 async function getJSON(url){
   const r = await fetch(url);
+  if (!r.ok) throw new Error("HTTP 状态码 " + r.status);
   const text = await r.text();
   let j; try { j = JSON.parse(text); } catch (e) { throw new Error("返回不是 JSON：" + text.slice(0,120)); }
-  if (j.code !== 200 && j.code !== undefined) throw new Error(friendly(j.code));
+  if (j.code !== 200) throw new Error(friendly(j.code));
   if (j.data && j.data[0] && j.data[0].result && j.data[0].result.api_result === false)
     throw new Error((j.data[0].result.error_message) || "操作被 App 拒绝（api_result=false）");
   return j;
@@ -135,10 +136,12 @@ async function load(){
         btn.disabled = true;
         btn.textContent = "…";
         try {
-          const result = await getJSON(API.do + encodeURIComponent("lifeup://api/complete?gid=" + encodeURIComponent(String(key))));
-          const operation = result.data && Array.isArray(result.data) ? result.data : [];
-          if (operation.some(item => item && item.result && item.result.api_result === false)) {
-            throw new Error(operation.find(item => item && item.result && item.result.api_result === false).result.error_message || "官方接口返回业务失败");
+          const result = await getJSON(API.do + encodeURIComponent("lifeup://api/complete?gid=" + String(key)));
+          const operation = Array.isArray(result.data) ? result.data : [];
+          const failed = operation.find(item => item && item.result && item.result.api_result === false);
+          if (failed) throw new Error(failed.result.error_message || "官方接口返回业务失败");
+          if (!operation.length || operation.some(item => !item || !item.result || item.result.api_result !== true)) {
+            throw new Error("官方响应未明确确认操作成功");
           }
           btn.textContent = "✔";
           setTimeout(load, 600);
