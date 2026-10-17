@@ -8,6 +8,11 @@ on:
       - 'docs/**'
       - 'scripts/build_llms.py'
       - '.github/workflows/build-llms-full.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: build-llms-full-main
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -17,18 +22,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-      - name: Rebuild llms-full.txt
-        run: python3 scripts/build_llms.py
-
-      - name: Commit if changed
+      - name: Rebuild and commit latest llms-full.txt
         run: |
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet -- llms-full.txt; then
-            echo "no change"
-            exit 0
-          fi
-          git add llms-full.txt
-          git commit -m "chore: 自动重建 llms-full.txt [skip ci]"
-          git push
+
+          # Retry against the newest main if another commit lands while this job runs.
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            python3 scripts/build_llms.py
+
+            if git diff --quiet -- llms-full.txt; then
+              echo "llms-full.txt is already up to date"
+              exit 0
+            fi
+
+            git add llms-full.txt
+            git commit -m "chore: 自动重建 llms-full.txt [skip ci]"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Push failed (attempt $attempt); retrying against latest main..."
+            sleep 2
+          done
+
+          echo "Unable to update llms-full.txt after 3 attempts."
+          exit 1
