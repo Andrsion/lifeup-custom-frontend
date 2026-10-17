@@ -1,6 +1,6 @@
 # LifeUp MCP 安装与使用指南
 
-> 本文帮助你将支持 MCP 的 AI 客户端连接到手机上的云人升。客户端界面和官方步骤如有变化，以[官方 MCP & Skills 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md)为准。
+> 本文帮助你将支持 MCP 的 AI 客户端连接到手机上的云人升。客户端界面和官方步骤如有变化，以[官方 MCP & Skills 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md)为准。需要了解 Skill 是否要单独安装、客户端差异和进阶工作流，参阅[LifeUp MCP 与 Skills 指南](mcp-skills.md)。
 
 ## 快速使用
 
@@ -99,7 +99,11 @@ npm 源访问不稳定时，可按客户端命令参数格式在 `args` 中加�
 
 不同客户端对工具的呈现方式不同。若找不到上述工具名，让 AI 列出实际可用的 LifeUp 工具，不要假设每个客户端界面相同。
 
-## 5. 安装后怎么用？
+## 5. MCP 工具与 Skills 怎么配合？
+
+MCP 提供可调用的工具；Skill 提供 Agent 的任务说明和操作流程。官方 `@lifeup/mcp` 已将 `lifeup-cloud` 指引随包提供，通常不需要单独安装 Skill 包。Cursor、Claude Desktop 等客户端可先通过 MCP 的 `help` 读取内置指引；Claude Code、Pi 或自定义 Agent 若支持独立 Skill 目录，可按需引用官方 `mcp/skills/lifeup-cloud/`。各客户端的区别、工具调用流程、事件能力和安全要点见[LifeUp MCP 与 Skills 指南](mcp-skills.md)。
+
+## 6. 安装后怎么用？
 
 连接成功后，可以直接用自然语言描述目标。以下是提问范例；涉及写入的任务应先确认对象和执行计划。
 
@@ -121,7 +125,7 @@ npm 源访问不稳定时，可按客户端命令参数格式在 `args` 中加�
 
 建议先从只读查询开始。确认数据、连接和字段无误后，再尝试写操作。
 
-## 6. 安全边界
+## 7. 安全边界
 
 - **先读后写**：先读取实际数据并确认目标对象，避免操作到名称相似的任务。
 - **写操作要明确**：完成任务、购买、奖励、删除或批量修改前，应明确目标；影响较大的操作先展示计划并等待确认。
@@ -130,7 +134,7 @@ npm 源访问不稳定时，可按客户端命令参数格式在 `args` 中加�
 - **保护 Token**：不要将 Token 放进公开仓库、URL、前端代码、日志或截图。
 - **核对业务结果**：重要操作后在 MCP 返回结果或人升 App 中检查实际状态。工具不可用或结果不明确时，不要声称成功。
 
-## 7. 常见问题
+## 8. 常见问题
 
 | 现象 | 排查方向 |
 | --- | --- |
@@ -141,7 +145,7 @@ npm 源访问不稳定时，可按客户端命令参数格式在 `args` 中加�
 | 已连接但读不到数据 | 确认人升正在运行，并已向云人升授权读取数据；检查工具返回的实际错误。 |
 | 部分工具或字段不可用 | 核对人升、云人升版本，并以对应的官方 MCP、Skills 与 Cloud HTTP 文档为准。 |
 
-## 8. 官方资料
+## 9. 官方资料
 
 - [官方 MCP & Skills 指南](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md) — 安装、配置、Agent 流程与 Skills。
 - [官方云人升 HTTP API](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md) — HTTP 路由、参数、权限和响应。
