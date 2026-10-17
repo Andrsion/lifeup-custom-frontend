@@ -36,7 +36,7 @@
 
 **怎么确认自己属于哪个渠道**：
 
-1. **先看有没有为应用本身付过费** —— Google Play 版是付费应用（持有效期内的 Play Pass 可免费获取）。没付过费，基本就是国内商店版或试用版；其他地区可通过 GitHub Releases 获取免费试用版。
+1. **先看有没有为应用本身付过费** —— Google Play 版是付费应用（持有效期内的 Play Pass 可免费获取）。没付过费，基本就是国内商店版或试用版；其他地区可通过 [LifeUp 官方 GitHub Releases](https://github.com/Ayagikei/LifeUp/releases) 获取免费试用版（官方发布页标注 7 天试用）。
 2. **再打开 App 的「关于」页面，看有没有「应用内更新」入口**：有 → 国内商店版；没有 → Google Play 版。
 3. 辅助判断：「关于」页里有没有「会员说明」入口（国内有、Google Play 版没有）。
 
