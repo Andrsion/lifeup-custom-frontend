@@ -15,7 +15,8 @@
 
 - 一台**电脑**（Windows / macOS）
 - 手机与电脑连**同一个 Wi-Fi**
-- 能装 **Node.js 20+**（去 [nodejs.org](https://nodejs.org/) 下 LTS；官网慢就用国内镜像，见[排错指南](docs/troubleshooting.md)「装 Node / 下依赖很慢」）
+- **Node.js 20+**（去 [nodejs.org](https://nodejs.org/) 下 LTS 版本；
+  官网慢就用国内镜像，见[排错指南](docs/troubleshooting.md)「装 Node / 下依赖很慢」）
 - 手机上是**人升 + 云人升**，并开启「读取人升数据」
 - **人升会员**（调用接口属于会员能力；云人升本身免费）—— 详见 [会员与接口门槛](docs/membership.md)
 
