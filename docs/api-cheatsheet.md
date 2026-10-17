@@ -1,10 +1,12 @@
 # 云人升 HTTP 接口 · 速查表
 
-> ⚠️ 本表仅供**速查 / 防臆造**。HTTP 路径与响应以 [官方云人升文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md) 为准；`lifeup://api/...` 方法名和参数以 [人升官方 API 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api.md) 为准。
+> ⚠️ 本表仅供**速查 / 防臆造**，并以官方资料交叉核对：HTTP 路由、权限与基础版本要求以 [官方云人升 HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md) 为入口；`lifeup://api/...` 方法名与参数以 [官方 URL Scheme / API 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api.md) 为准。
 >
-> 本次核对日期：2026-10-17。官方 Wiki 明确提示部分接口定义可能滞后；如有冲突，请核对其指向的 [LifeUp-SDK 服务端源码](https://github.com/Ayagikei/LifeUp-SDK/blob/main/http/src/main/java/net/lifeupapp/lifeup/http/service/KtorService.kt)。本次核对的 SDK 提交：`ab130079d7d44d1694f96481fa732148860d0b39`。
+> **来源分工与冲突处理**：官方 Wiki 是首要文档依据；`api_cloud.md` 提示部分接口定义可能滞后，因此仅在 HTTP 路由、参数或响应与文档不一致时，再核对它指向的 [官方 SDK HTTP 服务端实现](https://github.com/Ayagikei/LifeUp-SDK/blob/main/http/src/main/java/net/lifeupapp/lifeup/http/service/KtorService.kt)。MCP 安装与客户端接入看 [官方 MCP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md)；当前 Skills 的具体能力和版本要求看 [官方 `lifeup-cloud` Skill](https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud)。不同资料有冲突时，应明确标注冲突，不要把 MCP / Skills 的门槛套用到全部 HTTP 接口。
 >
-> 前置条件、权限和版本要求请按 [官方云人升 HTTP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md) 当前内容确认，不要把本表中的版本描述当作高于官方的要求。地址形如 `http://<手机IP>:13276`（局域网）。
+> 本次核对日期：2026-10-17。所核对的 SDK HTTP 服务端提交：`ab130079d7d44d1694f96481fa732148860d0b39`。地址形如 `http://<手机IP>:13276`（局域网）。
+>
+> 基础 HTTP 查询的前置条件、权限和版本要求按官方云人升 HTTP 文档确认；特定字段 / 功能另有门槛。MCP / Skills 版本要求与基础 HTTP 不同，见下方版本说明。
 
 ## 0. 基础
 
@@ -103,7 +105,7 @@ POST /files/upload
 - `/events`：当前 SDK 默认 `after=0`、`limit=50`；事件数据是否产生取决于人升「广播事件」设置，WebSocket 推送另受云人升开关控制。
 - 不要擅自给 `/tasks`、`/items`、`/skills` 等接口加分页参数；以各接口官方定义为准。
 - 官方云人升文档标注部分接口定义可能滞后；本表的默认值以核对时的官方 SDK `KtorService.kt` 为准，旧版云人升可能不同。
-- 版本：官方 HTTP 文档的基础要求为人升 v1.91+ 与最新版云人升；`weekdays` 字段标注人升 v1.106.0+，技能 ContentProvider 查询标注 v1.103.0+。MCP / Skills 的版本门槛属于另一套能力：官方 SDK 当前 `lifeup-cloud` Skill 要求人升 v1.106.0+、云人升 3.0.1+，不要把它当成所有 HTTP 路由的统一最低版本。使用前通过 `/info` 核对当前版本。
+- 版本：基础 HTTP 查询的官方文档要求为人升 v1.91+ 与最新版云人升；`weekdays` 字段标注人升 v1.106.0+，技能 ContentProvider 查询标注 v1.103.0+。MCP / Skills 是另一套能力：官方 Wiki 的 [MCP 文档](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md)目前写云人升 3.0.0+，而当前官方 SDK 的 `lifeup-cloud` Skill 要求人升 v1.106.0+、云人升 3.0.1+；如需当前完整 Skills 工作流，按更具体的 Skill 要求使用 3.0.1+，不要把它当成所有 HTTP 路由的统一最低版本。使用前可通过 `/info` 核对当前版本。
 
 ## 3. 写（调用 `lifeup://api/…`）
 
