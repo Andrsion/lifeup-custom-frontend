@@ -95,7 +95,7 @@ def main() -> None:
         parts.append(f"<!-- ===== {name} ({rel}) ===== -->\n\n{body}\n\n")
 
     body = "".join(parts)
-    stats = f"{len(body)} 字符 · {len(sources)} 篇（正文口径）"
+    stats = f"{len(body)} 字符 · {len(sources)} 篇"
     output = (HEADER_TEMPLATE.format(stats=stats) + body).rstrip() + "\n"
     out = ROOT / "llms-full.txt"
     out.write_text(output, encoding="utf-8")
