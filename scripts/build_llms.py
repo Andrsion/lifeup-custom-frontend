@@ -33,6 +33,7 @@ SECTION_NAMES = {
     "docs/ai-build-standard.md": "AI 施工标准",
     "docs/mcp-quickstart.md": "MCP 安装与使用指南",
     "docs/theme-spec-template.md": "主题规格模板",
+    "docs/membership.md": "会员与接口门槛",
 }
 
 HEADER_TEMPLATE = """# 自定义人升 · 核心文档（llms-full.txt）
