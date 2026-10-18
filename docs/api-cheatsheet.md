@@ -129,12 +129,12 @@ POST http://{host}:{port}/api
 ```
 
 > ⚠️ **写操作不幂等**：`complete` / `give_up` / `reward` 等超时后**不要自动重试**。
-> ⚠️ `/api/contentprovider` 的顶层 `code=200` 不应单独作为操作成功依据。按官方响应契约检查 `data[].result.api_result`：
-
-```json
-{"code":200,"message":"success","data":[{"url":"lifeup://api/item?id=1","result":{"api_result":true}}]}
-```
-
+> ⚠️ `/api/contentprovider` 的顶层 `code=200` 只表示请求处理层成功，业务结果必须按具体方法的响应契约判断，不能统一要求 `api_result=true`。
+>
+> - **void 方法**（如 `complete`、`reward`、`toast`）可能返回空对象；缺少 `api_result` 不等于失败，只有明确的 `api_result=false` 才能按该字段判定失败。
+> - **`purchase_item` / `synthesize`**：检查 `data[].result` 中该方法定义的状态码，不要用 `api_result` 替代。
+> - **`pomodoro_timer`**：该方法明确提供 `api_result`，可按该字段判断。
+>
 **常用 `lifeup://api/…` 方法**（完整见官方 [API 列表](https://wiki.lifeupapp.fun/zh-cn/guide/api.md)）：
 
 | 动作 | 方法 |

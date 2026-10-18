@@ -62,7 +62,7 @@ function friendly(code){
 }
 async function getJSON(url){
   const r = await fetch(url);
-  if (!r.ok) throw new Error("HTTP 状态码 " + r.status);
+  if (!r.ok) throw new Error(r.status === 401 ? friendly(401) : "HTTP 状态码 " + r.status);
   const text = await r.text();
   let j; try { j = JSON.parse(text); } catch (e) { throw new Error("返回不是 JSON：" + text.slice(0,120)); }
   if (j.code !== 200) throw new Error(friendly(j.code));
@@ -140,9 +140,6 @@ async function load(){
           const operation = Array.isArray(result.data) ? result.data : [];
           const failed = operation.find(item => item && item.result && item.result.api_result === false);
           if (failed) throw new Error(failed.result.error_message || "官方接口返回业务失败");
-          if (!operation.length || operation.some(item => !item || !item.result || item.result.api_result !== true)) {
-            throw new Error("官方响应未明确确认操作成功");
-          }
           btn.textContent = "✔";
           setTimeout(load, 600);
         } catch (e) {

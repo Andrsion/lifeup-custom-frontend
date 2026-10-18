@@ -27,7 +27,7 @@
 
 | 项 | 规则 |
 |---|---|
-| 读 | `GET http://<手机IP>:13276/{tasks,items,coin,skills,task_categories,info,...}` → `{code,message,data}`；默认 compact + `limit=20` + `offset` 分页 |
+| 读 | `GET http://<手机IP>:13276/{tasks,items,coin,skills,tasks_categories,info,...}` → `{code,message,data}`；`/tasks`、`/items`、`/skills` 等普通列表接口不分页；`/history`、`/feelings` 与 `*_records` 使用 `offset` / `limit`（默认 0 / 100） |
 | 写 | `POST http://<手机IP>:13276/api/contentprovider`，body `{"url":"lifeup://api/complete?id=<任务ID>"}` → `{result}` |
 | **写不幂等** | **超时不要自动重试**；「盖章 / 祈愿」按钮**点击后立即禁用**（或先确认），防双击重复完成、重复发奖 |
 | Token | 云人升设了 Token 就用 **raw 头**（**不是** `Bearer`） |
@@ -94,7 +94,7 @@
 
 【背景】
 人升（LifeUp）是安卓上的游戏化任务管理 App，配套的「云人升」在手机上开了 HTTP 服务（局域网，默认端口 13276），提供两类接口：
-① 读：GET http://<手机IP>:13276/tasks、/items、/coin、/skills、/task_categories、/info —— 返回 { code, message, data }，data 是列表，支持 offset / limit 分页；
+① 读：GET http://<手机IP>:13276/tasks、/items、/coin、/skills、/tasks_categories、/info —— 返回 { code, message, data }；普通列表接口不分页；`/history`、`/feelings` 与 `*_records` 使用 offset / limit（默认 0 / 100）；
 ② 写：POST http://<手机IP>:13276/api/contentprovider，请求体 { "url": "lifeup://api/complete?id=<任务ID>" } —— 返回 { result }。
 接口依据（重要）：以上只是常用示例，完整接口以官方文档为准 → https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md 。写代码前先核对方法名与参数，不要臆造。
 

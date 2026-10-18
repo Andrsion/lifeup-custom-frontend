@@ -52,7 +52,7 @@ def check_javascript() -> list[str]:
         content = html.read_text(encoding="utf-8")
         if "innerHTML" in content or "insertAdjacentHTML" in content:
             errors.append(f"{html.relative_to(ROOT)}: 动态数据渲染不得使用 innerHTML / insertAdjacentHTML")
-        if not re.search(r"api_result\s*!==\s*true", content):
+        if not re.search(r"api_result\s*===\s*false", content):
             errors.append(f"{html.relative_to(ROOT)}: 写操作必须明确检查官方业务结果")
         scripts = re.findall(r"<script(?:\s[^>]*)?>(.*?)</script\s*>", content, re.I | re.S)
         for index, script in enumerate(scripts):

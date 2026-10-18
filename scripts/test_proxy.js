@@ -14,6 +14,9 @@ const { spawn } = require("node:child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 const proxySource = path.join(ROOT, "examples/minimal-html/proxy.js");
+const NODE_BIN = process.env.NODE_BIN || (
+  path.basename(process.execPath).toLowerCase() === "linker64" ? "node" : process.execPath
+);
 
 function freePort() {
   return new Promise((resolve, reject) => {
@@ -92,7 +95,7 @@ async function waitForProxy(port, child) {
     }));
     fs.writeFileSync(path.join(temp, "index.html"), "proxy-test-page");
 
-    child = spawn(process.execPath, [path.join(temp, "proxy.js")], {
+    child = spawn(NODE_BIN, [path.join(temp, "proxy.js")], {
       cwd: temp,
       stdio: ["ignore", "ignore", "pipe"]
     });

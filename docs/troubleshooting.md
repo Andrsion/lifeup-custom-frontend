@@ -12,9 +12,9 @@
 
 ## Token 认证失败
 
-- 若云人升设了访问 Token：按云人升当前配置 / 官方实现要求发送认证信息；不要自行假设请求头名称或认证格式。
-- 本方案的代理支持配置请求头名称；仅在云人升实际启用 Token 时配置。不要将 Token 放在前端页面、公开仓库或日志中。
-- 先确认 Token 值与云人升设置一致，并分别检查 HTTP 状态码与 JSON 响应体中的 `code`。认证失败的具体状态以当前官方实现为准。
+- 云人升启用了 Token 时，请在配置中使用 `"tokenHeader": "Authorization"`，并将原始 Token 值填入 `"token"`；不要添加 `Bearer ` 前缀。
+- Token 不匹配时，官方服务返回 HTTP `401`，响应提示为 `Invalid API token`。这属于 HTTP 认证层，不是 JSON 业务 `code`。
+- 先确认 Token 与云人升设置逐字一致；未启用 Token 时保持 `"token": ""`。不要将 Token 放在前端页面、URL、公开仓库或日志中。
 
 ## 浏览器直连被 CORS 拦
 

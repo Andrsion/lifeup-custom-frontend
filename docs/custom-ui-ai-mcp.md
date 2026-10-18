@@ -180,9 +180,12 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 * 默认 `POST /api/contentprovider`，JSON body 使用官方定义的 `urls` 数组（例如 `{ "urls": ["lifeup://api/..."] }`）；具体方法与参数必须按官方文档核对。
 * 需要 UI（页面跳转 / 确认弹窗 / 番茄钟启动）才考虑 `POST /api`（start-activity 机制；部分设备可能限制后台弹界面）。具体返回行为按官方文档 / 当前 SDK 确认
 * 常用方法：`complete` / `give_up` / `purchase_item` / `use_item` / `synthesize` / `add_task` / `reward` / `loot_box` / `complete_achievement`；领取成就奖励使用 `complete_achievement`，通用发放奖励使用 `reward`
-* 批量：`call_api_batch`（≤20 个方法，顺序保持；批内后续调用看不到前面结果）
+* 批量（MCP 工具）：`call_api_batch`（≤20 个方法，顺序保持；批内后续调用看不到前面结果）。这是 MCP 工具名，HTTP 侧没有独立的 `call_api_batch` 路由；HTTP 写请求仍使用官方定义的 `/api/contentprovider`。
 * ⚠️ **写操作不幂等**（complete / skip / reward）：超时**不要自动重试**
-* 检查返回：顶层 `code=200` 只代表云人升请求处理层返回成功，不等于游戏内操作成功；按官方响应检查 `data[].result.api_result`。
+* 检查返回：顶层 `code=200` 只代表云人升请求处理层返回成功，按方法的响应契约判断业务结果：
+  * void 方法（如 `complete`、`reward`、`toast`）可能返回空对象；缺少 `api_result` 不等于失败，只有明确的 `api_result=false` 才能按该字段判失败。
+  * `purchase_item` / `synthesize` 应检查 `data[].result` 中的方法状态码。
+  * `pomodoro_timer` 明确提供 `api_result`，可按该字段判断。
 
 ### AI：两条接法
 

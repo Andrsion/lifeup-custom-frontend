@@ -47,7 +47,7 @@ const $err = document.getElementById("err");
 function showErr(m){ $err.style.display="block"; $err.textContent=m; }
 function fmt(code){ return {10001:"云人升：人升没运行 / 未授「读取数据」。",10002:"读取失败（权限 / 版本）。",401:"Token 不对。"}[code] || ("错误码 "+code); }
 async function getJSON(u){
-  const r = await fetch(u); if(!r.ok) throw new Error("HTTP 状态码 "+r.status); const t = await r.text(); let j;
+  const r = await fetch(u); if(!r.ok) throw new Error(r.status===401?fmt(401):"HTTP 状态码 "+r.status); const t = await r.text(); let j;
   try{ j = JSON.parse(t); }catch(e){ throw new Error("返回非 JSON："+t.slice(0,100)); }
   if(j.code!==200) throw new Error(fmt(j.code));
   if(j.data && j.data[0] && j.data[0].result && j.data[0].result.api_result===false) throw new Error(j.data[0].result.error_message||"被 App 拒绝");
@@ -88,7 +88,6 @@ async function load(){
           const operation=Array.isArray(result.data)?result.data:[];
           const failed=operation.find(item=>item&&item.result&&item.result.api_result===false);
           if(failed) throw new Error(failed.result.error_message||"官方接口返回业务失败");
-          if(!operation.length||operation.some(item=>!item||!item.result||item.result.api_result!==true)) throw new Error("官方响应未明确确认操作成功");
           b.textContent="✔"; setTimeout(load,600);
         }catch(e){
           // 写请求可能已送达；保持禁用，要求先刷新状态，避免立即重复执行。

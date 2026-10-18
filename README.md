@@ -32,7 +32,7 @@
 | **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端；需要了解 Skills 时看 [MCP 与 Skills 指南](docs/mcp-skills.md)，不需要自己开发界面。 |
 | **我遇到问题了** | 先运行下面的只读诊断，再查 [排错指南](docs/troubleshooting.md)；接口细节见 [API 速查表](docs/api-cheatsheet.md)。 |
 
-## 文档怎么读
+如果你更想使用现成的桌面端应用，而不是自己制作网页界面，也可以了解官方的 [LifeUp-Desktop](https://github.com/Ayagikei/LifeUp-Desktop)；它与本仓库的自定义网页方案是不同路线。\n\n## 文档怎么读
 
 | 难度 | 从这几篇开始 |
 | --- | --- |
@@ -47,7 +47,7 @@
 2. **确认网络**：手机与电脑通常需要在同一局域网；确认云人升显示的 IP 和端口，默认端口为 `13276`。
 3. **确认运行环境**：本地示例需要 Node.js 20+；没装的话先去 [nodejs.org](https://nodejs.org/) 安装 LTS；AI 工具与 Agent 的要求见上面「先选一条路」。
 4. **把仓库弄到电脑上**：在 GitHub 仓库页面点绿色 **Code** → **Download ZIP** → 解压到任意文件夹（记下路径，后面所有命令都在这个文件夹里跑）。
-5. **准备本地配置**：进入要运行的示例目录，将 `config.example.json` 复制为 `config.json`，按示例说明填写云人升地址。`host` 就填云人升首页显示的 `IP:13276`（形如 `192.168.1.23:13276`，`config.example.json` 里就是示例样子）。填错也不用怕：格式不对或端口写错，双击 `start.bat` 时会直接用 `✖` 告诉你哪不对，不会静默失败。不要提交真实配置或 Token.
+5. **准备本地配置**：进入要运行的示例目录，将 `config.example.json` 复制为 `config.json`，按示例说明填写云人升地址。`host` 就填云人升首页显示的 `IP:13276`（形如 `192.168.1.23:13276`，`config.example.json` 里就是示例样子）。填错也不用怕：格式不对或端口写错，双击 `start.bat` 时会直接用 `✖` 告诉你哪不对，不会静默失败。若云人升启用了 Token，`tokenHeader` 保持为 `Authorization`，`token` 填原始 Token 值（不要加 `Bearer ` 前缀）；Token 不匹配时会返回 HTTP `401`（`Invalid API token`）。不要提交真实配置或 Token.
 6. **（可选）先做一次只读诊断**：想确认能不能连上手机再往下走，就用它；**不想碰命令行可以整条跳过**，直接双击 `start.bat` 也能启动，连不上再回来。要跑的话最省事的是双击 `examples/minimal-html/check.bat`（Windows）或 `check.command`（macOS），它会自己找到目录并检查。看到 `✓ 只读检查通过` 就是成功；看到 `✖` 说明没过，按提示改。也可以手动在终端里运行：
 
    ```bash

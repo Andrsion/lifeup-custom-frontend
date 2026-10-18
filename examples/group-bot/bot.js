@@ -4,8 +4,8 @@
  * 这是个「平台无关」的核心：真正的机器人框架（QQ / 微信 / Telegram / Discord…）
  * 只需要在收到消息时调用本文件的 handleMessage(user, text) 即可。
  *
- * 它默认用「按任务名完成」：lifeup://api/complete?name=任务名
- * —— 所以先在《人升》里建好同名任务；群友发「打卡 喝水」就会完成「喝水」。
+ * 它先精确匹配唯一的未完成任务，再按任务 id（缺少 id 时才尝试 gid）调用完成接口。
+ * —— 群友发「打卡 喝水」时，只会处理名称完全一致且唯一的「喝水」任务。
  *
  * ⚠️ 写操作不幂等，别对同一条消息重复调用（自己去重）。
  * ⚠️ 接口以官方为准：https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md
@@ -96,10 +96,11 @@ async function handleMessage(user, text) {
     if (r && r.api_result === false) {
       return `@${user} 打卡失败：${r.error_message || "官方接口返回业务失败"}`;
     }
-    if (!r || r.api_result !== true) {
-      return `@${user} 请求已发送，但结果未确认。请先检查人升中的任务状态，不要重复打卡。`;
+    if (r && r.api_result === true) {
+      return `✅ @${user} 已完成「${name}」，官方接口已确认操作成功。`;
     }
-    return `✅ @${user} 已完成「${name}」，官方接口已确认操作成功。`;
+    // void 方法可能不返回 api_result；没有显式失败回执时，不将其判为失败。
+    return `@${user} 已发送「${name}」的完成请求；接口未返回明确业务回执，请核对任务状态，不要重复打卡。`;
   } catch (e) {
     return `@${user} 打卡出错：${e.message}（检查手机是否在线、是否同一 Wi‑Fi）`;
   }
