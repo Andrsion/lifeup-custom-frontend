@@ -99,8 +99,23 @@ async function handleMessage(user, text) {
     if (r && r.api_result === true) {
       return `✅ @${user} 已完成「${name}」，官方接口已确认操作成功。`;
     }
-    // void 方法可能不返回 api_result；没有显式失败回执时，不将其判为失败。
-    return `@${user} 已发送「${name}」的完成请求；接口未返回明确业务回执，请核对任务状态，不要重复打卡。`;
+    // void 方法可能不返回 api_result；没有显式失败回执时，重新读取任务列表做只读确认。
+    try {
+      const openTasks = await listOpenTasks();
+      const remainsOpen = openTasks.some((candidate) => {
+        if (task.id != null) {
+          return candidate.id != null && String(candidate.id) === String(task.id);
+        }
+        return task.gid != null && candidate.gid != null
+          && String(candidate.gid) === String(task.gid);
+      });
+      if (!remainsOpen) {
+        return `✅ @${user} 已完成「${name}」；重新读取后，该任务已不在未完成列表中。`;
+      }
+      return `@${user} 已发送「${name}」的完成请求，但重新读取后任务仍显示未完成，请核对状态；不要重复打卡。`;
+    } catch {
+      return `@${user} 已发送「${name}」的完成请求，但暂时无法重新读取任务确认结果，请稍后核对状态；不要重复打卡。`;
+    }
   } catch (e) {
     return `@${user} 打卡出错：${e.message}（检查手机是否在线、是否同一 Wi‑Fi）`;
   }
