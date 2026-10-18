@@ -4,7 +4,7 @@
 > 修改内容请改源文件，然后重跑：`python3 scripts/build_llms.py`
 > 自动收录 `README.md` 与 `docs/` 下的 Markdown 文档；`docs/specs/` 是可选的单主题材料，不并入本文件，索引见 `llms.txt`。
 > 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。文件开头自动生成收录目录。
-> 本文档体量：68174 字符 · 12 篇（正文口径，由脚本统计，随每次重建更新）。
+> 本文档体量：68930 字符 · 12 篇（正文口径，由脚本统计，随每次重建更新）。
 > 使用建议：此文档较大，token 受限时不要整篇投喂，改用 llms.txt 的路由逐篇读取。
 
 ## 文档目录（自动生成）
@@ -60,7 +60,7 @@
 | **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端；需要了解 Skills 时看 [MCP 与 Skills 指南](docs/mcp-skills.md)，不需要自己开发界面。 |
 | **我遇到问题了** | 先运行下面的只读诊断，再查 [排错指南](docs/troubleshooting.md)；接口细节见 [API 速查表](docs/api-cheatsheet.md)。 |
 
-## 文档怎么读
+如果你更想使用现成的桌面端应用，而不是自己制作网页界面，也可以了解官方的 [LifeUp-Desktop](https://github.com/Ayagikei/LifeUp-Desktop)；它与本仓库的自定义网页方案是不同路线。\n\n## 文档怎么读
 
 | 难度 | 从这几篇开始 |
 | --- | --- |
@@ -75,7 +75,7 @@
 2. **确认网络**：手机与电脑通常需要在同一局域网；确认云人升显示的 IP 和端口，默认端口为 `13276`。
 3. **确认运行环境**：本地示例需要 Node.js 20+；没装的话先去 [nodejs.org](https://nodejs.org/) 安装 LTS；AI 工具与 Agent 的要求见上面「先选一条路」。
 4. **把仓库弄到电脑上**：在 GitHub 仓库页面点绿色 **Code** → **Download ZIP** → 解压到任意文件夹（记下路径，后面所有命令都在这个文件夹里跑）。
-5. **准备本地配置**：进入要运行的示例目录，将 `config.example.json` 复制为 `config.json`，按示例说明填写云人升地址。`host` 就填云人升首页显示的 `IP:13276`（形如 `192.168.1.23:13276`，`config.example.json` 里就是示例样子）。填错也不用怕：格式不对或端口写错，双击 `start.bat` 时会直接用 `✖` 告诉你哪不对，不会静默失败。不要提交真实配置或 Token.
+5. **准备本地配置**：进入要运行的示例目录，将 `config.example.json` 复制为 `config.json`，按示例说明填写云人升地址。`host` 就填云人升首页显示的 `IP:13276`（形如 `192.168.1.23:13276`，`config.example.json` 里就是示例样子）。填错也不用怕：格式不对或端口写错，双击 `start.bat` 时会直接用 `✖` 告诉你哪不对，不会静默失败。若云人升启用了 Token，`tokenHeader` 保持为 `Authorization`，`token` 填原始 Token 值（不要加 `Bearer ` 前缀）；Token 不匹配时会返回 HTTP `401`（`Invalid API token`）。不要提交真实配置或 Token.
 6. **（可选）先做一次只读诊断**：想确认能不能连上手机再往下走，就用它；**不想碰命令行可以整条跳过**，直接双击 `start.bat` 也能启动，连不上再回来。要跑的话最省事的是双击 `examples/minimal-html/check.bat`（Windows）或 `check.command`（macOS），它会自己找到目录并检查。看到 `✓ 只读检查通过` 就是成功；看到 `✖` 说明没过，按提示改。也可以手动在终端里运行：
 
    ```bash
@@ -317,9 +317,12 @@ AI 推理跑在**云端**（Trae 这类工具用的都是云端大模型），�
 * 默认 `POST /api/contentprovider`，JSON body 使用官方定义的 `urls` 数组（例如 `{ "urls": ["lifeup://api/..."] }`）；具体方法与参数必须按官方文档核对。
 * 需要 UI（页面跳转 / 确认弹窗 / 番茄钟启动）才考虑 `POST /api`（start-activity 机制；部分设备可能限制后台弹界面）。具体返回行为按官方文档 / 当前 SDK 确认
 * 常用方法：`complete` / `give_up` / `purchase_item` / `use_item` / `synthesize` / `add_task` / `reward` / `loot_box` / `complete_achievement`；领取成就奖励使用 `complete_achievement`，通用发放奖励使用 `reward`
-* 批量：`call_api_batch`（≤20 个方法，顺序保持；批内后续调用看不到前面结果）
+* 批量（MCP 工具）：`call_api_batch`（≤20 个方法，顺序保持；批内后续调用看不到前面结果）。这是 MCP 工具名，HTTP 侧没有独立的 `call_api_batch` 路由；HTTP 写请求仍使用官方定义的 `/api/contentprovider`。
 * ⚠️ **写操作不幂等**（complete / skip / reward）：超时**不要自动重试**
-* 检查返回：顶层 `code=200` 只代表云人升请求处理层返回成功，不等于游戏内操作成功；按官方响应检查 `data[].result.api_result`。
+* 检查返回：顶层 `code=200` 只代表云人升请求处理层返回成功，按方法的响应契约判断业务结果：
+  * void 方法（如 `complete`、`reward`、`toast`）可能返回空对象；缺少 `api_result` 不等于失败，只有明确的 `api_result=false` 才能按该字段判失败。
+  * `purchase_item` / `synthesize` 应检查 `data[].result` 中的方法状态码。
+  * `pomodoro_timer` 明确提供 `api_result`，可按该字段判断。
 
 ### AI：两条接法
 
@@ -779,12 +782,12 @@ POST http://{host}:{port}/api
 ```
 
 > ⚠️ **写操作不幂等**：`complete` / `give_up` / `reward` 等超时后**不要自动重试**。
-> ⚠️ `/api/contentprovider` 的顶层 `code=200` 不应单独作为操作成功依据。按官方响应契约检查 `data[].result.api_result`：
-
-```json
-{"code":200,"message":"success","data":[{"url":"lifeup://api/item?id=1","result":{"api_result":true}}]}
-```
-
+> ⚠️ `/api/contentprovider` 的顶层 `code=200` 只表示请求处理层成功，业务结果必须按具体方法的响应契约判断，不能统一要求 `api_result=true`。
+>
+> - **void 方法**（如 `complete`、`reward`、`toast`）可能返回空对象；缺少 `api_result` 不等于失败，只有明确的 `api_result=false` 才能按该字段判定失败。
+> - **`purchase_item` / `synthesize`**：检查 `data[].result` 中该方法定义的状态码，不要用 `api_result` 替代。
+> - **`pomodoro_timer`**：该方法明确提供 `api_result`，可按该字段判断。
+>
 **常用 `lifeup://api/…` 方法**（完整见官方 [API 列表](https://wiki.lifeupapp.fun/zh-cn/guide/api.md)）：
 
 | 动作 | 方法 |
@@ -1992,9 +1995,9 @@ cd LifeUp-SDK
 
 ## Token 认证失败
 
-- 若云人升设了访问 Token：按云人升当前配置 / 官方实现要求发送认证信息；不要自行假设请求头名称或认证格式。
-- 本方案的代理支持配置请求头名称；仅在云人升实际启用 Token 时配置。不要将 Token 放在前端页面、公开仓库或日志中。
-- 先确认 Token 值与云人升设置一致，并分别检查 HTTP 状态码与 JSON 响应体中的 `code`。认证失败的具体状态以当前官方实现为准。
+- 云人升启用了 Token 时，请在配置中使用 `"tokenHeader": "Authorization"`，并将原始 Token 值填入 `"token"`；不要添加 `Bearer ` 前缀。
+- Token 不匹配时，官方服务返回 HTTP `401`，响应提示为 `Invalid API token`。这属于 HTTP 认证层，不是 JSON 业务 `code`。
+- 先确认 Token 与云人升设置逐字一致；未启用 Token 时保持 `"token": ""`。不要将 Token 放在前端页面、URL、公开仓库或日志中。
 
 ## 浏览器直连被 CORS 拦
 
