@@ -32,7 +32,9 @@
 | **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端；需要了解 Skills 时看 [MCP 与 Skills 指南](docs/mcp-skills.md)，不需要自己开发界面。 |
 | **我遇到问题了** | 先运行下面的只读诊断，再查 [排错指南](docs/troubleshooting.md)；接口细节见 [API 速查表](docs/api-cheatsheet.md)。 |
 
-如果你更想使用现成的桌面端应用，而不是自己制作网页界面，也可以了解官方的 [LifeUp-Desktop](https://github.com/Ayagikei/LifeUp-Desktop)；它与本仓库的自定义网页方案是不同路线。\n\n## 文档怎么读
+如果你更想使用现成的桌面端应用，而不是自己制作网页界面，也可以了解官方的 [LifeUp-Desktop](https://github.com/Ayagikei/LifeUp-Desktop)；它与本仓库的自定义网页方案是不同路线。
+
+## 文档怎么读
 
 | 难度 | 从这几篇开始 |
 | --- | --- |
