@@ -53,7 +53,10 @@ def should_exclude(path: Path) -> bool:
     relative_parts = path.relative_to(ROOT).parts
     if any(part.startswith("_") for part in relative_parts):
         return True
-    if any(part in EXCLUDED_DIRS for part in path.relative_to(DOCS).parts[:-1]) if path != README else False:
+    if path != README and any(
+        part in EXCLUDED_DIRS
+        for part in path.relative_to(DOCS).parts[:-1]
+    ):
         return True
     return EXCLUDE_MARKER in path.read_text(encoding="utf-8")
 
