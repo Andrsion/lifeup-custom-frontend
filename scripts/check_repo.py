@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -17,7 +18,7 @@ NODE_FILES = [
     ROOT / "scripts/doctor.js",
     ROOT / "scripts/test_proxy.js",
 ]
-MARKDOWN_LINK = re.compile(r"!??\[[^\]]*\]\(([^)]+)\)")
+MARKDOWN_LINK = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 
 
 def check_json() -> list[str]:
@@ -31,6 +32,11 @@ def check_json() -> list[str]:
 
 
 def check_javascript() -> list[str]:
+    if shutil.which("node") is None:
+        return [
+            "无法运行 JavaScript 语法检查：未找到 Node.js。"
+            "请安装 Node.js，并确认 node 已加入 PATH。"
+        ]
     errors: list[str] = []
     for path in NODE_FILES:
         result = subprocess.run(
