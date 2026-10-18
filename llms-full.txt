@@ -4,7 +4,7 @@
 > 修改内容请改源文件，然后重跑：`python3 scripts/build_llms.py`
 > 自动收录 `README.md` 与 `docs/` 下的 Markdown 文档；`docs/specs/` 是可选的单主题材料，不并入本文件，索引见 `llms.txt`。
 > 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。文件开头自动生成收录目录。
-> 本文档体量：68930 字符 · 12 篇（正文口径，由脚本统计，随每次重建更新）。
+> 本文档体量：68928 字符 · 12 篇（正文口径，由脚本统计，随每次重建更新）。
 > 使用建议：此文档较大，token 受限时不要整篇投喂，改用 llms.txt 的路由逐篇读取。
 
 ## 文档目录（自动生成）
@@ -60,7 +60,9 @@
 | **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端；需要了解 Skills 时看 [MCP 与 Skills 指南](docs/mcp-skills.md)，不需要自己开发界面。 |
 | **我遇到问题了** | 先运行下面的只读诊断，再查 [排错指南](docs/troubleshooting.md)；接口细节见 [API 速查表](docs/api-cheatsheet.md)。 |
 
-如果你更想使用现成的桌面端应用，而不是自己制作网页界面，也可以了解官方的 [LifeUp-Desktop](https://github.com/Ayagikei/LifeUp-Desktop)；它与本仓库的自定义网页方案是不同路线。\n\n## 文档怎么读
+如果你更想使用现成的桌面端应用，而不是自己制作网页界面，也可以了解官方的 [LifeUp-Desktop](https://github.com/Ayagikei/LifeUp-Desktop)；它与本仓库的自定义网页方案是不同路线。
+
+## 文档怎么读
 
 | 难度 | 从这几篇开始 |
 | --- | --- |
