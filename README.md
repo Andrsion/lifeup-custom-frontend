@@ -30,6 +30,7 @@
 | **我想直接运行示例** | 进入 [minimal-html](examples/minimal-html/README.md)（一个单页看板：顶部金币与属性、中间任务列表带「完成」按钮，跑起来就能点），按说明配置并启动；需要大屏时用 [desktop-dashboard](examples/desktop-dashboard/)。 |
 | **我想让 AI 帮我做** | **推荐使用本地 Agent**：例如 Cursor / Trae / Claude Code / WorkBuddy。它们可以调用大模型，并在授权范围内读写本地文件、执行命令，适合自动搭建和修改项目。先读 [llms.txt](llms.txt)，再按任务阅读 [实现方案](docs/custom-ui-ai-mcp.md) 与 [AI 施工标准](docs/ai-build-standard.md)；群机器人示例见 [group-bot](examples/group-bot/)。<br><br>**只用网页版 AI（豆包 / Kimi / DeepSeek）同样能做，而且做出来的东西可以和 Agent 一样**——用的是同一个大模型，区别只在「谁动手」：Agent 由 AI 自己读写文件、执行命令；网页版 AI 负责写代码，**你负责把代码存成文件、双击启动**。多几步复制粘贴，不用放弃。<br><br>**具体做法（全程不需要命令行）：**<br>1. 让 AI **完整输出**整个 `index.html`，并明确要求「不要省略、不要用 `…` 代替、不要写『其余同上』」。<br>2. 用记事本把代码粘进去，另存为 **`index.html`**——保存类型选**所有文件**，文件名带 `.html`，编码选 **UTF-8**。扩展名存成 `.txt` 是这一步最常见的翻车点。<br>3. 把文件放进 [minimal-html](examples/minimal-html/README.md) 目录：在解压出来的文件夹里找到 `examples/minimal-html` 这个文件夹，把刚存好的 `index.html` **用鼠标拖进去**，弹出「替换」就点替换；然后**双击 `start.bat`**。双击后会弹出一个黑底窗口——**那是正常的，别关它**，关了页面就打不开；想退出时直接关掉这个窗口即可。<br>4. 打不开或报错，就把报错原文整段贴回给 AI，让它改——这就是「你当手、它当脑」的循环。<br><br>两个已知坑：① 网页版窗口上下文短，一次让它写太大容易断在半句，建议**先跑通最小版再一块块加**；② 它看不到你手机里的清单名和货币叫法，需要你把结构贴给它，或直接用 [世界观 / 主题参考](docs/samples.md) 的换名对照表。环境准备（Node.js、云人升、会员）与 Agent 路线完全相同。 |
 | **我只想用 AI 操作人升（MCP）** | 按 [MCP 安装与使用指南](docs/mcp-quickstart.md) 配置客户端；需要了解 Skills 时看 [MCP 与 Skills 指南](docs/mcp-skills.md)，不需要自己开发界面。 |
+| **我已经做好了界面，想投稿** | 见下方「[投稿你的界面](#投稿你的界面)」；只投主题 / 换名（不用交代码）也欢迎 |
 | **我遇到问题了** | 先运行下面的只读诊断，再查 [排错指南](docs/troubleshooting.md)；接口细节见 [API 速查表](docs/api-cheatsheet.md)。 |
 
 如果你更想使用现成的桌面端应用，而不是自己制作网页界面，也可以了解官方的 [LifeUp-Desktop](https://github.com/Ayagikei/LifeUp-Desktop)；它与本仓库的自定义网页方案是不同路线。
@@ -97,6 +98,15 @@ Agent 需要能操作本机 MCP 配置、执行命令并访问手机所在的局
 ## 几个词
 
 只用到一个词：**MCP** —— 一种让 AI 工具直接操作人升的标准接口，不用自己写界面。
+
+## 投稿你的界面
+
+做了一套自己的界面？三种投法，从轻到重：
+1. **只投主题 / 换名**（不交代码）：提 [Issue「主题 / 换名 投稿」](https://github.com/Andrsion/lifeup-custom-frontend/issues/new/choose)，写清「金币→？任务→？属性→？」即可，会收进 [世界观 / 主题参考](docs/samples.md)。
+2. **投可运行的界面**（html / 示例）：先跑 `python3 scripts/case_check.py <你的文件或目录>` 确认没有 ✖（常见是夹带了自己的 token 或手机 IP），再按 [社区界面案例](docs/cases/) 的三步提交。
+3. **投施工稿**（完整规格 + 提示词）：同类走 Issue，说明所属主题与机制轴。
+
+不想碰 Git？在频道 / 群里发帖带截图，注明「可投稿」，管理员会替你整理提交。投稿通过后会：收录进 [docs/cases/](docs/cases/)（或 samples.md）、在 CHANGELOG 记一条，并注明作者。
 
 ## 仓库维护
 

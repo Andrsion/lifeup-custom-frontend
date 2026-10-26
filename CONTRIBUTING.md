@@ -12,11 +12,13 @@
 
 ## 投稿一套界面
 
-1. 先跑 `python3 scripts/case_check.py <路径>`，确认没有 ✖；
-2. 运行 `python3 scripts/case_check.py <路径> --emit --slug <名字>` 生成 `docs/cases/_drafts/<名字>.md`，填完三处待填；
-3. 把文件移出 `_drafts/`（`_` 开头不进 llms-full），在 `docs/cases/README.md` 补一行索引；
-4. 提 PR。**不要提交 `config.json`、`.lfbak`、任何真实 token。**
+完整流程见 **[docs/cases/README.md](docs/cases/README.md)**。三步概括：
 
+1. `python3 scripts/case_check.py <路径>` 确认没有 ✖（脱敏）；
+2. `--emit --slug <小写英文短名>` 生成骨架，填完三处待填；
+3. 提 [Issue](https://github.com/Andrsion/lifeup-custom-frontend/issues/new/choose) 或 PR。
+
+只投主题 / 换名（不交代码）的，直接提「主题 / 换名 投稿」Issue 即可.
 ## 提交前
 
 - 接口一律**以官方为准**：<https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>；**不要写没有依据的参数**。
@@ -26,6 +28,8 @@
 - 新主题优先使用 [主题规格模板](docs/theme-spec-template.md)；AI 生成代码遵循 [AI 施工标准](docs/ai-build-standard.md)。
 - 提交前可运行 `python scripts/check_repo.py`，确认配置、脚本语法和本地 Markdown 链接检查通过。
 - 文件命名：文档用 `kebab-case.md`。
+
+> **什么时候该更新 CHANGELOG**：只有用户能感知到的变化才写——新增文档、修改口径、改流程、修安全问题、加功能。纯重构、排版、机器重建、CI 调整不写。写法是按主题一句话概括一组改动，不要按 commit 逐条罗列。本仓库按日期分节、最新在前，同一天合并为一节，不打 tag / Release。
 
 ## 分支与 PR
 
