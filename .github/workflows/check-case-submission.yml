@@ -4,6 +4,10 @@ on:
   issues:
     types: [opened, edited, reopened]
 
+concurrency:
+  group: case-submission-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -22,8 +26,8 @@ jobs:
           python-version: "3.12"
       - name: Scan submission without executing it
         env:
-          ISSUE_BODY: \${{ github.event.issue.body }}
-          ISSUE_NUMBER: \${{ github.event.issue.number }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: python scripts/check_case_submission.py
       - name: Upload machine-readable result and report
         if: always()
