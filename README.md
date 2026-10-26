@@ -113,7 +113,7 @@ Agent 需要能操作本机 MCP 配置、执行命令并访问手机所在的局
 
 不方便使用 Git？优先使用上面的手机投稿表单；也可以在频道 / 群里发帖带截图，注明「可投稿」，管理员会替你整理提交。
 
-投稿通过后会收录进 [docs/cases/](docs/cases/)（或 samples.md），并在 CHANGELOG 记一条，注明作者。
+投稿通过后会收录进 [docs/cases/](docs/cases/)（或 samples.md），并在 CHANGELOG 记一条，注明作者。通过自动检查的投稿会先进入 `docs/cases/_incoming/` 暂存区，经人工确认后才移入正式目录。
 
 ## 仓库维护
 

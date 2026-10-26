@@ -5,6 +5,7 @@ Never executes submitted code. Writes a Markdown report to case-submission-repor
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 import stat
@@ -134,89 +135,87 @@ def run_static_check(target: Path) -> tuple[str, int]:
     return output, result.returncode
 
 
+def parse_submission_fields(body: str) -> dict[str, str]:
+    headings = list(re.finditer(r"(?m)^###\s+(.+?)\s*$", body))
+    sections = {}
+    for index, match in enumerate(headings):
+        end = headings[index + 1].start() if index + 1 < len(headings) else len(body)
+        sections[match.group(1).strip()] = body[match.end():end].strip()
+    def field(*names: str) -> str:
+        value = next((sections[name] for name in names if name in sections), "")
+        value = re.sub(r"^<!--.*?-->\s*", "", value, flags=re.S).strip()
+        if value.lower() in {"_no response_", "（无）", "(none)"}: return ""
+        if "HTML 源码（可选）" in names:
+            value = re.sub(r"^" + re.escape(FENCE) + r"[^\n]*\n", "", value)
+            value = re.sub(r"\n" + re.escape(FENCE) + r"\s*$", "", value)
+        return value
+    return {"case_name":field("案例名称"),"author":field("作者署名（可选）","作者署名"),
+            "case_type":field("投稿类型"),"data_source":field("数据来源"),
+            "summary":field("一句话介绍与设计思路"),
+            "notes":field("运行方式、已知限制或补充说明（可选）","运行方式、已知限制或补充说明"),
+            "html_source":field("HTML 源码（可选）")}
+
+
+def write_result(result: dict) -> None:
+    (ROOT / "case-submission-result.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
 def _main() -> int:
     body = os.environ.get("ISSUE_BODY", "")
-    with tempfile.TemporaryDirectory(prefix="lifeup-case-check-") as temp:
-        tempdir = Path(temp)
-        zip_url = find_zip_url(body)
-        try:
+    try: issue_number = int(os.environ.get("ISSUE_NUMBER", "0") or "0")
+    except (TypeError, ValueError): issue_number = 0
+    fields = parse_submission_fields(body)
+    zip_url = find_zip_url(body) or ""
+    result = {"issue_number":issue_number, **fields, "html_source_present":bool(fields["html_source"].strip()),
+              "zip_url":zip_url, "red":[], "yellow":[], "conclusion":"review"}
+    try:
+        with tempfile.TemporaryDirectory(prefix="lifeup-case-check-") as temp:
+            tempdir = Path(temp)
             if zip_url:
-                archive_path = tempdir / "submission.zip"
-                download_zip(zip_url, archive_path)
-                target = tempdir / "unpacked"
-                target.mkdir()
-                safe_extract(archive_path, target)
-                checkable = find_checkable_files(target)
-                if not checkable:
-                    write_report(
-                        "## 自动脱敏检查：需人工复核\n\n未在附件中找到可检查的界面文件。\n\n"
-                        "- 机器结论：**需人工复核**\n- 检查方式：未找到 .html/.js/.css/.json 文件，未能完成静态扫描。\n"
-                        "- 注意：检查通过不等于正式收录。\n"
-                        "> 你上传的截图不会被自动检查，请自行确认画面中没有真实手机 IP、任务内容或其他个人信息。\n\n"
-                        "这不代表投稿通过。"
-                    )
-                    return 0
+                archive_path = tempdir / "submission.zip"; download_zip(zip_url, archive_path)
+                target = tempdir / "unpacked"; target.mkdir(); safe_extract(archive_path, target)
+                if not find_checkable_files(target):
+                    write_report("## 自动脱敏检查：需人工复核\n\n未在附件中找到可检查的界面文件。\n\n- 机器结论：**需人工复核**\n- 注意：检查通过不等于正式收录。")
+                    result["yellow"] = ["未找到可检查的界面文件"]; return 0
                 source_description = "从投稿 Issue 的 ZIP 附件中提取文件"
             else:
-                match = HTML_BLOCK_RE.search(body)
-                if not match or not match.group(1).strip():
-                    write_report(
-                        "## 自动脱敏检查：未能检查\n\n"
-                        "没有检测到 ZIP 附件或 HTML 源码。请编辑这条 Issue，上传 ZIP 案例包，"
-                        "或把完整 HTML 粘贴到「HTML 源码」字段后重新保存。\n\n"
-                        "本次未扫描任何代码；这不代表投稿通过。"
-                    )
-                    return 0
-                target = tempdir / "pasted"
-                target.mkdir()
-                (target / "index.html").write_text(match.group(1), encoding="utf-8")
+                if not fields["html_source"].strip():
+                    write_report("## 自动脱敏检查：未能检查\n\n没有检测到 ZIP 附件或 HTML 源码。本次未扫描任何代码；这不代表投稿通过。")
+                    result["yellow"] = ["没有 ZIP 附件或 HTML 源码"]; return 0
+                target = tempdir / "pasted"; target.mkdir()
+                (target / "index.html").write_text(fields["html_source"], encoding="utf-8")
                 source_description = "从投稿表单中的 HTML 源码字段读取"
-
             output, code = run_static_check(target)
-            red = bool(re.search(r"(?m)^✖ RED\b", output))
-            conclusion_match = re.search(r"结论：([^\n]+)", output)
-            conclusion = conclusion_match.group(1).strip() if conclusion_match else (
-                "不可提交" if code else "需人工复核"
-            )
-            status = "发现需处理的 RED 项" if red or code else (
-                "可提交，仍需人工审核" if conclusion == "可提交" else conclusion
-            )
-            report = (
-                "## 自动脱敏检查结果\n\n"
-                f"- 检查来源：{source_description}\n"
-                f"- 机器结论：**{status}**\n"
-                "- 检查方式：静态扫描；没有执行投稿代码。\n"
-                "- 注意：检查通过不等于正式收录，外部资源、运行效果与授权仍需维护者审核。\n"
-                "> 你上传的截图不会被自动检查，请自行确认画面中没有真实手机 IP、任务内容或其他个人信息。\n\n"
-                "<details>\n<summary>查看检查明细</summary>\n\n"
-                "~~~text\n" + (output[:12000] or "检查器未返回明细") +
-                "\n~~~\n</details>\n"
-            )
-            write_report(report)
-        except (OSError, ValueError, zipfile.BadZipFile, urllib.error.URLError, TimeoutError, subprocess.TimeoutExpired) as exc:
-            write_report(
-                "## 自动脱敏检查：未完成\n\n"
-                f"检查器无法安全读取投稿文件：{type(exc).__name__}: {exc}\n\n"
-                "请确认 ZIP 文件完整、文件路径正常，并编辑 Issue 重新提交。此结果不代表投稿通过。"
-            )
-    return 0
+            result["red"] = [line.strip() for line in output.splitlines() if re.search(r"^(?:✖ RED|RED )\b", line)]
+            result["yellow"] = [line.strip() for line in output.splitlines() if re.search(r"^(?:⚠ YELLOW|YELLOW )\b", line)]
+            if code and not result["red"]: result["yellow"].append("静态检查异常退出")
+            result["conclusion"] = "reject" if result["red"] else ("review" if result["yellow"] or not fields["case_name"].strip() or not fields["summary"].strip() else "submit")
+            status = "发现需处理的 RED 项" if result["conclusion"] == "reject" else ("可提交，仍需人工审核" if result["conclusion"] == "submit" else "需人工复核")
+            report = ("## 自动脱敏检查结果\n\n" + f"- 检查来源：{source_description}\n- 机器结论：**{status}**\n"
+                      "- 检查方式：静态扫描；没有执行投稿代码。\n- 注意：检查通过不等于正式收录，外部资源、运行效果与授权仍需维护者审核。\n"
+                      "> 你上传的截图不会被自动检查，请自行确认画面中没有真实手机 IP、任务内容或其他个人信息。\n\n"
+                      "<details>\n<summary>查看检查明细</summary>\n\n~~~text\n" + (output[:12000] or "检查器未返回明细") + "\n~~~\n</details>\n")
+            write_report(report); return 0
+    except Exception as exc:
+        result["conclusion"] = "review"; result["yellow"].append(f"检查异常：{type(exc).__name__}: {exc}")
+        try: write_report("## 自动脱敏检查：未完成\n\n" + f"处理投稿时发生错误：{type(exc).__name__}: {exc}\n\n这不代表投稿通过。请维护者人工复核附件。")
+        except Exception: pass
+        return 0
+    finally:
+        try: write_result(result)
+        except Exception as exc: print(f"无法写入 case-submission-result.json：{type(exc).__name__}: {exc}")
+
 
 
 def main() -> int:
     try:
         return _main()
     except Exception as exc:
-        report = (
-            "## 自动脱敏检查：未完成\n\n"
-            f"处理投稿时发生未预期错误：{type(exc).__name__}: {exc}\n\n"
-            "- 注意：这不代表投稿通过。请维护者人工复核附件。\n"
-            "> 你上传的截图不会被自动检查，请自行确认画面中没有真实手机 IP、任务内容或其他个人信息。"
-        )
         try:
-            write_report(report)
-        except Exception as report_exc:
-            print(f"无法写入 case-submission-report.md：{type(report_exc).__name__}: {report_exc}")
-            print(report)
+            write_result({"issue_number":int(os.environ.get("ISSUE_NUMBER","0") or "0"),"case_name":"","author":"","case_type":"","data_source":"","summary":"","notes":"","html_source":"","html_source_present":False,"zip_url":"","red":[],"yellow":[str(exc)],"conclusion":"review"})
+        except Exception: pass
+        try: write_report("## 自动脱敏检查：未完成\\n\\n处理投稿时发生未预期错误；需人工复核。")
+        except Exception: pass
         return 0
 
 

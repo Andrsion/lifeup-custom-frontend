@@ -6,48 +6,119 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 jobs:
   static-check:
     if: contains(github.event.issue.body, '### 案例名称') && contains(github.event.issue.body, '### 投稿确认')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-
       - name: Scan submission without executing it
         env:
-          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_BODY: \${{ github.event.issue.body }}
+          ISSUE_NUMBER: \${{ github.event.issue.number }}
         run: python scripts/check_case_submission.py
+      - name: Upload machine-readable result and report
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: case-result
+          path: |
+            case-submission-result.json
+            case-submission-report.md
+          if-no-files-found: error
+          retention-days: 7
 
-      - name: Post or update check report
+  stage:
+    needs: static-check
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Download scan result
+        if: needs.static-check.result == 'success'
+        uses: actions/download-artifact@v7
+        with:
+          name: case-result
+          path: .
+      - name: Read conclusion and report manual review if needed
+        id: result
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            const marker = '<!-- case-submission-auto-check -->';
-            const report = fs.readFileSync('case-submission-report.md', 'utf8');
-            const body = marker + '\n' + report;
+            const marker = '<!-- case-stage-notice -->';
+            const issue_number = context.payload.issue.number;
+            const { owner, repo } = context.repo;
+            let result = null;
+            if (fs.existsSync('case-submission-result.json')) {
+              try { result = JSON.parse(fs.readFileSync('case-submission-result.json', 'utf8')); } catch {}
+            }
+            const conclusion = result?.conclusion || 'review';
+            core.setOutput('conclusion', conclusion);
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+            const previous = comments.find(comment => comment.body?.includes(marker));
+            if (conclusion !== 'submit') {
+              const body = marker + '\n自动检查结论：**需人工复核**。投稿未进入暂存区，请维护者检查静态扫描报告后再决定。自动检查只做静态扫描，不执行投稿代码。';
+              if (previous) await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body });
+              else await github.rest.issues.createComment({ owner, repo, issue_number, body });
+              return;
+            }
+            if (fs.existsSync('case-submission-report.md')) {
+              const report = fs.readFileSync('case-submission-report.md', 'utf8');
+              const reportMarker = '<!-- case-submission-auto-check -->';
+              const reportBody = reportMarker + '\n' + report;
+              const reportComment = comments.find(comment => comment.user?.type === 'Bot' && comment.body?.includes(reportMarker));
+              if (reportComment) await github.rest.issues.updateComment({ owner, repo, comment_id: reportComment.id, body: reportBody });
+              else await github.rest.issues.createComment({ owner, repo, issue_number, body: reportBody });
+            }
+      - name: Stage submission
+        if: steps.result.outputs.conclusion == 'submit'
+        run: python scripts/case_import.py --from-result case-submission-result.json --stage
+      - name: Commit only incoming Markdown
+        if: steps.result.outputs.conclusion == 'submit'
+        env:
+          ISSUE_NUMBER: \${{ github.event.issue.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/cases/_incoming/
+          if git diff --cached --quiet; then
+            echo "没有新的暂存 Markdown。"
+            exit 0
+          fi
+          git commit -m "feat(cases): 暂存投稿 #\${ISSUE_NUMBER}（未审核）[skip ci]"
+          git push
+      - name: Update staged notice and apply label
+        if: steps.result.outputs.conclusion == 'submit'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- case-stage-notice -->';
             const { owner, repo } = context.repo;
             const issue_number = context.payload.issue.number;
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner, repo, issue_number, per_page: 100
-            });
-            const previous = comments.find(comment =>
-              comment.user?.type === 'Bot' && comment.body?.includes(marker)
-            );
-            if (previous) {
-              await github.rest.issues.updateComment({
-                owner, repo, comment_id: previous.id, body
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner, repo, issue_number, body
-              });
-            }
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
+            const previous = comments.find(comment => comment.body?.includes(marker));
+            const body = marker + '\n已暂存到 \`docs/cases/_incoming/\`，等维护者确认后收录。自动检查只做静态扫描，不执行投稿代码。';
+            if (previous) await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body });
+            else await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            try { await github.rest.issues.getLabel({ owner, repo, name: 'case:staged' }); }
+            catch { try { await github.rest.issues.createLabel({ owner, repo, name: 'case:staged', color: '0e8a16', description: '投稿已自动暂存，等待维护者审核' }); } catch {} }
+            try { await github.rest.issues.addLabels({ owner, repo, issue_number, labels: ['case:staged'] }); } catch {}

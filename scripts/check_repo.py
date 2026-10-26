@@ -415,6 +415,44 @@ def check_case_submission_and_import_fixtures() -> list[str]:
     return errors
 
 
+
+def check_case_import_stage() -> list[str]:
+    errors: list[str] = []
+    incoming = ROOT / "docs/cases/_incoming"
+    incoming_existed = incoming.exists()
+    try:
+        with tempfile.TemporaryDirectory(prefix="case-import-stage-ci-") as temp_dir:
+            temp = Path(temp_dir)
+            submit_path = temp / "result-submit.json"
+            submit_path.write_text(json.dumps({
+                "issue_number":987654321,"case_name":"Test Case","author":"CI","case_type":"静态设计稿",
+                "data_source":"静态假数据","summary":"CI 一句话介绍。","notes":"CI 补充说明。",
+                "html_source_present":False,"html_source":"","zip_url":"","red":[],"yellow":[],"conclusion":"submit"
+            }, ensure_ascii=False), encoding="utf-8")
+            result = subprocess.run([sys.executable,str(ROOT/"scripts/case_import.py"),"--from-result",str(submit_path),"--stage","--slug","ci-test"],cwd=ROOT,text=True,capture_output=True,check=False)
+            draft = incoming / "987654321-ci-test.md"
+            if result.returncode or not draft.is_file():
+                errors.append("case_import stage submit failed: " + (result.stdout + "\n" + result.stderr)[-4000:])
+            else:
+                content = draft.read_text(encoding="utf-8")
+                if not content.splitlines() or content.splitlines()[0] != "<!-- 自动导入的未审核草稿 · issue #987654321 · 请勿直接发布 -->": errors.append("stage draft first line does not match required marker")
+                if content.count("<!-- 待填 -->") != 3: errors.append(f"expected exactly three generic placeholders; found {content.count('<!-- 待填 -->')}")
+                if content.count("](http") != 0: errors.append("stage draft contains external Markdown links")
+            reject_path = temp / "result-reject.json"
+            reject_path.write_text(json.dumps({"issue_number":987654322,"case_name":"Rejected","author":"CI","case_type":"","data_source":"","summary":"","notes":"","html_source_present":False,"html_source":"","zip_url":"","red":["fixture RED"],"yellow":[],"conclusion":"reject"},ensure_ascii=False),encoding="utf-8")
+            before = set(incoming.glob("*.md"))
+            rejected = subprocess.run([sys.executable,str(ROOT/"scripts/case_import.py"),"--from-result",str(reject_path),"--stage","--slug","ci-reject"],cwd=ROOT,text=True,capture_output=True,check=False)
+            if rejected.returncode or set(incoming.glob("*.md")) != before: errors.append("reject result unexpectedly added a file: " + (rejected.stdout + "\n" + rejected.stderr)[-3000:])
+            if not errors: print("✓ 案例暂存回归通过：submit 生成草稿、reject 拒绝生成")
+    except Exception as exc: errors.append(f"case_import stage regression raised {type(exc).__name__}: {exc}")
+    finally:
+        for name in ("987654321-ci-test.md","987654322-ci-reject.md"): (incoming/name).unlink(missing_ok=True)
+        if not incoming_existed:
+            try: incoming.rmdir()
+            except OSError: pass
+    return errors
+
+
 def main() -> int:
     errors = []
     errors += check_json()
@@ -424,12 +462,13 @@ def main() -> int:
     errors += check_case_examples()
     errors += check_case_checker_fixtures()
     errors += check_case_submission_and_import_fixtures()
+    errors += check_case_import_stage()
     if errors:
         print("仓库质量检查失败：")
         for error in errors:
             print(f"\n- {error}")
         return 1
-    print("✓ JSON 配置、Node.js/内嵌脚本语法、本地 Markdown 链接、llms-full.txt 确定性检查均通过。")
+    print("✓ JSON 配置、Node.js/内嵌脚本语法、本地 Markdown 链接、llms-full.txt 确定性检查、案例自动暂存回归均通过。")
     return 0
 
 

@@ -35,9 +35,12 @@ def args_parse():
     parser.add_argument("--slug", default=os.getenv("SLUG", ""))
     parser.add_argument("--dry-run", action="store_true", default=os.getenv("DRY_RUN", "").lower() == "true")
     parser.add_argument("--force", action="store_true")
+    parser.add_argument("--from-result", type=Path)
+    parser.add_argument("--stage", action="store_true")
     args = parser.parse_args()
-    if args.issue < 1: parser.error("必须提供 ISSUE_NUMBER 或 --issue（正整数）")
-    if not SLUG_RE.fullmatch(args.slug): parser.error("SLUG 仅允许小写字母、数字和连字符")
+    if args.slug and not SLUG_RE.fullmatch(args.slug): parser.error("--slug 仅允许小写字母、数字和连字符")
+    if args.stage and not args.from_result: parser.error("--stage 必须与 --from-result 同用")
+    if not args.from_result and args.issue < 1: parser.error("必须提供 ISSUE_NUMBER 或 --issue（正整数）")
     return args
 
 def api_json(url: str, token: str) -> dict:
@@ -157,67 +160,86 @@ def make_report(fields, issue_no, slug, output, files, status):
     lines.extend(["","## 仍待人工补充","- 为什么好玩","- 灵感来源","- 机制决定情绪","","没有执行投稿中的任何代码。"])
     return "\n".join(lines)+"\n"
 
-def main():
-    args=args_parse()
-    repo=os.getenv("GITHUB_REPOSITORY",""); token=os.getenv("GITHUB_TOKEN","")
-    if not repo or "/" not in repo: raise ValueError("缺少 GITHUB_REPOSITORY（owner/repo）")
-    if not token: raise ValueError("缺少 GITHUB_TOKEN")
-    case_path=ROOT/"docs/cases"/f"{args.slug}.md"
-    if case_path.exists() and not args.force: raise FileExistsError(f"{case_path.relative_to(ROOT)} 已存在；如确认覆盖请加 --force")
-    owner,repo_name=repo.split("/",1)
-    issue=api_json(f"https://api.github.com/repos/{owner}/{repo_name}/issues/{args.issue}",token)
-    body=issue.get("body") or ""; fields=parse_fields(body)
-    name=fields.get("案例名称","").strip()
-    if not name: raise ValueError("Issue 中未解析到「案例名称」；拒绝猜测并停止")
-    author=fields.get("作者署名","").strip() or (issue.get("user") or {}).get("login","") or "（作者未提供）"
-    download_zip,safe_extract=helper_functions()
-    with tempfile.TemporaryDirectory(prefix="case-import-") as tmp:
-        temp=Path(tmp); source=(temp/f"{args.slug}-src") if args.dry_run else (DRAFTS/f"{args.slug}-src")
-        if not args.dry_run:
-            DRAFTS.mkdir(parents=True,exist_ok=True)
-            if source.exists(): shutil.rmtree(source)
-        source.mkdir(parents=True,exist_ok=True)
-        zip_url=find_zip(body)
-        if zip_url:
-            archive=temp/"submission.zip"; download_zip(zip_url,archive); safe_extract(archive,source)
-            source_desc="Issue ZIP 附件"
-        else:
-            html=fields.get("HTML 源码（可选）","").strip()
-            if not html: raise ValueError("没有 ZIP 附件，也没有可解析的 HTML 源码")
-            (source/"index.html").write_text(html,encoding="utf-8"); source_desc="表单 HTML 源码"
-        if not any(p.is_file() and p.suffix.lower() in {".html",".js",".css",".json"} for p in source.rglob("*")):
-            raise ValueError("未在投稿附件中找到可检查的界面文件")
-        output,code,skeleton_path=check_and_emit(source,args.slug,args.dry_run)
-        output=f"检查来源：{source_desc}\n"+output
-        red=[line for line in output.splitlines() if re.search(r"(^✖ RED\b|^RED )",line)]
-        if code or red:
-            report(make_report(fields,args.issue,args.slug,output,[],"停止导入：发现 RED"),args.dry_run); return 1
-        if not skeleton_path or not skeleton_path.is_file(): raise RuntimeError("case_check.py 未生成案例骨架")
-        case_text=build_case(skeleton_path.read_text(encoding="utf-8"),fields,author)
-        index_path=ROOT/"docs/cases/README.md"; log_path=ROOT/"CHANGELOG.md"
-        index_text=update_index(index_path.read_text(encoding="utf-8"),name,args.slug,fields.get("一句话介绍与设计思路","").strip())
-        log_text=update_changelog(log_path.read_text(encoding="utf-8"),name,author)
-        planned=[f"docs/cases/{args.slug}.md","docs/cases/README.md","CHANGELOG.md",f"docs/cases/_drafts/{args.slug}-src/ (gitignore 忽略)"]
-        status="DRY_RUN 预览：检查无 RED，可继续人工审核" if args.dry_run else "检查无 RED：已生成案例，仍需维护者补充与审核"
-        text=make_report(fields,args.issue,args.slug,output,planned,status)
-        if args.dry_run:
-            print("DRY_RUN=true：仅预览，未写入仓库文件。")
-            print("计划生成的案例开头：\n"+"\n".join(case_text.splitlines()[:12]))
-            print("计划更新索引和 CHANGELOG；未写入仓库文件。")
-            report(text,True); return 0
-        case_path.parent.mkdir(parents=True,exist_ok=True)
-        case_path.write_text(case_text,encoding="utf-8")
-        index_path.write_text(index_text,encoding="utf-8")
-        log_path.write_text(log_text,encoding="utf-8")
-        report(text); return 0
+def slugify(value: str, issue_no: int, requested: str = "") -> str:
+    if requested: return requested
+    clean = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    clean = re.sub(r"-+", "-", clean)
+    return clean if clean and re.fullmatch(r"[a-z0-9-]+", clean) else f"issue-{issue_no}"
 
-if __name__=="__main__":
+
+def plain_external_links(text: str) -> str:
+    text = re.sub(r"!\[.*?\]\((https?://[^)\s]+)\)", r"图片/链接：\1", text, flags=re.S)
+    return re.sub(r"\[[^\]]*\]\((https?://[^)\s]+)\)", r"图片/链接：\1", text)
+
+
+def build_staged_markdown(fields: dict[str, str], issue_no: int, skeleton: str, author: str) -> str:
+    mapping = {"案例名称":fields.get("case_name",""),"作者署名":fields.get("author","") or author,
+               "投稿类型":fields.get("case_type",""),"数据来源":fields.get("data_source",""),
+               "一句话介绍与设计思路":fields.get("summary",""),"运行方式、已知限制或补充说明":fields.get("notes","")}
+    text = build_case(skeleton, mapping, author)
+    lines = text.splitlines()
+    if len(lines) < 2: raise ValueError("case_check.py --emit 生成了空骨架")
+    lines[0] = f"<!-- 自动导入的未审核草稿 · issue #{issue_no} · 请勿直接发布 -->"
+    text = re.sub(r"<!-- 待填(?::[^>]*)? -->", "<!-- 待填 -->", "\n".join(lines) + "\n")
+    text = plain_external_links(text)
+    if re.search(r"!\[.*?\]\(https?:", text, re.S) or re.search(r"\[[^\]]*\]\(https?:", text): raise ValueError("外链降级检查失败")
+    return text
+
+
+def main():
+    args = args_parse()
+    if args.from_result:
+        result = json.loads(args.from_result.read_text(encoding="utf-8"))
+        issue_no = int(result.get("issue_number") or args.issue or 0)
+        if args.stage and result.get("conclusion") != "submit":
+            print(f"投稿 #{issue_no} 结论为 {result.get('conclusion')!r}，不生成暂存文件。"); return 0
+        fields = {k:str(result.get(k) or "") for k in ("case_name","author","case_type","data_source","summary","notes","zip_url","html_source")}
+        html_present = bool(result.get("html_source_present")); author = fields["author"] or "（作者未提供）"
+    else:
+        repo = os.getenv("GITHUB_REPOSITORY",""); token = os.getenv("GITHUB_TOKEN","")
+        if not repo or "/" not in repo: raise ValueError("缺少 GITHUB_REPOSITORY（owner/repo）")
+        if not token: raise ValueError("缺少 GITHUB_TOKEN")
+        owner, repo_name = repo.split("/",1)
+        issue = api_json(f"https://api.github.com/repos/{owner}/{repo_name}/issues/{args.issue}", token)
+        body = issue.get("body") or ""; parsed = parse_fields(body)
+        fields = {"case_name":parsed.get("案例名称",""),"author":parsed.get("作者署名",""),
+                  "case_type":parsed.get("投稿类型",""),"data_source":parsed.get("数据来源",""),
+                  "summary":parsed.get("一句话介绍与设计思路",""),"notes":parsed.get("运行方式、已知限制或补充说明",""),
+                  "zip_url":find_zip(body) or "","html_source":parsed.get("HTML 源码（可选）","")}
+        html_present = bool(fields["html_source"].strip()); issue_no = args.issue
+        author = fields["author"] or (issue.get("user") or {}).get("login","") or "（作者未提供）"
+    if issue_no < 1: raise ValueError("result.json 缺少有效 issue_number")
+    if not args.stage: raise ValueError("正式收录写入路径已移除；请使用 --from-result ... --stage")
+    slug = slugify(fields.get("case_name",""), issue_no, args.slug)
+    incoming = ROOT / "docs/cases/_incoming"; drafts = ROOT / "docs/cases/_drafts"
+    source = drafts / f"{issue_no}-{slug}-src"; target_md = incoming / f"{issue_no}-{slug}.md"
+    if target_md.exists(): print(f"暂存文件已存在，保持不覆盖：{target_md.relative_to(ROOT)}"); return 0
+    download_zip, safe_extract = helper_functions()
+    drafts.mkdir(parents=True, exist_ok=True); source.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="case-stage-") as temp_dir:
+        temp = Path(temp_dir); zip_url = fields.get("zip_url","")
+        if zip_url:
+            archive = temp / "submission.zip"; download_zip(zip_url, archive); safe_extract(archive, source)
+        elif html_present and fields.get("html_source"):
+            (source / "index.html").write_text(fields["html_source"], encoding="utf-8")
+        check_source = source
+        if not any(p.is_file() and p.suffix.lower() in {".html",".js",".css",".json"} for p in source.rglob("*")):
+            check_source = temp / "skeleton-source"; check_source.mkdir()
+            (check_source / "index.html").write_text("<!doctype html><title>未审核草稿</title><h1>待补充</h1>", encoding="utf-8")
+        output, code, skeleton_path = check_and_emit(check_source, f"stage-{issue_no}-{slug}", True)
+        if code or not skeleton_path or not skeleton_path.is_file(): raise ValueError("case_check.py --emit 未能生成草稿骨架：\n" + output[-3000:])
+        markdown = build_staged_markdown(fields, issue_no, skeleton_path.read_text(encoding="utf-8"), author)
+        incoming.mkdir(parents=True, exist_ok=True); target_md.write_text(markdown, encoding="utf-8")
+        print(f"暂存文件：{target_md.relative_to(ROOT)}")
+    try:
+        status = subprocess.run(["git","status","--short"], cwd=ROOT, text=True, capture_output=True, check=False)
+        print("git status --short：\n" + (status.stdout.rstrip() or "（无输出）"))
+    except OSError as exc: print(f"无法读取 git status：{exc}")
+    return 0
+
+if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except Exception as exc:
-        text=f"# 案例导入报告\n\n- 结论：**导入失败**\n- 错误：{type(exc).__name__}: {exc}\n\n没有执行投稿中的任何代码。"
-        if os.getenv("DRY_RUN","").lower()!="true":
-            try: REPORT.write_text(text,encoding="utf-8")
-            except Exception: pass
-        print(text)
+        print(f"暂存失败：{type(exc).__name__}: {exc}")
         raise
