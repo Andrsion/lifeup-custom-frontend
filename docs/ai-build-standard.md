@@ -53,6 +53,58 @@
 - 写操作超时或结果不明确时，不要自动重试；先刷新只读数据或让用户确认状态。
 - 对破坏性或经济性操作（完成任务、奖励、购买、惩罚等）不要在“诊断”流程中自动执行。
 
+### 4.5 地址切换（所有带页面的界面必做）
+
+自定义界面最容易卡住人的一步是「手机 IP 变了」。因此**任何带页面的示例或 AI 生成的界面，都必须在顶栏提供地址切换**，而不是让人回去改 `config.json`。
+
+必做三件事：
+1. 代理暴露 `GET /__upstream`（读当前地址）与 `POST /__upstream`（改地址），**只改内存、不写配置文件**；
+2. 顶栏显示当前地址 + 一个输入框 + 一个「换」按钮；
+3. 切换成功后自动重新拉取数据，失败时把错误原因显示在页面上。
+
+可粘贴实现（放到 `proxy.js` 的 `/cloud/` 路由之前；启动时把 `UPSTREAM_HOST` / `UPSTREAM_PORT` 改成 `let`）：
+
+```js
+const HOST_RE = /^([^:\s/]+)(?::(\d{1,5}))?$/;
+// 启动时使用 HOST_RE 校验 config.json，并将 UPSTREAM_HOST / UPSTREAM_PORT 声明为 let。
+if (url.pathname === "/__upstream") {
+  const json = (status, data) => { res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }); res.end(JSON.stringify(data)); };
+  if (!["GET", "POST"].includes(req.method)) return json(405, { error: "只允许 GET 和 POST。" });
+  if (req.method === "GET") return json(200, { host: UPSTREAM_HOST, port: UPSTREAM_PORT });
+  if (!/^application\/json(?:\s*;|$)/i.test(req.headers["content-type"] || "")) return json(415, { error: "Content-Type 必须为 application/json。" });
+  let raw = "", tooLarge = false;
+  req.on("data", chunk => { if (tooLarge) return; raw += chunk; if (Buffer.byteLength(raw, "utf8") > 512) { tooLarge = true; json(413, { error: "请求体过大。" }); } });
+  req.on("end", () => {
+    if (tooLarge || res.writableEnded) return;
+    let body; try { body = JSON.parse(raw || "{}"); } catch { return json(400, { error: "请求体不是合法 JSON。" }); }
+    const parts = String(body.host || "").trim().match(HOST_RE);
+    if (!parts) return json(400, { error: "地址格式应为 手机IP 或 手机IP:端口" });
+    const port = Number(parts[2] || 13276);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) return json(400, { error: "端口无效。" });
+    UPSTREAM_HOST = parts[1]; UPSTREAM_PORT = port;
+    json(200, { host: UPSTREAM_HOST, port: UPSTREAM_PORT });
+  });
+  return;
+}
+```
+
+前端片段（沿用各示例的样式）：
+
+```js
+const box = document.getElementById("upstreamBox");
+fetch("/__upstream").then(r => r.json()).then(d => { box.textContent = d.host + ":" + d.port; });
+document.getElementById("upstreamBtn").onclick = async () => {
+  const r = await fetch("/__upstream", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ host: document.getElementById("upstreamInput").value }) });
+  const d = await r.json();
+  if (!r.ok) { showErr(d.error || "切换失败"); return; }
+  box.textContent = d.host + ":" + d.port;
+  document.getElementById("upstreamInput").value = "";
+  await load();
+};
+```
+
+> 安全：该接口仅在回环监听下可用，且不写配置文件——它改变的是本次运行的上游地址，重启即回到 `config.json` 的值。
+
 ### 5. 验证并交付
 
 - 运行项目提供的语法检查、配置检查和测试。
@@ -76,6 +128,8 @@
 - [ ] **交付说明**：给出启动 / 配置步骤、已验证能力、未验证事项、已知限制和排错路径。
 
 ## 交付前检查清单
+
+- [ ] 顶栏有地址显示与切换（`/__upstream`），切换后能重新拉到数据。
 
 - [ ] 官方接口文档和必要时的官方源码已核对。
 - [ ] 未自行发明接口路径、参数、字段或版本要求。
