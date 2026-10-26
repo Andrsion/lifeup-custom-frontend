@@ -1,0 +1,11 @@
+# 真实配置（含手机 IP；填过 token 的更敏感）。示例配置是 config.example.json，不要忽略它
+config.json
+examples/*/config.json
+
+# 投稿草稿目录：投稿人本地生成，不进版本库
+docs/cases/_drafts/
+
+# 依赖与系统文件
+node_modules/
+.DS_Store
+Thumbs.db
