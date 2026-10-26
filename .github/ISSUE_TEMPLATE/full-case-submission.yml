@@ -1,0 +1,116 @@
+name: "🎨 完整界面案例投稿"
+description: "手机直接上传界面 ZIP 或粘贴 HTML；无需 Git，提交后自动进行静态脱敏检查"
+title: "[完整界面案例投稿] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 手机即可投稿，无需 Git 或电脑
+
+        两种方式任选一种：
+        - **推荐：上传 ZIP**，里面放 index.html、本地 CSS / JS 和必要的示例配置。ZIP 最大 25 MB。
+        - **简单单页：粘贴 HTML 源码**到下方源码框。源码较长或包含多个文件时，请用 ZIP。
+
+        **投稿会公开显示在 Issue 中。** 请先移除真实 Token、手机 IP、个人数据和备份文件。自动检查只做静态扫描，不会执行代码；检查通过也不代表正式收录。
+  - type: input
+    id: case_name
+    attributes:
+      label: 案例名称
+      description: 给这套界面起个名字。
+      placeholder: 例如：冒险者任务面板
+    validations:
+      required: true
+      min_length: 2
+  - type: input
+    id: author
+    attributes:
+      label: 作者署名（可选）
+      description: 留空则使用 GitHub 用户名。
+      placeholder: 昵称或署名
+    validations:
+      required: false
+  - type: dropdown
+    id: case_type
+    attributes:
+      label: 投稿类型
+      options:
+        - 可运行界面（连接云人升）
+        - 静态设计稿 / 假数据演示
+        - 主题与换名方案
+    validations:
+      required: true
+  - type: dropdown
+    id: data_source
+    attributes:
+      label: 数据来源
+      options:
+        - 真实云人升数据（已移除个人信息）
+        - 静态假数据
+        - 纯设计稿，不连接接口
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: 一句话介绍与设计思路
+      description: 这套界面解决什么需求？希望用户感受到什么？
+      placeholder: 简要介绍界面用途、灵感来源和最有特点的设计。
+    validations:
+      required: true
+      min_length: 20
+  - type: textarea
+    id: mapping
+    attributes:
+      label: 换名对照与界面分区
+      description: 可写金币、任务、属性分别换成什么名字，以及页面有哪些分区。
+      placeholder: |
+        金币 → ...
+        任务 → ...
+        属性 → ...
+        界面分区：...
+    validations:
+      required: false
+  - type: textarea
+    id: html_source
+    attributes:
+      label: HTML 源码（可选）
+      description: 单页 HTML 可直接粘贴到这里；此字段会自动格式化为代码块。多文件项目请上传 ZIP。
+      placeholder: 从 HTML 文档开头开始粘贴完整源码。
+      render: html
+    validations:
+      required: false
+  - type: upload
+    id: case_zip
+    attributes:
+      label: 上传界面文件 ZIP（可选）
+      description: 推荐多文件项目使用。ZIP 中放 HTML、CSS、JS 和必要的示例文件；不要放 node_modules、真实 config.json、Token 或备份。
+    validations:
+      required: false
+      accept: ".zip"
+  - type: upload
+    id: screenshots
+    attributes:
+      label: 上传界面截图（可选）
+      description: 上传 PNG、JPG 或 WebP 截图，方便维护者快速了解效果。
+    validations:
+      required: false
+      accept: ".png,.jpg,.jpeg,.webp,.gif"
+  - type: textarea
+    id: notes
+    attributes:
+      label: 运行方式、已知限制或补充说明（可选）
+      description: 例如是否依赖外部 CDN、如何启动、哪些功能还未实现。
+    validations:
+      required: false
+  - type: checkboxes
+    id: declarations
+    attributes:
+      label: 投稿确认
+      description: 请确认以下事项后再提交。
+      options:
+        - label: 我确认已移除 Token、真实手机 IP、手机号、个人数据和不应公开的配置 / 备份。
+          required: true
+        - label: 我拥有这些内容的投稿权利，并同意在本仓库 LICENSE 许可下公开收录；如含第三方素材，我已确认其使用权限。
+          required: true
+        - label: 我理解自动检查不等于审核通过，案例只有经维护者确认后才会正式收录。
+          required: true
