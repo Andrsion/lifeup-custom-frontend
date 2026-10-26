@@ -103,6 +103,7 @@ Agent 需要能操作本机 MCP 配置、执行命令并访问手机所在的局
 - `node scripts/doctor.js <示例目录>`：检查本地配置并只读请求 `GET /info`，例如 `node scripts/doctor.js examples/minimal-html`。
 - `node scripts/test_proxy.js`：运行本地代理集成测试，使用 mock 上游，不会访问真实手机。
 - `python3 scripts/check_repo.py`：检查配置、脚本语法、本地 Markdown 链接和 `llms-full.txt` 生成稳定性。
+- `python3 scripts/case_check.py <html|目录>`：投稿前的脱敏与可跑性检查，`--emit` 可生成案例骨架。
 - `llms-full.txt` 是生成文件；修改源文档后由 `scripts/build_llms.py` 重建，不要手工编辑。
 
 本仓库为社区整理的公开项目，非 LifeUp 官方仓库。许可信息见 [LICENSE](LICENSE)。
