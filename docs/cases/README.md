@@ -4,6 +4,12 @@
 
 ## 怎么投稿
 
+**手机直接投稿（推荐，不需要 Git 或电脑）：** 打开[完整界面案例投稿表单](https://github.com/Andrsion/lifeup-custom-frontend/issues/new?template=full-case-submission.yml)，填写案例说明，上传 ZIP 或粘贴单页 HTML，还可附截图。提交后 GitHub Actions 会自动进行静态脱敏检查并回帖；检查器不会执行投稿代码，检查通过也不等于正式收录。
+
+ZIP 附件最大 25 MB。请勿包含真实 Token、手机 IP、个人数据、真实 config.json、备份文件或 node_modules。多文件项目建议把 HTML、CSS、JS 和必要的示例配置打包成 ZIP。
+
+**传统方式（适合会用 Git 的投稿者）：**
+
 **第 0 步：脱敏。** 运行检查器，确认没有 ✖：
 
 ```bash
@@ -20,11 +26,11 @@ python3 scripts/case_check.py <路径> --emit --slug <小写英文短名>
 
 例如 `--slug adventurer-board`（只允许小写字母、数字、连字符）。会在 `docs/cases/_drafts/<slug>.md` 生成骨架，配色、换名、分区会自动填好，**留三处等你写**：为什么好玩 / 灵感来源 / 机制决定情绪（紧迫·松弛·期待）。
 
-**第 2 步：提交。** 二选一：
-- **提 Issue**（推荐，不用懂 Git）：[新建 Issue](https://github.com/Andrsion/lifeup-custom-frontend/issues/new/choose) → 选「🎨 主题 / 换名 投稿」，把骨架内容贴上，并附截图；
-- **提 PR**：把 `_drafts/` 里的文件移到 `docs/cases/`，在本页「已收录」补一行，再提交。
+**第 2 步：提交。** 传统方式二选一：
+- 提 Issue「主题 / 换名 投稿」：适合只投主题设定，不交完整代码；
+- 提 PR：把 `_drafts/` 里的文件移到 `docs/cases/`，在本页「已收录」补一行，再提交。
 
-**不想碰 Git？** 在频道 / 群发帖带截图，注明「可投稿」，管理员会代你整理。
+如果不想碰 Git，使用本页开头的完整界面案例投稿表单，或在频道 / 群发帖带截图并注明「可投稿」，由维护者代为整理。
 
 ## 用 AI Agent 准备投稿（Vibecoding）
 
