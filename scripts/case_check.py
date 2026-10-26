@@ -16,8 +16,9 @@ TOKEN_RE = re.compile(r'"(?:token|tokenHeader)"\s*:\s*"[^"]{3,}"')
 PHONE_RE = re.compile(r"\b1[3-9]\d{9}\b")
 BASE64_RE = re.compile(r"[A-Za-z0-9+/=]{2001,}")
 PRIVATE_IP_RE = re.compile(
-    r"(?<![\w.])(?:192\.168|10)(?:\.\d{1,3}){2}(?![\w.])"
-    r"|(?<![\w.])172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}(?![\w.])"
+    r"(?<![\\w.])192\\.168\\.\\d{1,3}\\.\\d{1,3}(?![\\w.])"
+    r"|(?<![\\w.])10(?:\\.\\d{1,3}){3}(?![\\w.])"
+    r"|(?<![\\w.])172\\.(?:1[6-9]|2\\d|3[01])(?:\\.\\d{1,3}){2}(?![\\w.])"
 )
 EMAIL_RE = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b")
 CSS_COLOR_RE = re.compile(r"--[\w-]+\s*:\s*(#[0-9a-fA-F]{3,8})")
@@ -371,12 +372,7 @@ def print_report(results: list[tuple[str, str, int, str]], green: dict[str, obje
     print(f"  - 总大小：{green['total_bytes']} 字节")
     if green["truncated"]:
         print("  - 截断文件：" + ", ".join(green["truncated"]))  # type: ignore[arg-type]
-    if any(level == "RED" for level, *_ in results):
-        conclusion = "不可提交"
-    elif any(level == "YELLOW" for level, *_ in results):
-        conclusion = "需修改后提交"
-    else:
-        conclusion = "可提交"
+
 
 
 def main() -> int:
