@@ -113,9 +113,12 @@ def build_case(skeleton: str, fields: dict[str,str], author: str) -> str:
     lines=skeleton.splitlines()
     if not lines or not lines[0].startswith("<!--"): raise ValueError("--emit 骨架首行来源注释缺失")
     lines[1:2]=[f"# {name}"]
-    if len(lines)>2 and lines[2].startswith("> 社区投稿"):
-        lines[2]=f"> 社区投稿 · 作者：{author} · 类型：{typ} · 数据来源：{source} · 授权：<请作者确认>"
-    if len(lines)>3 and lines[3].startswith("> 数据来源："): del lines[3]
+    for index, line in enumerate(lines):
+        if line.startswith("> 社区投稿"):
+            lines[index]=f"> 社区投稿 · 作者：{author} · 类型：{typ} · 数据来源：{source} · 授权：<请作者确认>"
+        elif line.startswith("> 数据来源："):
+            del lines[index]
+            break
     text="\n".join(lines).rstrip()+"\n"
     text=replace_section(text,"一句话",fields.get("一句话介绍与设计思路","").strip() or "（投稿人未填写）")
     text=replace_section(text,"补充说明",fields.get("运行方式、已知限制或补充说明","").strip() or "（投稿人未填写运行方式、已知限制或补充说明）")
