@@ -197,7 +197,7 @@ def check_files(files: list[Path]) -> tuple[list[tuple[str, str, int, str]], dic
         for match in TOKEN_HEADER_RE.finditer(content):
             value = match.group(1)
             suspicious_header = (
-                re.search(r"bearer\\s", value, re.I) is not None
+                re.search(r"bearer\s", value, re.I) is not None
                 or len(value) > 60
                 or (
                     len(value) >= 20
