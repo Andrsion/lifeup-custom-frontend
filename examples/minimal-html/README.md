@@ -21,6 +21,10 @@ start.bat / start.command  ← 双击启动
 6. 浏览器打开 **http://127.0.0.1:8787**。
 7. 最省事：直接双击同目录的 `check.bat`（Windows）/ `check.command`（macOS），它等价于下面这条命令。可在仓库根目录运行 `node scripts/doctor.js examples/minimal-html`；它只读检查 `/info`，不执行任何写操作。
 
+## iPad / 平板访问
+
+本示例的代理默认只监听本机回环地址，适合在同一台电脑上打开浏览器。**不要把 `listenHost` 改成局域网地址后就认为可以直接访问**：代理还会校验 Host / Origin，且默认没有面向局域网的用户认证。若确实要让 iPad 访问，需自行修改并审查监听、访问校验和认证策略；风险与限制见[排错指南](../../docs/troubleshooting.md#只有-ipad--平板当看板)。更简单的受支持用法是让 iPad 与运行代理的设备分工：代理留在电脑 / NAS / 树莓派，iPad 只负责显示。
+
 ## 换主题（很简单）
 
 打开 `index.html`，改顶部 `UI` 对象即可：
