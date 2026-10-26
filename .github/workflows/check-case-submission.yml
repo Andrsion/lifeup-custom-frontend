@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   static-check:
-    if: startsWith(github.event.issue.title, '[完整界面案例投稿]')
+    if: contains(github.event.issue.body, '### 案例名称') && contains(github.event.issue.body, '### 投稿确认')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
