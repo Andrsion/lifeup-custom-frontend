@@ -212,6 +212,48 @@ def check_case_checker_fixtures() -> list[str]:
             else:
                 print("✓ case_check.py RED 临时用例通过：token 与私网 IP 均为 RED。")
 
+            token_fixtures = [
+                ('{token:"abcdef123456"}', "key-value"),
+                ('const token="abcdef123456"', "key-value"),
+                ('fetch("/x?token=abcdef123456")', "url-query"),
+                ('Authorization: "Bearer abcdef123456"', "authorization-bearer"),
+                ('localStorage.setItem("lifeup-token","abcdef123456")', "setItem-token-key"),
+                ('{"X-LifeUp-Token":"abcdefghijklmnop"}', "custom-token-header"),
+            ]
+            for index, (payload, mode) in enumerate(token_fixtures):
+                token_file = temp_root / f"token-{index}.html"
+                token_file.write_text(payload, encoding="utf-8")
+                token_result = subprocess.run(
+                    [sys.executable, str(checker), str(token_file), "--no-emit", "--quiet"],
+                    cwd=ROOT, text=True, capture_output=True, check=False,
+                )
+                if token_result.returncode == 0 or mode not in token_result.stdout:
+                    errors.append(f"token fixture {mode} failed: " + (token_result.stdout or token_result.stderr))
+                else:
+                    print(f"✓ token 检测模式 {mode} 临时用例通过。")
+
+            placeholder_file = temp_root / "placeholder.html"
+            placeholder_file.write_text('{token:"your-token-here"} {token:"example-secret"}', encoding="utf-8")
+            placeholder_result = subprocess.run(
+                [sys.executable, str(checker), str(placeholder_file), "--no-emit", "--quiet"],
+                cwd=ROOT, text=True, capture_output=True, check=False,
+            )
+            if placeholder_result.returncode != 0 or "疑似真实 token" in placeholder_result.stdout:
+                errors.append("token placeholder whitelist failed: " + placeholder_result.stdout)
+            else:
+                print("✓ token 占位符白名单临时用例通过。")
+
+            header_file = temp_root / "token-header.html"
+            header_file.write_text('tokenHeader:"Authorization"', encoding="utf-8")
+            header_result = subprocess.run(
+                [sys.executable, str(checker), str(header_file), "--no-emit", "--quiet"],
+                cwd=ROOT, text=True, capture_output=True, check=False,
+            )
+            if header_result.returncode != 0 or "结论：可提交" not in header_result.stdout:
+                errors.append("tokenHeader false-positive fixture failed: " + header_result.stdout)
+            else:
+                print("✓ tokenHeader 请求头名称误判回归用例通过。")
+
             clean_html = temp_root / "clean.html"
             clean_html.write_text("<h1>测试</h1>", encoding="utf-8")
             clean_result = subprocess.run(

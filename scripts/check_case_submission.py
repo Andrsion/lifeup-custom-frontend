@@ -57,7 +57,7 @@ def download_zip(url: str, destination: Path) -> None:
     )
     with urllib.request.urlopen(request, timeout=25) as response:
         final = urllib.parse.urlparse(response.geturl())
-        if final.hostname != "github.com" and not (final.hostname or "").endswith(".githubusercontent.com"):
+        if (final.hostname or "").lower() not in {"github.com", "githubusercontent.com"} and not (final.hostname or "").lower().endswith(".githubusercontent.com"):
             raise ValueError("附件下载被重定向到不受支持的主机，已停止检查。")
         data = response.read(MAX_DOWNLOAD + 1)
     if len(data) > MAX_DOWNLOAD:
@@ -107,7 +107,7 @@ def run_static_check(target: Path) -> tuple[str, int]:
     return output, result.returncode
 
 
-def main() -> int:
+def _main() -> int:
     body = os.environ.get("ISSUE_BODY", "")
     with tempfile.TemporaryDirectory(prefix="lifeup-case-check-") as temp:
         tempdir = Path(temp)
@@ -119,8 +119,16 @@ def main() -> int:
                 target = tempdir / "unpacked"
                 target.mkdir()
                 safe_extract(archive_path, target)
-                if not any(path.is_file() and path.suffix.lower() == ".html" for path in target.rglob("*")):
-                    raise ValueError("ZIP 中没有 HTML 文件，请至少包含一个完整的 .html 界面文件。")
+                checkable = [p for p in target.rglob("*") if p.is_file() and p.suffix.lower() in {".html", ".js", ".css", ".json"}]
+                if not checkable:
+                    write_report(
+                        "## 自动脱敏检查：需人工复核\n\n未在附件中找到可检查的界面文件。\n\n"
+                        "- 机器结论：**需人工复核**\n- 检查方式：未找到 .html/.js/.css/.json 文件，未能完成静态扫描。\n"
+                        "- 注意：检查通过不等于正式收录。\n"
+                        "> 你上传的截图不会被自动检查，请自行确认画面中没有真实手机 IP、任务内容或其他个人信息。\n\n"
+                        "这不代表投稿通过。"
+                    )
+                    return 0
                 source_description = "从投稿 Issue 的 ZIP 附件中提取文件"
             else:
                 match = HTML_BLOCK_RE.search(body)
@@ -151,7 +159,8 @@ def main() -> int:
                 f"- 检查来源：{source_description}\n"
                 f"- 机器结论：**{status}**\n"
                 "- 检查方式：静态扫描；没有执行投稿代码。\n"
-                "- 注意：检查通过不等于正式收录，外部资源、运行效果与授权仍需维护者审核。\n\n"
+                "- 注意：检查通过不等于正式收录，外部资源、运行效果与授权仍需维护者审核。\n"
+                "> 你上传的截图不会被自动检查，请自行确认画面中没有真实手机 IP、任务内容或其他个人信息。\n\n"
                 "<details>\n<summary>查看检查明细</summary>\n\n"
                 "~~~text\n" + (output[:12000] or "检查器未返回明细") +
                 "\n~~~\n</details>\n"
@@ -164,6 +173,23 @@ def main() -> int:
                 "请确认 ZIP 文件完整、文件路径正常，并编辑 Issue 重新提交。此结果不代表投稿通过。"
             )
     return 0
+
+
+def main() -> int:
+    try:
+        return _main()
+    except Exception as exc:
+        report = (
+            "## 自动脱敏检查：未完成\n\n"
+            f"处理投稿时发生未预期错误：{type(exc).__name__}: {exc}\n\n"
+            "这不代表投稿通过。请维护者人工复核附件，并在修复问题后重新编辑 Issue。"
+        )
+        try:
+            write_report(report)
+        except Exception as report_exc:
+            print(f"无法写入 case-submission-report.md：{type(report_exc).__name__}: {report_exc}")
+            print(report)
+        return 0
 
 
 if __name__ == "__main__":

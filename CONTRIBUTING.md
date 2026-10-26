@@ -21,6 +21,15 @@
 3. 提 [Issue](https://github.com/Andrsion/lifeup-custom-frontend/issues/new/choose) 或 PR。
 
 只投主题 / 换名（不交代码）的，直接提「主题 / 换名 投稿」Issue 即可.
+
+## 维护者：把投稿导入成案例
+
+1. 打开投稿 Issue，确认内容、授权与素材版权没问题。
+2. 去 **Actions → import-case → Run workflow**，填 Issue 编号与 slug，先 `dry_run = true` 跑一遍看报告。
+3. 报告无 RED 后再用 `dry_run = false` 跑一次，仓库会自动生成 `docs/cases/<slug>.md`、补索引与 CHANGELOG 并提交。
+4. 打开生成文件，补齐三处待填（为什么好玩 / 灵感来源 / 机制决定情绪），必要时调整措辞后提交。
+
+> 自动检查只做静态扫描，不执行投稿代码；工作流只有手动触发才有写权限。
 ## 提交前
 
 - 接口一律**以官方为准**：<https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>；**不要写没有依据的参数**。

@@ -12,8 +12,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MAX_BYTES = 2 * 1024 * 1024
 SCAN_EXTENSIONS = {".html", ".js", ".css", ".json"}
-TOKEN_SECRET_RE = re.compile(r'"token"\s*:\s*"[^"]{3,}"')
-TOKEN_HEADER_RE = re.compile(r'"tokenHeader"\s*:\s*"([^"]{3,})"')
+TOKEN_KEY_VALUE_PATTERNS = [
+    ("key-value", re.compile(r"""(?i)\b(token|access_token|api_key|apikey|secret|password|passwd)\b["']?\s*[:=]\s*["']([^"']{8,})["']""")),
+    ("authorization-bearer", re.compile(r"""(?i)authorization["']?\s*[:=]\s*["']?\s*bearer\s+([A-Za-z0-9._-]{8,})""")),
+    ("url-query", re.compile(r"""(?i)[?&](?:token|access_token|api_key)=([A-Za-z0-9._-]{8,})""")),
+    ("custom-token-header", re.compile(r"""(?i)["']([\w-]*token[\w-]*)["']\s*:\s*["']([A-Za-z0-9._-]{12,})["']""")),
+    ("setItem-token-key", re.compile(r"""(?i)setItem\(\s*["'][^"']*token[^"']*["']\s*,\s*["']([^"']{8,})["']""")),
+]
+TOKEN_HEADER_RE = re.compile(r"""(?i)\btokenHeader\b["']?\s*[:=]\s*["']([^"']*)["']""")
+TOKEN_PLACEHOLDER_RE = re.compile(r"(?i)^(your|xxx|replace|todo|example|placeholder|<|\.\.\.)")
 PHONE_RE = re.compile(r"\b1[3-9]\d{9}\b")
 BASE64_RE = re.compile(r"[A-Za-z0-9+/=]{2001,}")
 PRIVATE_IP_RE = re.compile(
@@ -150,6 +157,28 @@ def add_matches(results: list[tuple[str, str, int, str]], level: str, path: Path
         results.append((level, relpath(path), line_number(content, match.start()), message))
 
 
+def scan_token_patterns(results: list[tuple[str, str, int, str]], path: Path, content: str) -> None:
+    """Detect common token-bearing source forms without printing secret values."""
+    filename = relpath(path)
+    for mode, pattern in TOKEN_KEY_VALUE_PATTERNS:
+        for match in pattern.finditer(content):
+            if mode == "custom-token-header" and match.group(1).lower() == "tokenheader":
+                continue
+            value = match.group(2) if mode == "custom-token-header" else match.group(match.lastindex or 1)
+            if TOKEN_PLACEHOLDER_RE.search(value):
+                continue
+            results.append(("RED", filename, line_number(content, match.start()),
+                            f"疑似真实 token（命中模式：{mode}）"))
+    for match in TOKEN_HEADER_RE.finditer(content):
+        value = match.group(1).strip()
+        if TOKEN_PLACEHOLDER_RE.search(value):
+            continue
+        suspicious = bool(re.search(r"(?i)bearer\s", value)) or len(value) > 60
+        results.append(("RED" if suspicious else "YELLOW", filename, line_number(content, match.start()),
+                        "疑似真实 token（命中模式：tokenHeader-secret）" if suspicious
+                        else "tokenHeader 是请求头名称，请确认没有在这里写密钥"))
+
+
 def is_backup_filename(path: Path) -> bool:
     name = path.name.lower()
     if name.endswith(".lfbak"):
@@ -193,26 +222,7 @@ def check_files(files: list[Path]) -> tuple[list[tuple[str, str, int, str]], dic
         if is_backup_filename(path):
             results.append(("RED", relpath(path), 1, "疑似备份数据文件名（.lfbak / backup）"))
 
-        add_matches(results, "RED", path, content, TOKEN_SECRET_RE, "疑似真实 token")
-        for match in TOKEN_HEADER_RE.finditer(content):
-            value = match.group(1)
-            suspicious_header = (
-                re.search(r"bearer\s", value, re.I) is not None
-                or len(value) > 60
-                or (
-                    len(value) >= 20
-                    and ("-" in value or "_" in value)
-                    and re.search(r"[a-z]", value) is not None
-                    and re.search(r"[A-Z]", value) is not None
-                )
-            )
-            results.append((
-                "RED" if suspicious_header else "YELLOW",
-                relpath(path),
-                line_number(content, match.start()),
-                "疑似真实密钥被填入 tokenHeader" if suspicious_header
-                else "tokenHeader 是请求头名称，请确认没有在这里写密钥",
-            ))
+        scan_token_patterns(results, path, content)
         add_matches(results, "RED", path, content, PHONE_RE, "疑似手机号")
         add_matches(results, "RED", path, content, BASE64_RE, "连续 Base64 字符超过 2000")
         if path.name == "config.example.json":
