@@ -19,6 +19,7 @@
 | Skills 是否需要单独安装、客户端差异、进阶工具与事件工作流 | [MCP 与 Skills 指南](docs/mcp-skills.md) → 官方 [MCP 包说明](https://github.com/Ayagikei/LifeUp-SDK/blob/main/mcp/README.md) → 当前 [lifeup-cloud Skill](https://github.com/Ayagikei/LifeUp-SDK/tree/main/mcp/skills/lifeup-cloud) → [官方 MCP Wiki](https://wiki.lifeupapp.fun/zh-cn/guide/api_mcp.md) |
 | 制作某个主题的界面 | 先读 [主题施工稿目录](docs/specs/) 中对应的一份；不要将所有主题稿当成通用 API 规范 |
 | 想直接运行 / 改造现有项目 | [可运行示例](#examples) 与 [仓库质量检查](scripts/check_repo.py) |
+| 投稿案例、脱敏检查、自动暂存或正式收录 | [社区界面案例流程](docs/cases/README.md) → [AI 投稿提示词](docs/cases/_agent-prompt.md)（使用 Agent 整理投稿时） |
 
 ## AI 必须遵守的规则
 
