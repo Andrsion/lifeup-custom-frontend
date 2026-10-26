@@ -176,6 +176,76 @@ def check_case_examples() -> list[str]:
     return errors
 
 
+
+def check_case_checker_fixtures() -> list[str]:
+    """Exercise RED detection, clean HTML, and draft emission using disposable files."""
+    checker = ROOT / "scripts" / "case_check.py"
+    errors: list[str] = []
+    draft_dir = ROOT / "docs" / "cases" / "_drafts"
+    draft_dir_existed = draft_dir.exists()
+    slug = f"case-check-ci-smoke-{__import__('os').getpid()}"
+    draft_path = draft_dir / f"{slug}.md"
+    try:
+        with tempfile.TemporaryDirectory(prefix="case-check-fixture-") as temp_dir:
+            temp_root = Path(temp_dir)
+            red_html = temp_root / "red.html"
+            red_html.write_text(
+                '<html><body>{"token":"abcdef123456"} 192.168.1.50</body></html>',
+                encoding="utf-8",
+            )
+            red_result = subprocess.run(
+                [sys.executable, str(checker), str(red_html), "--no-emit", "--quiet"],
+                cwd=ROOT, text=True, capture_output=True, check=False,
+            )
+            red_output = red_result.stdout
+            if (
+                red_result.returncode == 0
+                or "结论：不可提交" not in red_output
+                or "疑似真实 token" not in red_output
+                or "出现私网 IP" not in red_output
+            ):
+                errors.append(
+                    "case_check.py RED fixture failed: expected token and private-IP REDs; "
+                    + (red_output or red_result.stderr)
+                )
+            else:
+                print("✓ case_check.py RED 临时用例通过：token 与私网 IP 均为 RED。")
+
+            clean_html = temp_root / "clean.html"
+            clean_html.write_text("<h1>测试</h1>", encoding="utf-8")
+            clean_result = subprocess.run(
+                [sys.executable, str(checker), str(clean_html), "--no-emit", "--quiet"],
+                cwd=ROOT, text=True, capture_output=True, check=False,
+            )
+            if clean_result.returncode != 0 or "结论：可提交" not in clean_result.stdout:
+                errors.append(
+                    "case_check.py clean fixture failed: "
+                    + (clean_result.stdout or clean_result.stderr)
+                )
+            else:
+                print("✓ case_check.py 纯标题临时用例通过：结论为可提交。")
+
+            emit_result = subprocess.run(
+                [sys.executable, str(checker), str(clean_html), "--emit", "--slug", slug, "--quiet"],
+                cwd=ROOT, text=True, capture_output=True, check=False,
+            )
+            if emit_result.returncode != 0 or not draft_path.is_file():
+                errors.append(
+                    "case_check.py --emit fixture failed: "
+                    + (emit_result.stdout or emit_result.stderr)
+                )
+            else:
+                print("✓ case_check.py --emit 临时用例通过：已生成草稿骨架。")
+    finally:
+        draft_path.unlink(missing_ok=True)
+        if not draft_dir_existed:
+            try:
+                draft_dir.rmdir()
+            except OSError:
+                pass
+    return errors
+
+
 def main() -> int:
     errors = []
     errors += check_json()
@@ -183,6 +253,7 @@ def main() -> int:
     errors += check_local_links()
     errors += check_llms_deterministic()
     errors += check_case_examples()
+    errors += check_case_checker_fixtures()
     if errors:
         print("仓库质量检查失败：")
         for error in errors:
