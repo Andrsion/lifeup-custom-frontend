@@ -4,7 +4,7 @@
 > 修改内容请改源文件，然后重跑：`python3 scripts/build_llms.py`
 > 自动收录 `README.md` 与 `docs/` 下的 Markdown 文档；`docs/specs/` 是可选的单主题材料，不并入本文件，索引见 `llms.txt`。
 > 以 `_` 开头的文件或目录，以及包含 `<!-- llms:exclude -->` 标记的文档会被跳过。文件开头自动生成收录目录。
-> 本文档体量：74136 字符 · 13 篇（正文口径，由脚本统计，随每次重建更新）。
+> 本文档体量：74519 字符 · 13 篇（正文口径，由脚本统计，随每次重建更新）。
 > 使用建议：此文档较大，token 受限时不要整篇投喂，改用 llms.txt 的路由逐篇读取。
 
 ## 文档目录（自动生成）
@@ -133,14 +133,14 @@ Agent 需要能操作本机 MCP 配置、执行命令并访问手机所在的局
 
 做了一套自己的界面？三种投法，从轻到重：
 1. **只投主题 / 换名**（不交代码）：提 [Issue「主题 / 换名 投稿」](https://github.com/Andrsion/lifeup-custom-frontend/issues/new/choose)，写清「金币→？任务→？属性→？」即可，会收进 [世界观 / 主题参考](docs/samples.md)。
-2. **投可运行的界面**（html / 示例）：先跑 `python3 scripts/case_check.py <你的文件或目录>` 确认没有 ✖（常见是夹带了自己的 token 或手机 IP），再按 [社区界面案例](docs/cases/) 的三步提交。
+2. **投完整界面（推荐，无需 Git）**：手机打开[完整界面案例投稿表单](https://github.com/Andrsion/lifeup-custom-frontend/issues/new?template=full-case-submission.yml)，填写介绍，上传 ZIP 或粘贴单页 HTML，还可以附截图。提交后会自动做静态脱敏检查并回帖；检查通过不等于审核通过，维护者确认后才会收录。
+3. **投施工稿**（完整规格 + 提示词）：提 Issue，说明所属主题与机制轴。
 
-`docs/cases/_drafts/` 已在 `.gitignore` 中，草稿不会被提交；确认要收录时，把文件移到 `docs/cases/` 再提交。
-3. **投施工稿**（完整规格 + 提示词）：同类走 Issue，说明所属主题与机制轴。
+如果你有电脑，也可以继续按 [社区界面案例](docs/cases/) 的传统流程准备文件并提 PR。`docs/cases/_drafts/` 中的草稿不会自动收录。
 
 **用 Vibecoding 做界面？** Vibecoding（氛围编程）就是用自然语言描述需求，让 AI 帮你生成或修改代码。你可以把 [AI 投稿提示词](docs/cases/_agent-prompt.md) 全文复制给能读写项目文件、运行命令的 Agent，让它整理案例、脱敏检查并生成草稿；提示词文件开头有用途标识。它只负责准备投稿材料，不会自动审核或收录。
 
-不想碰 Git？在频道 / 群里发帖带截图，注明「可投稿」，管理员会替你整理提交。
+不方便使用 Git？优先使用上面的手机投稿表单；也可以在频道 / 群里发帖带截图，注明「可投稿」，管理员会替你整理提交。
 
 投稿通过后会收录进 [docs/cases/](docs/cases/)（或 samples.md），并在 CHANGELOG 记一条，注明作者。
 
@@ -1207,6 +1207,12 @@ curl http://192.168.1.23:13276/info
 
 ## 怎么投稿
 
+**手机直接投稿（推荐，不需要 Git 或电脑）：** 打开[完整界面案例投稿表单](https://github.com/Andrsion/lifeup-custom-frontend/issues/new?template=full-case-submission.yml)，填写案例说明，上传 ZIP 或粘贴单页 HTML，还可附截图。提交后 GitHub Actions 会自动进行静态脱敏检查并回帖；检查器不会执行投稿代码，检查通过也不等于正式收录。
+
+ZIP 附件最大 25 MB。请勿包含真实 Token、手机 IP、个人数据、真实 config.json、备份文件或 node_modules。多文件项目建议把 HTML、CSS、JS 和必要的示例配置打包成 ZIP。
+
+**传统方式（适合会用 Git 的投稿者）：**
+
 **第 0 步：脱敏。** 运行检查器，确认没有 ✖：
 
 ```bash
@@ -1223,11 +1229,11 @@ python3 scripts/case_check.py <路径> --emit --slug <小写英文短名>
 
 例如 `--slug adventurer-board`（只允许小写字母、数字、连字符）。会在 `docs/cases/_drafts/<slug>.md` 生成骨架，配色、换名、分区会自动填好，**留三处等你写**：为什么好玩 / 灵感来源 / 机制决定情绪（紧迫·松弛·期待）。
 
-**第 2 步：提交。** 二选一：
-- **提 Issue**（推荐，不用懂 Git）：[新建 Issue](https://github.com/Andrsion/lifeup-custom-frontend/issues/new/choose) → 选「🎨 主题 / 换名 投稿」，把骨架内容贴上，并附截图；
-- **提 PR**：把 `_drafts/` 里的文件移到 `docs/cases/`，在本页「已收录」补一行，再提交。
+**第 2 步：提交。** 传统方式二选一：
+- 提 Issue「主题 / 换名 投稿」：适合只投主题设定，不交完整代码；
+- 提 PR：把 `_drafts/` 里的文件移到 `docs/cases/`，在本页「已收录」补一行，再提交。
 
-**不想碰 Git？** 在频道 / 群发帖带截图，注明「可投稿」，管理员会代你整理。
+如果不想碰 Git，使用本页开头的完整界面案例投稿表单，或在频道 / 群发帖带截图并注明「可投稿」，由维护者代为整理。
 
 ## 用 AI Agent 准备投稿（Vibecoding）
 
