@@ -12,7 +12,9 @@
 
 ## 投稿一套界面
 
-完整流程见 **[docs/cases/README.md](docs/cases/README.md)**。三步概括：
+**不需要 Git 或电脑：** 在手机打开[完整界面案例投稿表单](https://github.com/Andrsion/lifeup-custom-frontend/issues/new?template=full-case-submission.yml)，填写说明，上传 ZIP 或粘贴单页 HTML。GitHub Actions 会自动进行静态脱敏检查并回帖；检查不会执行投稿代码，也不会自动收录。
+
+使用传统文件流程时，完整步骤见 **[docs/cases/README.md](docs/cases/README.md)**。三步概括：
 
 1. `python3 scripts/case_check.py <路径>` 确认没有 ✖（脱敏）；
 2. `--emit --slug <小写英文短名>` 生成骨架，填完三处待填；
