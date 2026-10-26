@@ -22,10 +22,6 @@
 
 只投主题 / 换名（不交代码）的，直接提「主题 / 换名 投稿」Issue 即可.
 
-## 维护者：把投稿导入成案例
-
-维护者流程见 [docs/cases/README.md](docs/cases/README.md)「维护者：投稿怎么进仓库」——投稿自动暂存，收录只需让 Agent 执行一句话。
-
 ## 提交前
 
 - 接口一律**以官方为准**：<https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>；**不要写没有依据的参数**。
