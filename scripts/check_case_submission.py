@@ -175,7 +175,7 @@ def _main() -> int:
                 archive_path = tempdir / "submission.zip"; download_zip(zip_url, archive_path)
                 target = tempdir / "unpacked"; target.mkdir(); safe_extract(archive_path, target)
                 if not find_checkable_files(target):
-                    write_report("## 自动脱敏检查：需人工复核\n\n未在附件中找到可检查的界面文件。\n\n- 机器结论：**需人工复核**\n- 注意：检查通过不等于正式收录。")
+                    write_report("## 自动脱敏检查：需人工复核\n\n未在附件中找到可检查的界面文件。\n\n- 机器结论：**需人工复核**\n- 注意：检查通过不等于正式收录。\n> 你上传的截图不会被自动检查，请自行确认画面中没有真实手机 IP、任务内容或其他个人信息。\n\n这不代表投稿通过。")
                     result["yellow"] = ["未找到可检查的界面文件"]; return 0
                 source_description = "从投稿 Issue 的 ZIP 附件中提取文件"
             else:
@@ -214,7 +214,7 @@ def main() -> int:
         try:
             write_result({"issue_number":int(os.environ.get("ISSUE_NUMBER","0") or "0"),"case_name":"","author":"","case_type":"","data_source":"","summary":"","notes":"","html_source":"","html_source_present":False,"zip_url":"","red":[],"yellow":[str(exc)],"conclusion":"review"})
         except Exception: pass
-        try: write_report("## 自动脱敏检查：未完成\\n\\n处理投稿时发生未预期错误；需人工复核。")
+        try: write_report("## 自动脱敏检查：未完成\n\n处理投稿时发生未预期错误；这不代表投稿通过。请维护者人工复核附件。")
         except Exception: pass
         return 0
 

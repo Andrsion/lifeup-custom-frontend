@@ -180,7 +180,7 @@ def build_staged_markdown(fields: dict[str, str], issue_no: int, skeleton: str, 
     lines = text.splitlines()
     if len(lines) < 2: raise ValueError("case_check.py --emit 生成了空骨架")
     lines[0] = f"<!-- 自动导入的未审核草稿 · issue #{issue_no} · 请勿直接发布 -->"
-    text = re.sub(r"<!-- 待填(?::[^>]*)? -->", "<!-- 待填 -->", "\n".join(lines) + "\n")
+    text = re.sub(r"<!-- 待填[^>]* -->", "<!-- 待填 -->", text)
     text = plain_external_links(text)
     if re.search(r"!\[.*?\]\(https?:", text, re.S) or re.search(r"\[[^\]]*\]\(https?:", text): raise ValueError("外链降级检查失败")
     return text
