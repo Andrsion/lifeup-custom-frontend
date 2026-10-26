@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 const assert=require("node:assert/strict"),fs=require("node:fs"),os=require("node:os"),path=require("node:path"),http=require("node:http"),{spawn}=require("node:child_process");
+// 两个页面示例各自自包含；相同主用例分别验证，避免 proxy.js 实现漂移。
 const ROOT=path.resolve(__dirname,".."),proxySources=[path.join(ROOT,"examples/minimal-html/proxy.js"),path.join(ROOT,"examples/desktop-dashboard/proxy.js")];
 const NODE_BIN=process.env.NODE_BIN||(path.basename(process.execPath).toLowerCase()==="linker64"?"node":process.execPath);
 function freePort(){return new Promise((resolve,reject)=>{const s=http.createServer();s.once("error",reject);s.listen(0,"127.0.0.1",()=>{const a=s.address();s.close(e=>e?reject(e):resolve(a.port));});});}
