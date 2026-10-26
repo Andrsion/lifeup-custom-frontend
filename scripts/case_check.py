@@ -52,7 +52,7 @@ class TextExtractor(HTMLParser):
         self.title_depth = 0
         self.h1_depth = 0
         self.nav_depth = 0
-        self.tab_depth = 0
+        self.open_elements: list[tuple[str, bool]] = []
         self.title_parts: list[str] = []
         self.h1_parts: list[str] = []
         self.nav_parts: list[str] = []
@@ -61,28 +61,30 @@ class TextExtractor(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         values = dict(attrs)
-        if tag.lower() == "title":
+        lowered = tag.lower()
+        self.open_elements.append((lowered, values.get("role") == "tab"))
+        if lowered == "title":
             self.title_depth += 1
-        if tag.lower() == "h1":
+        if lowered == "h1" and not self.h1_parts:
             self.h1_depth += 1
-        if tag.lower() == "nav":
+        if lowered == "nav":
             self.nav_depth += 1
-        if values.get("role") == "tab":
-            self.tab_depth += 1
         if values.get("data-tab"):
             self.data_tabs.append(values["data-tab"] or "")
 
     def handle_endtag(self, tag: str) -> None:
-        if tag.lower() == "title" and self.title_depth:
+        lowered = tag.lower()
+        if lowered == "title" and self.title_depth:
             self.title_depth -= 1
-        if tag.lower() == "h1" and self.h1_depth:
+        if lowered == "h1" and self.h1_depth:
             self.h1_depth -= 1
-        if tag.lower() == "nav" and self.nav_depth:
+        if lowered == "nav" and self.nav_depth:
             self.nav_depth -= 1
-        if tag.lower() in {"button", "a", "div", "span"} and self.tab_depth:
-            # The tab's visible text is collected below; depth is reset at matching close
-            # only for common tab elements, while malformed HTML remains non-fatal.
-            self.tab_depth = max(0, self.tab_depth - 1)
+        # Remove the closed element and any malformed nested elements after it.
+        for index in range(len(self.open_elements) - 1, -1, -1):
+            if self.open_elements[index][0] == lowered:
+                del self.open_elements[index:]
+                break
 
     def handle_data(self, data: str) -> None:
         if self.title_depth:
@@ -91,7 +93,7 @@ class TextExtractor(HTMLParser):
             self.h1_parts.append(data)
         if self.nav_depth:
             self.nav_parts.append(data)
-        if self.tab_depth:
+        if any(is_tab for _tag, is_tab in self.open_elements):
             self.tab_parts.append(data)
 
 
