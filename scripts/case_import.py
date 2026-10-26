@@ -81,16 +81,18 @@ def helper_functions():
 def check_and_emit(source: Path, slug: str, dry_run: bool):
     checker=SCRIPTS/"case_check.py"
     if dry_run:
-        with tempfile.TemporaryDirectory(prefix="case-import-checker-") as tmp:
-            root=Path(tmp); (root/"scripts").mkdir()
-            isolated=root/"scripts/case_check.py"; shutil.copy2(checker,isolated)
-            (root/"docs/cases/_drafts").mkdir(parents=True)
-            first=subprocess.run([sys.executable,str(isolated),str(source),"--no-emit"],cwd=root,text=True,capture_output=True,timeout=60)
-            output=(first.stdout+"\n"+first.stderr).strip()
-            if first.returncode or re.search(r"(?m)^✖ RED\b",output): return output,first.returncode or 1,None
-            emitted=subprocess.run([sys.executable,str(isolated),str(source),"--emit","--slug",slug,"--force"],cwd=root,text=True,capture_output=True,timeout=60)
-            output+="\n"+(emitted.stdout+"\n"+emitted.stderr).strip()
-            return output,emitted.returncode,root/"docs/cases/_drafts"/f"{slug}.md"
+        # Keep the isolated checker tree under the outer temporary source directory,
+        # which remains alive until the caller has read the generated skeleton.
+        root=source.parent/"checker-root"
+        (root/"scripts").mkdir(parents=True,exist_ok=True)
+        isolated=root/"scripts/case_check.py"; shutil.copy2(checker,isolated)
+        (root/"docs/cases/_drafts").mkdir(parents=True,exist_ok=True)
+        first=subprocess.run([sys.executable,str(isolated),str(source),"--no-emit"],cwd=root,text=True,capture_output=True,timeout=60)
+        output=(first.stdout+"\n"+first.stderr).strip()
+        if first.returncode or re.search(r"(?m)^✖ RED\b",output): return output,first.returncode or 1,None
+        emitted=subprocess.run([sys.executable,str(isolated),str(source),"--emit","--slug",slug,"--force"],cwd=root,text=True,capture_output=True,timeout=60)
+        output+="\n"+(emitted.stdout+"\n"+emitted.stderr).strip()
+        return output,emitted.returncode,root/"docs/cases/_drafts"/f"{slug}.md"
     first=subprocess.run([sys.executable,str(checker),str(source),"--no-emit"],cwd=ROOT,text=True,capture_output=True,timeout=60)
     output=(first.stdout+"\n"+first.stderr).strip()
     if first.returncode or re.search(r"(?m)^✖ RED\b",output): return output,first.returncode or 1,None
