@@ -12,8 +12,9 @@
 
 - 主机：`http://{手机IP}:13276`（默认端口 **13276**，以云人升显示为准）
 - 统一响应：`{ code, message, data }`。**`code=200` 只表示传输成功**
-  - JSON `code=10001`：人升未运行 / 未授「读取数据」
-  - JSON `code=10002`：ContentProvider 查询失败
+  - **列表为空 / 请求失败**：检查云人升三项授权与人升是否在后台运行。
+  - **HTTP 401**：Token 不匹配，检查云人升当前配置。
+  - **请求超时**：检查手机是否休眠，以及手机与电脑是否处于同一 Wi-Fi。
 - Token 认证失败属于 HTTP 认证层：仅当云人升配置了 Token 时适用；检查当前云人升设置与请求认证方式。HTTP 状态码和 JSON `code` 是不同层次，不把未由官方文档明确保证的状态码当作稳定业务码。
 - 常见列表接口的 `data` 是**数组**；`/coin`、`/info`、`/events`、`/statistics` 返回对象结构（其中 `/events` 的事件列表位于对象内部）。`/files/{url}` 返回文件流，不套用 JSON 响应包装
 - 当前官方 SDK 默认值：`/history`、`/feelings`、五种 `*_records` 接口均为 `offset=0`、`limit=100`；`/events` 为 `after=0`、`limit=50`。这些默认值是核对时 SDK 的实现，不保证旧版完全一致。

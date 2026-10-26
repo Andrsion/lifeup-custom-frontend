@@ -18,7 +18,11 @@
 - 一台**电脑**（Windows / macOS）
 - 手机与电脑连**同一个 Wi-Fi**
 - **Node.js 20+**：本地代理需要它运行。到 [nodejs.org](https://nodejs.org/) 下载 LTS 安装包即可；安装与版本检查遇到问题，见[排错指南](docs/troubleshooting.md)「装 Node / 下依赖很慢」。
-- 手机上是**人升 + 云人升**，并开启「读取人升数据」。云人升在应用商店搜不到：国内版要**先有会员**，再在 人升「侧边栏 → 设置 → 实验」里点《云人升》下载（非会员看不到该入口）；Google Play 版也可在商店搜《云人升》（`net.lifeupapp.lifeup.http`）
+- 手机上是**人升 + 云人升**，并完成云人升里的三项授权（打开云人升 → 「配置」区，每项右侧都有「配置」按钮）：
+  ① **读取「人升」数据权限**（最关键）——授权以便读取任务、商品等数据；点「配置」后会弹出系统弹窗「“云人升” 想要打开 “人升”」，选 **30 天内允许** 或 **仅本次允许**，跟随跳转完成授权（部分旧系统会直接跳转、不弹窗）。
+  ② **悬浮窗权限**（Android 10+）——授予后才能在后台显示页面并拉起人升的 API 页面。
+  ③ **忽略电池优化**——保持服务稳定后台运行；另需按厂商自行检查「自启动」并在多任务界面锁定本应用。
+  底部「状态」区可自查是否已获得悬浮窗权限。云人升在应用商店搜不到：国内版要**先有会员**，再在 人升「侧边栏 → 设置 → 实验」里点《云人升》下载（非会员看不到该入口）；Google Play 版也可在商店搜《云人升》（`net.lifeupapp.lifeup.http`）
 - **人升会员**（**是硬前提**：国内版连云人升的下载入口都在会员区；调用接口当然也要会员）—— 详见 [会员与接口门槛](docs/membership.md)
 
 **只有手机、没有电脑？** 暂时无法运行本项目的本地代理；MCP 客户端也需要受支持的运行环境。可以先了解概念，有条件时再动手。
@@ -44,7 +48,7 @@
 | 入门 | [会员与接口门槛](docs/membership.md) · [minimal-html 快速上手](examples/minimal-html/README.md) · [排错指南](docs/troubleshooting.md) |
 | 参考 | [API 速查表](docs/api-cheatsheet.md) · [世界观 / 主题参考](docs/samples.md) · [从书到人升](docs/books-to-lifeup.md) |
 | 进阶 | [实现方案](docs/custom-ui-ai-mcp.md) · [AI 施工标准](docs/ai-build-standard.md) · [MCP 与 Skills 指南](docs/mcp-skills.md) · [MCP 安装与使用指南](docs/mcp-quickstart.md) |
-| 主题施工稿 | [docs/specs/](docs/specs/)：星露谷农场 / 原神 / 崩坏：星穹铁道（界面规格 + 可粘贴提示词） |
+| 主题施工稿 | [星露谷](docs/specs/stardew-farm.md) · [原神](docs/specs/genshin.md) · [崩坏：星穹铁道](docs/specs/star-rail.md)（界面规格 + 可粘贴提示词） |
 
 ## 开工前 5 分钟自检
 
@@ -53,6 +57,8 @@
 1. **手机侧**：人升 + 云人升已安装，并开启「读取人升数据」；会员与版本门槛见[会员与接口门槛](docs/membership.md)及上方「版本门槛」。
 2. **网络与环境**：手机和代理设备在同一局域网；记下云人升显示的 `IP:13276`。本地示例需要 Node.js 20+。
 3. **配置与验证**：下载并解压仓库后，进入示例目录，把 `config.example.json` 复制为 `config.json`，按该示例的说明填写地址。不要提交真实配置或 Token。详细步骤见 [minimal-html 快速上手](examples/minimal-html/README.md)；可选的只读诊断见 `node scripts/doctor.js examples/minimal-html`（只请求 `GET /info`，不执行写操作）。
+
+> 文档请在 GitHub 网页上读：解压后本地的 `.md` 用记事本打开是源码、链接点不动，本地那份只需要用来跑示例。
 
 ## 给 AI Agent 的启动指令
 
