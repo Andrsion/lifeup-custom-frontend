@@ -26,12 +26,16 @@
   .err{ background:#3a1e22; border:1px solid #6b2b33; color:#ffb4b4; border-radius:10px;
         padding:12px 14px; margin-bottom:14px; white-space:pre-wrap; }
   .muted{ color:var(--sub); font-size:13px; }
+  .upstream-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 18px;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:10px}
+  .upstream-bar .label{color:var(--sub);font-size:13px} #upstreamBox{color:var(--fg);font:600 13px/1.4 ui-monospace,monospace}
+  #upstreamInput{width:150px;max-width:42vw;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:7px;padding:7px 8px;font:13px system-ui,sans-serif} #upstreamMessage{color:var(--sub);font-size:12px}
 </style>
 </head>
 <body>
   <h1 id="appTitle">人升 · 我的看板</h1>
   <div class="sub" id="subTitle">云人升 · 最小可运行示例 —— 想换主题，改下面 &lt;script&gt; 里的 UI 即可</div>
 
+  <div class="upstream-bar" aria-label="云人升地址切换"><span class="label">当前地址</span><code id="upstreamBox">读取中…</code><input id="upstreamInput" type="text" placeholder="手机IP 或 IP:13276" aria-label="新的云人升地址" /><button id="upstreamBtn" type="button">换</button><span id="upstreamMessage" role="status" aria-live="polite"></span></div>
   <div id="err" class="err" style="display:none"></div>
   <div class="row" id="stats"></div>
   <div id="tasks"></div>
@@ -157,7 +161,10 @@ async function load(){
   }
 }
 
-load();
+const $upstreamBox=document.getElementById("upstreamBox"),$upstreamInput=document.getElementById("upstreamInput"),$upstreamMessage=document.getElementById("upstreamMessage");
+async function refreshUpstreamAddress(){try{const r=await fetch("/__upstream"),d=await r.json();if(!r.ok)throw new Error(d.error||"读取地址失败");$upstreamBox.textContent=d.host+":"+d.port}catch(e){$upstreamMessage.textContent=e.message}}
+document.getElementById("upstreamBtn").onclick=async()=>{$upstreamMessage.textContent="";try{const r=await fetch("/__upstream",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({host:$upstreamInput.value})}),d=await r.json();if(!r.ok)throw new Error(d.error||"切换失败");$upstreamBox.textContent=d.host+":"+d.port;$upstreamInput.value="";await load()}catch(e){$upstreamMessage.textContent=e.message;showErr(e.message)}};
+refreshUpstreamAddress();load();
 setInterval(load, 30000);   // 每 30 秒自动刷新；也可改成监听云人升广播事件
 </script>
 </body>
