@@ -8,7 +8,7 @@
 - README 按新手重写：`Download ZIP` 取文件、Node 安装与成功 / 失败对照、只读诊断改为可选并给双击脚本、说明「只有手机时能先做的三件事」、补网页版 AI 的完整路线（含存成 `.txt` 与误关黑框两个坑）。
 - 两个示例新增顶栏地址切换（`/__upstream`，只改内存不写配置），并写入 AI 施工标准 4.5 作为必做项，测试同时覆盖两份代理。
 - 新增 `scripts/case_check.py`：投稿脱敏与可跑性检查（真实 token、私网 IP、手机号、大段 base64、外部 CDN），`--emit` 生成案例骨架到 `docs/cases/_drafts/`；接入 CI 与仓库回归，并修正把请求头名称误判为密钥的问题。
-- 新增投稿入口与完整流程：README「投稿你的界面」分三种投法（只投主题 / 换名、投可运行界面、投施工稿）；`docs/cases/` 写全「脱敏检查 → 生成骨架 → 提 Issue 或 PR」；CONTRIBUTING 改为单向指向 `docs/cases/`。
+- 新增手机友好的完整界面投稿表单：支持上传 ZIP / 截图或粘贴单页 HTML；GitHub Actions 自动进行静态脱敏扫描并在 Issue 回帖，不执行投稿代码、不自动收录；同步更新 README、`docs/cases/` 与 CONTRIBUTING 的投稿说明。
 - 新增带用途注释的 AI Agent 投稿提示词，面向 Vibecoding 用户辅助整理案例、脱敏检查和生成草稿；明确不自动审核、提交或收录。
 - 排错指南补 Node / npm 国内镜像（阿里云、清华 TUNA、`registry.npmmirror.com`）；主题参考补「先盘点四样地基 + 四个问题」与五种质感及字体版权说明。
 - 校正 HTTP 路由、写操作结果语义与 Token 配置说明；看板打卡后重新读取任务确认状态。
