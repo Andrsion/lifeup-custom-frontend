@@ -155,6 +155,17 @@ def is_backup_filename(path: Path) -> bool:
     }
 
 
+def target_has_node_modules(files: list[Path]) -> bool:
+    """检查扫描根目录附近是否存在依赖目录（扫描文件列表本身会跳过该目录）。"""
+    if not files:
+        return False
+    try:
+        common = Path(__import__("os").path.commonpath([str(p.resolve().parent) for p in files]))
+    except (ValueError, OSError):
+        return False
+    return any((parent / "node_modules").is_dir() for parent in (common, *common.parents))
+
+
 def check_files(files: list[Path]) -> tuple[list[tuple[str, str, int, str]], dict[str, object]]:
     results: list[tuple[str, str, int, str]] = []
     contents: dict[Path, str] = {}
@@ -200,7 +211,10 @@ def check_files(files: list[Path]) -> tuple[list[tuple[str, str, int, str]], dic
         "total_bytes": total_bytes,
         "requests_cloud": bool(re.search(r"/cloud/", combined)),
         "has_upstream_endpoint": bool(re.search(r"/__upstream", combined)),
-        "has_node_modules": any("node_modules" in p.parts for p in files),
+        "has_node_modules": (
+            any("node_modules" in p.parts for p in files)
+            or (target_has_node_modules(files))
+        ),
         "nonbuiltin_require": [],
         "truncated": truncated,
         "contents": contents,
@@ -363,7 +377,6 @@ def print_report(results: list[tuple[str, str, int, str]], green: dict[str, obje
         conclusion = "需修改后提交"
     else:
         conclusion = "可提交"
-    print(f"结论：{conclusion}")
 
 
 def main() -> int:
@@ -392,19 +405,30 @@ def main() -> int:
 
     print_report(results, green)
     has_red = any(level == "RED" for level, *_ in results)
+    actionable_yellow = any(
+        level == "YELLOW" and not (
+            path.endswith("config.example.json")
+            and message.startswith("config.example.json 含私网 IP")
+        )
+        for level, path, _line, message in results
+    )
+    conclusion = "不可提交" if has_red else ("需修改后提交" if actionable_yellow else "可提交")
     if args.emit:
         if has_red:
             print("未生成骨架：存在 RED 项，修复后再试。")
+            print(f"结论：{conclusion}")
             return 1
         draft_dir = ROOT / "docs" / "cases" / "_drafts"
         draft_path = draft_dir / f"{args.slug}.md"
         if draft_path.exists() and not args.force:
             print(f"未生成骨架：文件已存在 {draft_path.relative_to(ROOT)}；如确认覆盖，请加 --force。")
+            print(f"结论：{conclusion}")
             return 1
         draft_dir.mkdir(parents=True, exist_ok=True)
         draft_path.write_text(make_draft(info, green, args.slug), encoding="utf-8")
         print(f"已生成草稿：{draft_path.relative_to(ROOT).as_posix()}")
-    return 1 if has_red else 0
+    print(f"结论：{conclusion}")
+    return 1 if has_red else (1 if actionable_yellow else 0)
 
 
 if __name__ == "__main__":
