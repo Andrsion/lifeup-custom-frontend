@@ -117,6 +117,8 @@ def main() -> int:
                 target = tempdir / "unpacked"
                 target.mkdir()
                 safe_extract(archive_path, target)
+                if not any(path.is_file() and path.suffix.lower() == ".html" for path in target.rglob("*")):
+                    raise ValueError("ZIP 中没有 HTML 文件，请至少包含一个完整的 .html 界面文件。")
                 source_description = "从投稿 Issue 的 ZIP 附件中提取文件"
             else:
                 match = HTML_BLOCK_RE.search(body)
