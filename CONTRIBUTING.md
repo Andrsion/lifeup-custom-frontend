@@ -10,6 +10,13 @@
 - 🐞 **勘误**：接口 / 参数 / 链接写错了 → 提 Issue 或 PR
 - 🎨 **主题 / 换名**：提 Issue「主题 / 换名 投稿」→ 收录进 [docs/samples.md](docs/samples.md)
 
+## 投稿一套界面
+
+1. 先跑 `python3 scripts/case_check.py <路径>`，确认没有 ✖；
+2. 运行 `python3 scripts/case_check.py <路径> --emit --slug <名字>` 生成 `docs/cases/_drafts/<名字>.md`，填完三处待填；
+3. 把文件移出 `_drafts/`（`_` 开头不进 llms-full），在 `docs/cases/README.md` 补一行索引；
+4. 提 PR。**不要提交 `config.json`、`.lfbak`、任何真实 token。**
+
 ## 提交前
 
 - 接口一律**以官方为准**：<https://wiki.lifeupapp.fun/zh-cn/guide/api_cloud.md>；**不要写没有依据的参数**。
