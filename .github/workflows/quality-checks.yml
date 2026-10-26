@@ -28,7 +28,7 @@ jobs:
           node-version: "20"
 
       - name: Check Python syntax
-        run: python -m py_compile scripts/build_llms.py scripts/check_repo.py
+        run: python -m py_compile scripts/*.py
 
       - name: Check repository quality
         run: python scripts/check_repo.py

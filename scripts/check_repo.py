@@ -138,12 +138,51 @@ def check_llms_deterministic() -> list[str]:
     return []
 
 
+
+def check_case_examples() -> list[str]:
+    """Run the submission checker against each runnable HTML example, offline."""
+    checker = ROOT / "scripts" / "case_check.py"
+    errors: list[str] = []
+    example_dirs = sorted(
+        path.parent for path in (ROOT / "examples").rglob("index.html")
+        if path.is_file()
+    )
+    for directory in example_dirs:
+        result = subprocess.run(
+            [sys.executable, str(checker), str(directory), "--no-emit", "--quiet"],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        relative = directory.relative_to(ROOT).as_posix()
+        conclusion = next(
+            (line for line in result.stdout.splitlines() if line.startswith("结论：")),
+            "",
+        )
+        if result.returncode != 0 or conclusion != "结论：可提交":
+            red_lines = [
+                line for line in result.stdout.splitlines()
+                if line.startswith("RED ")
+            ]
+            detail = "\\n".join(red_lines) if red_lines else (
+                result.stderr.strip() or result.stdout.strip() or "未输出结论"
+            )
+            errors.append(
+                f"{relative}: case_check.py 回归失败（{conclusion or '缺少结论'}）\\n{detail}"
+            )
+    if not errors:
+        print(f"✓ 投稿脱敏回归通过：{len(example_dirs)} 个含 index.html 的示例目录均非 RED。")
+    return errors
+
+
 def main() -> int:
     errors = []
     errors += check_json()
     errors += check_javascript()
     errors += check_local_links()
     errors += check_llms_deterministic()
+    errors += check_case_examples()
     if errors:
         print("仓库质量检查失败：")
         for error in errors:

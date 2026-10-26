@@ -12,7 +12,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MAX_BYTES = 2 * 1024 * 1024
 SCAN_EXTENSIONS = {".html", ".js", ".css", ".json"}
-TOKEN_RE = re.compile(r'"(?:token|tokenHeader)"\s*:\s*"[^"]{3,}"')
+TOKEN_SECRET_RE = re.compile(r'"token"\s*:\s*"[^"]{3,}"')
+TOKEN_HEADER_RE = re.compile(r'"tokenHeader"\s*:\s*"([^"]{3,})"')
 PHONE_RE = re.compile(r"\b1[3-9]\d{9}\b")
 BASE64_RE = re.compile(r"[A-Za-z0-9+/=]{2001,}")
 PRIVATE_IP_RE = re.compile(
@@ -192,7 +193,26 @@ def check_files(files: list[Path]) -> tuple[list[tuple[str, str, int, str]], dic
         if is_backup_filename(path):
             results.append(("RED", relpath(path), 1, "疑似备份数据文件名（.lfbak / backup）"))
 
-        add_matches(results, "RED", path, content, TOKEN_RE, "疑似真实 Token")
+        add_matches(results, "RED", path, content, TOKEN_SECRET_RE, "疑似真实 token")
+        for match in TOKEN_HEADER_RE.finditer(content):
+            value = match.group(1)
+            suspicious_header = (
+                re.search(r"bearer\\s", value, re.I) is not None
+                or len(value) > 60
+                or (
+                    len(value) >= 20
+                    and ("-" in value or "_" in value)
+                    and re.search(r"[a-z]", value) is not None
+                    and re.search(r"[A-Z]", value) is not None
+                )
+            )
+            results.append((
+                "RED" if suspicious_header else "YELLOW",
+                relpath(path),
+                line_number(content, match.start()),
+                "疑似真实密钥被填入 tokenHeader" if suspicious_header
+                else "tokenHeader 是请求头名称，请确认没有在这里写密钥",
+            ))
         add_matches(results, "RED", path, content, PHONE_RE, "疑似手机号")
         add_matches(results, "RED", path, content, BASE64_RE, "连续 Base64 字符超过 2000")
         if path.name == "config.example.json":
@@ -383,6 +403,8 @@ def main() -> int:
     parser.add_argument("--emit", action="store_true", help="检查通过后生成案例骨架")
     parser.add_argument("--slug", help="草稿文件名（与 --emit 同用）")
     parser.add_argument("--force", action="store_true", help="允许覆盖同名草稿")
+    parser.add_argument("--no-emit", action="store_true", help="仅检查（兼容显式 CI 调用）")
+    parser.add_argument("--quiet", action="store_true", help="仅输出 RED 明细和最终结论")
     args = parser.parse_args()
 
     if args.emit and not args.slug:
@@ -401,12 +423,20 @@ def main() -> int:
         print("结论：不可提交")
         return 2
 
-    print_report(results, green)
+    if args.quiet:
+        for level, path, line, message in results:
+            if level == "RED":
+                print(f"RED {path}:{line} - {message}")
+    else:
+        print_report(results, green)
     has_red = any(level == "RED" for level, *_ in results)
     actionable_yellow = any(
         level == "YELLOW" and not (
-            path.endswith("config.example.json")
-            and message.startswith("config.example.json 含私网 IP")
+            (
+                path.endswith("config.example.json")
+                and message.startswith("config.example.json 含私网 IP")
+            )
+            or message.startswith("tokenHeader 是请求头名称")
         )
         for level, path, _line, message in results
     )
