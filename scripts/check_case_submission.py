@@ -134,7 +134,7 @@ def main() -> int:
                 source_description = "从投稿表单中的 HTML 源码字段读取"
 
             output, code = run_static_check(target)
-            red = bool(re.search(r"(?:✖ RED|\bRED\b)", output))
+            red = bool(re.search(r"(?m)^✖ RED\b", output))
             conclusion_match = re.search(r"结论：([^\n]+)", output)
             conclusion = conclusion_match.group(1).strip() if conclusion_match else (
                 "不可提交" if code else "需人工复核"
