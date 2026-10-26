@@ -50,14 +50,32 @@ def find_zip_url(body: str) -> str | None:
     return candidates[-1] if candidates else None
 
 
+def is_allowed_attachment_url(url: str) -> bool:
+    parsed = urllib.parse.urlparse(url)
+    host = (parsed.hostname or "").lower()
+    return parsed.scheme == "https" and (
+        host in {"github.com", "githubusercontent.com"}
+        or host.endswith(".githubusercontent.com")
+    )
+
+
+class SafeAttachmentRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not is_allowed_attachment_url(newurl):
+            raise ValueError("附件下载重定向到不受支持的主机，已停止请求。")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def download_zip(url: str, destination: Path) -> None:
+    if not is_allowed_attachment_url(url):
+        raise ValueError("附件地址不是受支持的 HTTPS GitHub 附件主机。")
     request = urllib.request.Request(
         url,
         headers={"User-Agent": "lifeup-custom-frontend-case-check/1.0"},
     )
-    with urllib.request.urlopen(request, timeout=25) as response:
-        final = urllib.parse.urlparse(response.geturl())
-        if (final.hostname or "").lower() not in {"github.com", "githubusercontent.com"} and not (final.hostname or "").lower().endswith(".githubusercontent.com"):
+    opener = urllib.request.build_opener(SafeAttachmentRedirectHandler())
+    with opener.open(request, timeout=25) as response:
+        if not is_allowed_attachment_url(response.geturl()):
             raise ValueError("附件下载被重定向到不受支持的主机，已停止检查。")
         data = response.read(MAX_DOWNLOAD + 1)
     if len(data) > MAX_DOWNLOAD:
