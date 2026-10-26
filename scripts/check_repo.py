@@ -431,13 +431,30 @@ def check_case_import_stage() -> list[str]:
             }, ensure_ascii=False), encoding="utf-8")
             result = subprocess.run([sys.executable,str(ROOT/"scripts/case_import.py"),"--from-result",str(submit_path),"--stage","--slug","ci-test"],cwd=ROOT,text=True,capture_output=True,check=False)
             draft = incoming / "987654321-ci-test.md"
-            if result.returncode or not draft.is_file():
-                errors.append("case_import stage submit failed: " + (result.stdout + "\n" + result.stderr)[-4000:])
+            if result.returncode or "STAGE_CREATED" not in result.stdout or not draft.is_file():
+                errors.append("case_import stage create failed: " + (result.stdout + "\n" + result.stderr)[-4000:])
             else:
                 content = draft.read_text(encoding="utf-8")
                 if not content.splitlines() or content.splitlines()[0] != "<!-- 自动导入的未审核草稿 · issue #987654321 · 请勿直接发布 -->": errors.append("stage draft first line does not match required marker")
                 if content.count("<!-- 待填 -->") != 3: errors.append(f"expected exactly three generic placeholders; found {content.count('<!-- 待填 -->')}")
                 if content.count("](http") != 0: errors.append("stage draft contains external Markdown links")
+                original_content = content
+                unchanged = subprocess.run([sys.executable,str(ROOT/"scripts/case_import.py"),"--from-result",str(submit_path),"--stage","--slug","ci-test"],cwd=ROOT,text=True,capture_output=True,check=False)
+                if unchanged.returncode or "STAGE_UNCHANGED" not in unchanged.stdout or draft.read_text(encoding="utf-8") != original_content:
+                    errors.append("case_import unchanged regression failed: " + (unchanged.stdout + "\n" + unchanged.stderr)[-3000:])
+                else:
+                    print("✓ 案例暂存无变化回归通过：重复 submit 输出 STAGE_UNCHANGED 且文件不变。")
+                updated_data = json.loads(submit_path.read_text(encoding="utf-8"))
+                updated_data["summary"] = "CI 更新后的一句话介绍。"
+                submit_path.write_text(json.dumps(updated_data, ensure_ascii=False), encoding="utf-8")
+                updated = subprocess.run([sys.executable,str(ROOT/"scripts/case_import.py"),"--from-result",str(submit_path),"--stage","--slug","ci-test"],cwd=ROOT,text=True,capture_output=True,check=False)
+                updated_content = draft.read_text(encoding="utf-8") if draft.is_file() else ""
+                if updated.returncode or "STAGE_UPDATED" not in updated.stdout or "CI 更新后的一句话介绍。" not in updated_content or updated_content == original_content:
+                    errors.append("case_import update regression failed: " + (updated.stdout + "\n" + updated.stderr)[-3000:])
+                if updated_content.count("本稿已随 issue 编辑更新") != 1:
+                    errors.append("case_import update marker should appear exactly once")
+                else:
+                    print("✓ 案例暂存更新回归通过：summary 变化输出 STAGE_UPDATED，更新时间标记仅一行。")
             reject_path = temp / "result-reject.json"
             reject_path.write_text(json.dumps({"issue_number":987654322,"case_name":"Rejected","author":"CI","case_type":"","data_source":"","summary":"","notes":"","html_source_present":False,"html_source":"","zip_url":"","red":["fixture RED"],"yellow":[],"conclusion":"reject"},ensure_ascii=False),encoding="utf-8")
             before = set(incoming.glob("*.md"))
@@ -447,6 +464,9 @@ def check_case_import_stage() -> list[str]:
     except Exception as exc: errors.append(f"case_import stage regression raised {type(exc).__name__}: {exc}")
     finally:
         for name in ("987654321-ci-test.md","987654322-ci-reject.md"): (incoming/name).unlink(missing_ok=True)
+        drafts_dir = ROOT / "docs" / "cases" / "_drafts"
+        shutil.rmtree(drafts_dir / "987654321-ci-test-src", ignore_errors=True)
+        shutil.rmtree(drafts_dir / "987654322-ci-reject-src", ignore_errors=True)
         if not incoming_existed:
             try: incoming.rmdir()
             except OSError: pass

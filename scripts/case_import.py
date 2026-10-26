@@ -2,7 +2,7 @@
 """Import a reviewed GitHub Issue case; never execute submitted code."""
 from __future__ import annotations
 import argparse, json, os, re, shutil, subprocess, sys, tempfile, urllib.parse, urllib.request
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -214,7 +214,13 @@ def main():
     slug = slugify(fields.get("case_name",""), issue_no, args.slug)
     incoming = ROOT / "docs/cases/_incoming"; drafts = ROOT / "docs/cases/_drafts"
     source = drafts / f"{issue_no}-{slug}-src"; target_md = incoming / f"{issue_no}-{slug}.md"
-    if target_md.exists(): print(f"暂存文件已存在，保持不覆盖：{target_md.relative_to(ROOT)}"); return 0
+    if args.stage and result.get("conclusion") != "submit":
+        if result.get("red"):
+            print("STAGE_BLOCKED")
+            print(f"投稿 #{issue_no} 本次编辑检出敏感内容，未更新暂存稿。")
+            return 1
+        print(f"投稿 #{issue_no} 结论为 {result.get('conclusion')!r}，不生成暂存文件。")
+        return 0
     download_zip, safe_extract = helper_functions()
     drafts.mkdir(parents=True, exist_ok=True); source.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="case-stage-") as temp_dir:
@@ -228,9 +234,30 @@ def main():
             check_source = temp / "skeleton-source"; check_source.mkdir()
             (check_source / "index.html").write_text("<!doctype html><title>未审核草稿</title><h1>待补充</h1>", encoding="utf-8")
         output, code, skeleton_path = check_and_emit(check_source, f"stage-{issue_no}-{slug}", True)
-        if code or not skeleton_path or not skeleton_path.is_file(): raise ValueError("case_check.py --emit 未能生成草稿骨架：\n" + output[-3000:])
+        if code or not skeleton_path or not skeleton_path.is_file():
+            if re.search(r"(?m)^✖ RED\b", output) or result.get("red"):
+                print("STAGE_BLOCKED")
+                print(f"投稿 #{issue_no} 本次编辑检出敏感内容，未更新暂存稿。")
+                return 1
+            raise ValueError("case_check.py --emit 未能生成草稿骨架：\n" + output[-3000:])
         markdown = build_staged_markdown(fields, issue_no, skeleton_path.read_text(encoding="utf-8"), author)
-        incoming.mkdir(parents=True, exist_ok=True); target_md.write_text(markdown, encoding="utf-8")
+        incoming.mkdir(parents=True, exist_ok=True)
+        if target_md.exists():
+            previous = target_md.read_text(encoding="utf-8")
+            previous_normalized = re.sub(r"(?m)^<!-- 本稿已随 issue 编辑更新于 \d{4}-\d{2}-\d{2} \d{2}:\d{2} -->\n?", "", previous, count=1)
+            if previous_normalized == markdown:
+                print("STAGE_UNCHANGED")
+                print("暂存稿无变化")
+                return 0
+            timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+            lines = markdown.splitlines()
+            lines[1:1] = [f"<!-- 本稿已随 issue 编辑更新于 {timestamp} -->"]
+            markdown = "\n".join(lines) + "\n"
+            target_md.write_text(markdown, encoding="utf-8")
+            print("STAGE_UPDATED")
+        else:
+            target_md.write_text(markdown, encoding="utf-8")
+            print("STAGE_CREATED")
         print(f"暂存文件：{target_md.relative_to(ROOT)}")
     try:
         status = subprocess.run(["git","status","--short"], cwd=ROOT, text=True, capture_output=True, check=False)

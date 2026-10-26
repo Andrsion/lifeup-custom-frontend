@@ -58,13 +58,12 @@ jobs:
         with:
           name: case-result
           path: .
-      - name: Read conclusion and report manual review if needed
+      - name: Read conclusion and update scan report
         id: result
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            const marker = '<!-- case-stage-notice -->';
             const issue_number = context.payload.issue.number;
             const { owner, repo } = context.repo;
             let result = null;
@@ -73,15 +72,8 @@ jobs:
             }
             const conclusion = result?.conclusion || 'review';
             core.setOutput('conclusion', conclusion);
-            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
-            const previous = comments.find(comment => comment.body?.includes(marker));
-            if (conclusion !== 'submit') {
-              const body = marker + '\n自动检查结论：**需人工复核**。投稿未进入暂存区，请维护者检查静态扫描报告后再决定。自动检查只做静态扫描，不执行投稿代码。';
-              if (previous) await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body });
-              else await github.rest.issues.createComment({ owner, repo, issue_number, body });
-              return;
-            }
             if (fs.existsSync('case-submission-report.md')) {
+              const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
               const report = fs.readFileSync('case-submission-report.md', 'utf8');
               const reportMarker = '<!-- case-submission-auto-check -->';
               const reportBody = reportMarker + '\n' + report;
@@ -89,13 +81,26 @@ jobs:
               if (reportComment) await github.rest.issues.updateComment({ owner, repo, comment_id: reportComment.id, body: reportBody });
               else await github.rest.issues.createComment({ owner, repo, issue_number, body: reportBody });
             }
-      - name: Stage submission
-        if: steps.result.outputs.conclusion == 'submit'
-        run: python scripts/case_import.py --from-result case-submission-result.json --stage
-      - name: Commit only incoming Markdown
-        if: steps.result.outputs.conclusion == 'submit'
+      - name: Generate or compare staged Markdown
+        id: stage_result
+        if: needs.static-check.result == 'success'
         env:
-          ISSUE_NUMBER: \${{ github.event.issue.number }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set +e
+          output=$(python scripts/case_import.py --from-result case-submission-result.json --stage 2>&1)
+          rc=$?
+          printf '%s\n' "$output"
+          status=$(printf '%s\n' "$output" | grep -E '^STAGE_(CREATED|UPDATED|UNCHANGED|BLOCKED)$' | tail -n 1)
+          if [ -z "$status" ]; then status=REVIEW; fi
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          if [ "$status" = "STAGE_BLOCKED" ]; then exit 0; fi
+          if [ "$rc" -ne 0 ]; then exit "$rc"; fi
+      - name: Commit only incoming Markdown
+        if: steps.stage_result.outputs.status == 'STAGE_CREATED' || steps.stage_result.outputs.status == 'STAGE_UPDATED'
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          STAGE_STATUS: ${{ steps.stage_result.outputs.status }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -104,21 +109,39 @@ jobs:
             echo "没有新的暂存 Markdown。"
             exit 0
           fi
-          git commit -m "feat(cases): 暂存投稿 #\${ISSUE_NUMBER}（未审核）[skip ci]"
+          if [ "$STAGE_STATUS" = "STAGE_UPDATED" ]; then
+            git commit -m "更新暂存投稿 #${ISSUE_NUMBER}（未审核）[skip ci]"
+          else
+            git commit -m "暂存投稿 #${ISSUE_NUMBER}（未审核）[skip ci]"
+          fi
           git push
-      - name: Update staged notice and apply label
-        if: steps.result.outputs.conclusion == 'submit'
+      - name: Update staged notice and apply status label
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
             const marker = '<!-- case-stage-notice -->';
             const { owner, repo } = context.repo;
             const issue_number = context.payload.issue.number;
+            const status = '${{ steps.stage_result.outputs.status }}' || 'REVIEW';
+            const messages = {
+              STAGE_CREATED: '已创建未审核暂存稿，路径为 `docs/cases/_incoming/`。该稿尚未正式收录；自动检查只做静态扫描，不执行投稿代码。',
+              STAGE_UPDATED: '已根据本次 Issue 编辑更新 `docs/cases/_incoming/` 中的未审核暂存稿。该稿尚未正式收录；自动检查只做静态扫描，不执行投稿代码。',
+              STAGE_UNCHANGED: '暂存稿无变化：本次编辑生成的内容与现有暂存稿一致，未提交文件变更。',
+              STAGE_BLOCKED: '本次编辑检出敏感内容，未更新暂存稿，请修改后重新提交。',
+              REVIEW: '自动检查未能确认可暂存状态，投稿未进入暂存区，请维护者检查静态扫描报告后再决定。自动检查只做静态扫描，不执行投稿代码。'
+            };
+            const body = marker + '\n' + (messages[status] || messages.REVIEW);
             const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number, per_page: 100 });
             const previous = comments.find(comment => comment.body?.includes(marker));
-            const body = marker + '\n已暂存到 \`docs/cases/_incoming/\`，等维护者确认后收录。自动检查只做静态扫描，不执行投稿代码。';
             if (previous) await github.rest.issues.updateComment({ owner, repo, comment_id: previous.id, body });
             else await github.rest.issues.createComment({ owner, repo, issue_number, body });
-            try { await github.rest.issues.getLabel({ owner, repo, name: 'case:staged' }); }
-            catch { try { await github.rest.issues.createLabel({ owner, repo, name: 'case:staged', color: '0e8a16', description: '投稿已自动暂存，等待维护者审核' }); } catch {} }
-            try { await github.rest.issues.addLabels({ owner, repo, issue_number, labels: ['case:staged'] }); } catch {}
+            if (status === 'STAGE_BLOCKED') {
+              try { await github.rest.issues.getLabel({ owner, repo, name: 'case:blocked' }); }
+              catch { try { await github.rest.issues.createLabel({ owner, repo, name: 'case:blocked', color: 'b60205', description: '投稿编辑检出敏感内容，暂存稿未更新' }); } catch {} }
+              try { await github.rest.issues.addLabels({ owner, repo, issue_number, labels: ['case:blocked'] }); } catch {}
+            } else if (['STAGE_CREATED', 'STAGE_UPDATED', 'STAGE_UNCHANGED'].includes(status)) {
+              try { await github.rest.issues.getLabel({ owner, repo, name: 'case:staged' }); }
+              catch { try { await github.rest.issues.createLabel({ owner, repo, name: 'case:staged', color: '0e8a16', description: '投稿已自动暂存，等待维护者审核' }); } catch {} }
+              try { await github.rest.issues.addLabels({ owner, repo, issue_number, labels: ['case:staged'] }); } catch {}
+            }

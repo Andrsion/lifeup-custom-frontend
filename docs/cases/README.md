@@ -47,7 +47,7 @@ Vibecoding（氛围编程）是通过自然语言描述需求，让 AI 帮你生
 
 ## 维护者：投稿怎么进仓库
 
-1. 投稿通过静态检查后，工作流会**自动**把草稿放到 `docs/cases/_incoming/`，并给 Issue 打上 `case:staged` 标签。**你不需要做任何操作。**
+1. 投稿通过静态检查后，工作流会**自动**把草稿放到 `docs/cases/_incoming/`，并给 Issue 打上 `case:staged` 标签。投稿人编辑 Issue 后，暂存稿会自动更新；若编辑后检出敏感内容，则不更新并给 Issue 打 `case:blocked`。**你不需要做任何操作。**
 2. 想收录时，对 Agent 说一句：**「把 `docs/cases/_incoming/` 里合格的案例收进正式目录，补索引和 CHANGELOG」**。Agent 会移入 `docs/cases/`、补「已收录」一行、记 CHANGELOG、补齐三处待填（必要时向你确认），再回复并关闭 Issue。
 3. 不想收录：删掉 `_incoming/` 里那份文件，在 Issue 回一句原因。
 4. `_incoming/` 不参与 `llms-full.txt`（`_` 前缀目录自动排除），也不在正式索引里。
