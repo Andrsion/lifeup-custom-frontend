@@ -108,7 +108,9 @@ Agent 需要能操作本机 MCP 配置、执行命令并访问手机所在的局
 
 **用 Vibecoding 做界面？** Vibecoding（氛围编程）就是用自然语言描述需求，让 AI 帮你生成或修改代码。你可以把 [AI 投稿提示词](docs/cases/_agent-prompt.md) 全文复制给能读写项目文件、运行命令的 Agent，让它整理案例、脱敏检查并生成草稿；提示词文件开头有用途标识。它只负责准备投稿材料，不会自动审核或收录。
 
-不想碰 Git？在频道 / 群里发帖带截图，注明「可投稿」，管理员会替你整理提交。投稿通过后会：收录进 [docs/cases/](docs/cases/)（或 samples.md）、在 CHANGELOG 记一条，并注明作者。
+不想碰 Git？在频道 / 群里发帖带截图，注明「可投稿」，管理员会替你整理提交。
+
+投稿通过后会收录进 [docs/cases/](docs/cases/)（或 samples.md），并在 CHANGELOG 记一条，注明作者。
 
 ## 仓库维护
 

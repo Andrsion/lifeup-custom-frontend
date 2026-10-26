@@ -339,7 +339,8 @@ def make_draft(info: dict[str, object], green: dict[str, object], slug: str) -> 
         f"- 文件数：{green['files']}",
         f"- 总大小：{green['total_bytes']} 字节",
     ]
-    return f"""# {title}
+    return f"""<!-- 由 AI Agent 辅助生成或整理时，请在此保留来源说明；未经维护者审核的草稿不得移入正式案例目录。 -->
+# {title}
 
 > 社区投稿 · 类型：{run_type} · 授权：<请作者确认>
 > 数据来源：{data_source}
@@ -369,6 +370,8 @@ def make_draft(info: dict[str, object], green: dict[str, object], slug: str) -> 
 
 ## 机制决定情绪
 <!-- 待填：属于「紧迫 / 松弛 / 期待」哪一种，靠哪个机制实现 -->
+
+> 本稿若由 AI 协助整理，请保留文首注释；投稿人需自行确认内容与授权。
 
 ## 收录检查
 {chr(10).join(report_lines)}

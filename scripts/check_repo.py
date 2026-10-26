@@ -185,6 +185,7 @@ def check_case_checker_fixtures() -> list[str]:
     draft_dir_existed = draft_dir.exists()
     slug = f"case-check-ci-smoke-{__import__('os').getpid()}"
     draft_path = draft_dir / f"{slug}.md"
+    marker = "<!-- 由 AI Agent 辅助生成或整理时，请在此保留来源说明；未经维护者审核的草稿不得移入正式案例目录。 -->"
     try:
         with tempfile.TemporaryDirectory(prefix="case-check-fixture-") as temp_dir:
             temp_root = Path(temp_dir)
@@ -234,8 +235,13 @@ def check_case_checker_fixtures() -> list[str]:
                     "case_check.py --emit fixture failed: "
                     + (emit_result.stdout or emit_result.stderr)
                 )
+            elif marker not in draft_path.read_text(encoding="utf-8").splitlines()[0]:
+                errors.append(
+                    "case_check.py --emit fixture failed: first line missing AI-source comment; "
+                    + draft_path.read_text(encoding="utf-8").splitlines()[0]
+                )
             else:
-                print("✓ case_check.py --emit 临时用例通过：已生成草稿骨架。")
+                print("✓ case_check.py --emit 临时用例通过：草稿首行含来源注释。")
     finally:
         draft_path.unlink(missing_ok=True)
         if not draft_dir_existed:
