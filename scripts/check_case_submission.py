@@ -112,6 +112,15 @@ def safe_extract(archive_path: Path, destination: Path) -> None:
                     output.write(chunk)
 
 
+def find_checkable_files(target: Path) -> list[Path]:
+    """Return supported static-scan source files; screenshots are not source code."""
+    return sorted(
+        (path for path in target.rglob("*")
+         if path.is_file() and path.suffix.lower() in {".html", ".js", ".css", ".json"}),
+        key=lambda path: str(path).casefold(),
+    )
+
+
 def run_static_check(target: Path) -> tuple[str, int]:
     result = subprocess.run(
         [sys.executable, str(CHECKER), str(target), "--no-emit"],
@@ -137,7 +146,7 @@ def _main() -> int:
                 target = tempdir / "unpacked"
                 target.mkdir()
                 safe_extract(archive_path, target)
-                checkable = [p for p in target.rglob("*") if p.is_file() and p.suffix.lower() in {".html", ".js", ".css", ".json"}]
+                checkable = find_checkable_files(target)
                 if not checkable:
                     write_report(
                         "## 自动脱敏检查：需人工复核\n\n未在附件中找到可检查的界面文件。\n\n"
