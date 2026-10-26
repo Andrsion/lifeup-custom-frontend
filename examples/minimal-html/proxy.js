@@ -26,14 +26,15 @@ try {
   process.exit(1);
 }
 
+const HOST_RE = /^([^:\s/]+)(?::(\d{1,5}))?$/;
 const hostInput = String(cfg.host || "").trim();
-const hostParts = hostInput.match(/^([^:\s/]+)(?::(\d{1,5}))?$/);
+const hostParts = hostInput.match(HOST_RE);
 if (!hostParts) {
   console.error("✖ config.json 的 host 格式应为手机 IP 或 IP:端口。");
   process.exit(1);
 }
-const UPSTREAM_HOST = hostParts[1];
-const UPSTREAM_PORT = Number(hostParts[2] || 13276);
+let UPSTREAM_HOST = hostParts[1];
+let UPSTREAM_PORT = Number(hostParts[2] || 13276);
 if (!Number.isInteger(UPSTREAM_PORT) || UPSTREAM_PORT < 1 || UPSTREAM_PORT > 65535) {
   console.error("✖ 上游端口无效。");
   process.exit(1);
@@ -108,6 +109,26 @@ const server = http.createServer((req, res) => {
     url = new URL(req.url, "http://" + req.headers.host);
   } catch {
     return send(res, 400, "请求 URL 无效。");
+  }
+
+  if (url.pathname === "/__upstream") {
+    const json = (status, data) => { res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }); res.end(JSON.stringify(data)); };
+    if (!["GET", "POST"].includes(req.method)) return json(405, { error: "只允许 GET 和 POST。" });
+    if (req.method === "GET") return json(200, { host: UPSTREAM_HOST, port: UPSTREAM_PORT });
+    if (!/^application\/json(?:\s*;|$)/i.test(req.headers["content-type"] || "")) return json(415, { error: "Content-Type 必须为 application/json。" });
+    let raw = "", tooLarge = false;
+    req.on("data", chunk => { if (tooLarge) return; raw += chunk; if (Buffer.byteLength(raw, "utf8") > 512) { tooLarge = true; json(413, { error: "请求体过大。" }); } });
+    req.on("end", () => {
+      if (tooLarge || res.writableEnded) return;
+      let body; try { body = JSON.parse(raw || "{}"); } catch { return json(400, { error: "请求体不是合法 JSON。" }); }
+      const parts = String(body.host || "").trim().match(HOST_RE);
+      if (!parts) return json(400, { error: "地址格式应为 手机IP 或 手机IP:端口" });
+      const port = Number(parts[2] || 13276);
+      if (!Number.isInteger(port) || port < 1 || port > 65535) return json(400, { error: "端口无效。" });
+      UPSTREAM_HOST = parts[1]; UPSTREAM_PORT = port;
+      json(200, { host: UPSTREAM_HOST, port: UPSTREAM_PORT });
+    });
+    return;
   }
 
   if (url.pathname.startsWith("/cloud/")) {
@@ -191,5 +212,6 @@ server.listen(LISTEN_PORT, LISTEN_HOST, () => {
   console.log("✔ 本地看板代理已启动");
   console.log(`   页面：http://127.0.0.1:${LISTEN_PORT}`);
   console.log(`   云人升上游：http://${UPSTREAM_HOST}:${UPSTREAM_PORT}`);
+  console.log("   地址可在页面顶栏直接改（临时生效，不写入 config.json）。");
   console.log("   默认只接受本机访问；按 Ctrl+C 停止。");
 });
