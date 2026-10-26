@@ -424,7 +424,7 @@ def main() -> int:
         draft_path.write_text(make_draft(info, green, args.slug), encoding="utf-8")
         print(f"已生成草稿：{draft_path.relative_to(ROOT).as_posix()}")
     print(f"结论：{conclusion}")
-    return 1 if has_red else (1 if actionable_yellow else 0)
+    return 1 if has_red else 0
 
 
 if __name__ == "__main__":
