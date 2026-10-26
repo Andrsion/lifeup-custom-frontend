@@ -38,14 +38,16 @@ def write_report(text: str) -> None:
 
 
 def find_zip_url(body: str) -> str | None:
+    candidates: list[str] = []
     for raw in ATTACHMENT_RE.findall(body):
         candidate = raw.rstrip(".,;")
         parsed = urllib.parse.urlparse(candidate)
         if parsed.hostname != "github.com" or not parsed.path.startswith("/user-attachments/files/"):
             continue
         if parsed.path.lower().endswith(".zip"):
-            return candidate
-    return None
+            candidates.append(candidate)
+    # If the submitter edits the Issue and uploads a replacement, prefer the newest link.
+    return candidates[-1] if candidates else None
 
 
 def download_zip(url: str, destination: Path) -> None:
